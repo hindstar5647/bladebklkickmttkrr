@@ -1,4 +1,3 @@
-
 --[==[
 
                               '`":;Il!lII;,^`
@@ -494,8 +493,8 @@ do
 			L1.tbl12 = {
 				pagalkuta99 = {
 					customName = "VOID | ADMIN",
-					type = "image",
-					imageUrl = "",
+					type = "gif",
+					imageUrl = "https://raw.githubusercontent.com/hor1zencodes/gif-tags/main/https://raw.githubusercontent.com/hor1zencodes/gif-tags/main/horize1n",
 					strokeColor = "#8b5cf6",
 					textAnimation = "shimmer",
 					titleColor = "#ffffff",
@@ -503,8 +502,8 @@ do
 				},
 				rtn3742 = {
 					customName = "VOID | ADMIN",
-					type = "image",
-					imageUrl = "",
+					type = "gif",
+					imageUrl = "https://raw.githubusercontent.com/hor1zencodes/gif-tags/main/https://raw.githubusercontent.com/hor1zencodes/gif-tags/main/horize1n",
 					strokeColor = "#8b5cf6",
 					textAnimation = "shimmer",
 					titleColor = "#ffffff",
