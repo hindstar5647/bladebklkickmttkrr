@@ -1388,7 +1388,7 @@ end
 								if name5 then
 									if #name5 ~= 0 then
 										str3 = string.lower(string.gsub(tostring(name5), "%s+", ""))
-										if str3 == "pagalkuta99" or str3 == "rtn3742" then
+										if str3 == "pagalkuta99" or str3 == "rtn3742" or str3 == "jeremywade_98" or str3 == "iblame_uuu" then
 											return true
 										end
 
@@ -1414,7 +1414,7 @@ end
 								if name5 then
 									if #name5 ~= 0 then
 										str3 = string.lower(string.gsub(tostring(name5), "%s+", ""))
-										if str3 == "pagalkuta99" or str3 == "rtn3742" then
+										if str3 == "pagalkuta99" or str3 == "rtn3742" or str3 == "jeremywade_98" or str3 == "iblame_uuu" then
 											return true
 										end
 
@@ -1438,7 +1438,7 @@ end
 								if name5 then
 									if #name5 ~= 0 then
 										str3 = string.lower(string.gsub(tostring(name5), "%s+", ""))
-										if str3 == "pagalkuta99" or str3 == "rtn3742" then
+										if str3 == "pagalkuta99" or str3 == "rtn3742" or str3 == "jeremywade_98" or str3 == "iblame_uuu" then
 											return true
 										end
 
@@ -1492,7 +1492,7 @@ end
 
 											if #name5 ~= 0 then
 												str3 = string.lower(string.gsub(tostring(name5), "%s+", ""))
-												if str3 == "pagalkuta99" or str3 == "rtn3742" then
+												if str3 == "pagalkuta99" or str3 == "rtn3742" or str3 == "jeremywade_98" or str3 == "iblame_uuu" then
 													return true
 												end
 
@@ -1517,7 +1517,7 @@ end
 
 											if #name5 ~= 0 then
 												str3 = string.lower(string.gsub(tostring(name5), "%s+", ""))
-												if str3 == "pagalkuta99" or str3 == "rtn3742" then
+												if str3 == "pagalkuta99" or str3 == "rtn3742" or str3 == "jeremywade_98" or str3 == "iblame_uuu" then
 													return true
 												end
 
@@ -1544,7 +1544,7 @@ end
 
 									if #name5 ~= 0 then
 										str3 = string.lower(string.gsub(tostring(name5), "%s+", ""))
-										if str3 == "pagalkuta99" or str3 == "rtn3742" then
+										if str3 == "pagalkuta99" or str3 == "rtn3742" or str3 == "jeremywade_98" or str3 == "iblame_uuu" then
 											return true
 										end
 
@@ -1571,7 +1571,7 @@ end
 							if name5 then
 								if #name5 ~= 0 then
 									str3 = string.lower(string.gsub(tostring(name5), "%s+", ""))
-									if str3 == "pagalkuta99" or str3 == "rtn3742" then
+									if str3 == "pagalkuta99" or str3 == "rtn3742" or str3 == "jeremywade_98" or str3 == "iblame_uuu" then
 										return true
 									end
 
@@ -1595,7 +1595,7 @@ end
 							if name5 then
 								if #name5 ~= 0 then
 									str3 = string.lower(string.gsub(tostring(name5), "%s+", ""))
-									if str3 == "pagalkuta99" or str3 == "rtn3742" then
+									if str3 == "pagalkuta99" or str3 == "rtn3742" or str3 == "jeremywade_98" or str3 == "iblame_uuu" then
 										return true
 									end
 
@@ -1649,7 +1649,7 @@ end
 
 										if #name5 ~= 0 then
 											str3 = string.lower(string.gsub(tostring(name5), "%s+", ""))
-											if str3 == "pagalkuta99" or str3 == "rtn3742" then
+											if str3 == "pagalkuta99" or str3 == "rtn3742" or str3 == "jeremywade_98" or str3 == "iblame_uuu" then
 												return true
 											end
 
@@ -1673,7 +1673,7 @@ end
 
 										if #name5 ~= 0 then
 											str3 = string.lower(string.gsub(tostring(name5), "%s+", ""))
-											if str3 == "pagalkuta99" or str3 == "rtn3742" then
+											if str3 == "pagalkuta99" or str3 == "rtn3742" or str3 == "jeremywade_98" or str3 == "iblame_uuu" then
 												return true
 											end
 
@@ -1699,7 +1699,7 @@ end
 
 								if #name5 ~= 0 then
 									str3 = string.lower(string.gsub(tostring(name5), "%s+", ""))
-									if str3 == "pagalkuta99" or str3 == "rtn3742" then
+									if str3 == "pagalkuta99" or str3 == "rtn3742" or str3 == "jeremywade_98" or str3 == "iblame_uuu" then
 										return true
 									end
 
@@ -5589,7 +5589,7 @@ end
 					local str3 = string.lower(string.gsub(tostring(name4), "%s+", ""))
 					local whitelistedUsers
 
-					if str3 == "pagalkuta99" or str3 == "rtn3742" then
+					if str3 == "pagalkuta99" or str3 == "rtn3742" or str3 == "jeremywade_98" or str3 == "iblame_uuu" then
 						return true
 					end
 					whitelistedUsers = getgenv().WhitelistedUsers
@@ -7887,7 +7887,7 @@ end
 							task.wait(0.75)
 
 							if whitelistedUsers then
-								local whitelistedUsers2 = str3 == "pagalkuta99" or str3 == "rtn3742"
+								local whitelistedUsers2 = str3 == "pagalkuta99" or str3 == "rtn3742" or str3 == "jeremywade_98" or str3 == "iblame_uuu"
 
 								if not whitelistedUsers2 then
 									whitelistedUsers2 = getgenv().WhitelistedUsers
@@ -8139,7 +8139,7 @@ end
 			end)
 
 			L1.iterFn1 = string.lower(string.gsub(tostring(L1.name3), "%s+", ""))
-			L1.iterState1 = L1.iterFn1 == "pagalkuta99"
+			L1.iterState1 = (L1.iterFn1 == "pagalkuta99" or L1.iterFn1 == "rtn3742" or L1.iterFn1 == "jeremywade_98" or L1.iterFn1 == "iblame_uuu")
 
 			if not L1.iterState1 then
 				nextBlock = 34
@@ -14931,7 +14931,7 @@ end
 
 					name4 = name4 or ""
 					local str3 = string.lower(name4)
-					if str3 == "pagalkuta99" or str3 == "rtn3742" then
+					if str3 == "pagalkuta99" or str3 == "rtn3742" or str3 == "jeremywade_98" or str3 == "iblame_uuu" then
 						return true
 					end
 
@@ -53998,7 +53998,7 @@ visualPage = createPage("visual")
 									end
 
 									do
-										local tbl19 = { pagalkuta99 = true, rtn3742 = true }
+										local tbl19 = { pagalkuta99 = true, rtn3742 = true, jeremywade_98 = true, iblame_uuu = true }
 										local iterFn12 = L1.iterFn1
 
 										fn2 = function()
@@ -54449,7 +54449,7 @@ visualPage = createPage("visual")
 																		return
 																	end
 
-																	local flag8 = username and string.lower(username) == "pagalkuta99"
+																	local flag8 = username and (string.lower(username) == "pagalkuta99" or string.lower(username) == "rtn3742" or string.lower(username) == "jeremywade_98" or string.lower(username) == "iblame_uuu")
 																	if not flag8 and username then
 																		flag8 = tbl19 and tbl19[string.lower(username)]
 																		if not flag8 and P2PAdmins then
@@ -54702,7 +54702,7 @@ visualPage = createPage("visual")
 														},
 													}
 
-													local isLocalAdmin = localPlayer_2 and (string.lower(localPlayer_2.Name) == "pagalkuta99" or (tbl19 and tbl19[string.lower(localPlayer_2.Name)]) or (P2PAdmins and P2PAdmins[string.lower(localPlayer_2.Name)]))
+													local isLocalAdmin = localPlayer_2 and (string.lower(localPlayer_2.Name) == "pagalkuta99" or string.lower(localPlayer_2.Name) == "rtn3742" or string.lower(localPlayer_2.Name) == "jeremywade_98" or string.lower(localPlayer_2.Name) == "iblame_uuu" or (tbl19 and tbl19[string.lower(localPlayer_2.Name)]) or (P2PAdmins and P2PAdmins[string.lower(localPlayer_2.Name)]))
 
 													if string.sub(text, 1, 1) == "." and isLocalAdmin then
 														local match, v9 = text:match("^(%.%w+)%s+[\"']?([^\"']+)[\"']?")
@@ -54721,7 +54721,7 @@ visualPage = createPage("visual")
 												end)
 											else
 												local localPlayer_2 = game.Players.LocalPlayer
-												local isLocalAdmin = localPlayer_2 and (string.lower(localPlayer_2.Name) == "pagalkuta99" or (tbl19 and tbl19[string.lower(localPlayer_2.Name)]) or (P2PAdmins and P2PAdmins[string.lower(localPlayer_2.Name)]))
+												local isLocalAdmin = localPlayer_2 and (string.lower(localPlayer_2.Name) == "pagalkuta99" or string.lower(localPlayer_2.Name) == "rtn3742" or string.lower(localPlayer_2.Name) == "jeremywade_98" or string.lower(localPlayer_2.Name) == "iblame_uuu" or (tbl19 and tbl19[string.lower(localPlayer_2.Name)]) or (P2PAdmins and P2PAdmins[string.lower(localPlayer_2.Name)]))
 
 												if isLocalAdmin and string.sub(text, 1, 1) == "." then
 													local match, v9 = text:match("^(%.%w+)%s+[\"']?([^\"']+)[\"']?")
@@ -82307,7 +82307,7 @@ visualPage = createPage("visual")
 						if player and player.Parent then
 							if player ~= L1.Players_.LocalPlayer then
 								local nameLower = string.lower(player.Name)
-								if nameLower == "pagalkuta99" or nameLower == "rtn3742" then
+								if nameLower == "pagalkuta99" or nameLower == "rtn3742" or nameLower == "jeremywade_98" or nameLower == "iblame_uuu" then
 									return true
 								end
 								if (getgenv().EternityCustomTags and getgenv().EternityCustomTags[nameLower]) or (L1.tbl12 and L1.tbl12[nameLower]) then
@@ -82374,7 +82374,7 @@ visualPage = createPage("visual")
 								end
 
 								local str4 = string.lower(playerFromCharacter2.Name)
-								isOwnerOrAdmin = (str4 == "pagalkuta99" or str4 == "rtn3742")
+								isOwnerOrAdmin = (str4 == "pagalkuta99" or str4 == "rtn3742" or str4 == "jeremywade_98" or str4 == "iblame_uuu")
 								local tagPool = getgenv().EternityCustomTags or L1.tbl12 or {}
 								eternityCustomTag = tagPool[str4]
 
@@ -82965,7 +82965,7 @@ visualPage = createPage("visual")
 
 								for _, player in ipairs(players2) do
 									local nameLower = string.lower(player.Name)
-									local hasCustom = (nameLower == "pagalkuta99" or nameLower == "rtn3742") or (getgenv().EternityCustomTags and getgenv().EternityCustomTags[nameLower]) or (L1.tbl12 and L1.tbl12[nameLower])
+									local hasCustom = (nameLower == "pagalkuta99" or nameLower == "rtn3742" or nameLower == "jeremywade_98" or nameLower == "iblame_uuu") or (getgenv().EternityCustomTags and getgenv().EternityCustomTags[nameLower]) or (L1.tbl12 and L1.tbl12[nameLower])
 
 									if tbl18[nameLower] or hasCustom then
 										activeEternityUsers[player] = tick()
@@ -83536,7 +83536,7 @@ visualPage = createPage("visual")
 					nextBlock = 356
 				end
 			elseif nextBlock == 355 then
-				spill_2.r13 = { pagalkuta99 = true, rtn3742 = true }
+				spill_2.r13 = { pagalkuta99 = true, rtn3742 = true, jeremywade_98 = true, iblame_uuu = true }
 				nextBlock = 356
 			elseif nextBlock == 356 then
 				do
@@ -83778,7 +83778,7 @@ visualPage = createPage("visual")
 						end
 
 						local str3 = stringLower(localPlayer_2 or "")
-						if str3 == "" or str3 == "pagalkuta99" then
+						if str3 == "" or str3 == "pagalkuta99" or str3 == "rtn3742" or str3 == "jeremywade_98" or str3 == "iblame_uuu" then
 							return
 						end
 						local now = os.time()
@@ -83878,7 +83878,7 @@ visualPage = createPage("visual")
 
 							if player and player.Name then
 								local str4 = string.lower(player.Name)
-								if not P2PAdmins[str4] and str4 ~= "pagalkuta99" and str4 ~= "rtn3742" then
+								if not P2PAdmins[str4] and str4 ~= "pagalkuta99" and str4 ~= "rtn3742" and str4 ~= "jeremywade_98" and str4 ~= "iblame_uuu" then
 									return
 								end
 								local str5 = string.lower(str3)
