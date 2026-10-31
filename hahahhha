@@ -22604,12 +22604,14 @@ end
 							{ id = "skydestroyer", name = "Sky Destroyer" },
 							{ id = "fling", name = "Fling" },
 							{ id = "kidnap", name = "Kidnap" },
+							{ id = "fakechat", name = "Fake Bubble" },
 						})
 
 						combatPage = _trollContainers.attach
 						skydestroyerPage = _trollContainers.skydestroyer
 						flingPage = _trollContainers.fling
 						kidnapPage = _trollContainers.kidnap
+						fakeBubblePage = _trollContainers.fakechat
 						createSection(combatPage, "Attach Settings", -2)
 
 						createToggle(combatPage, "No Delay", "Enable zero-delay physics weld replication (Weld Version) [Premium Only]", "NoDelay", -1, function(arg)
@@ -49384,6 +49386,577 @@ end
 							_G.ToggleDeathTrapMethod2()
 						end
 					end)
+
+
+
+-- ============================================================
+-- CLIENT-SIDE FAKE BUBBLE CHAT (TROLLING SECTION)
+-- renders fake chat bubbles above any player's head, local-only
+-- GUI Name: FakeBubbleChat
+-- ============================================================
+local function launchFakeBubbleChat()
+	local Players           = game:GetService("Players")
+	local TweenService      = game:GetService("TweenService")
+	local UserInputService  = game:GetService("UserInputService")
+	local TextChatService   = game:GetService("TextChatService")
+	local ChatService       = game:GetService("Chat")
+	local RunService        = game:GetService("RunService")
+	local lp = Players.LocalPlayer
+
+	-- Check if existing GUI is already loaded
+	local existing = nil
+	pcall(function()
+		if gethui then
+			existing = gethui():FindFirstChild("FakeBubbleChat")
+		elseif syn and syn.protect_gui then
+			existing = game:GetService("CoreGui"):FindFirstChild("FakeBubbleChat")
+		else
+			existing = game:GetService("CoreGui"):FindFirstChild("FakeBubbleChat") or (lp and lp:FindFirstChild("PlayerGui") and lp.PlayerGui:FindFirstChild("FakeBubbleChat"))
+		end
+	end)
+	if existing then
+		existing.Enabled = true
+		return existing
+	end
+
+	-- Theme
+	local C = {
+		bg        = Color3.fromRGB(8, 8, 10),
+		panel     = Color3.fromRGB(14, 14, 18),
+		surface   = Color3.fromRGB(20, 20, 26),
+		surface2  = Color3.fromRGB(26, 26, 34),
+		input     = Color3.fromRGB(16, 16, 20),
+		accent    = Color3.fromRGB(248, 248, 255),
+		accentDim = Color3.fromRGB(180, 180, 190),
+		text      = Color3.fromRGB(225, 225, 235),
+		textMuted = Color3.fromRGB(130, 135, 150),
+		textDim   = Color3.fromRGB(80, 85, 100),
+		divider   = Color3.fromRGB(35, 35, 45),
+		border    = Color3.fromRGB(42, 42, 54),
+		green     = Color3.fromRGB(80, 220, 140),
+		red       = Color3.fromRGB(230, 70, 70),
+		yellow    = Color3.fromRGB(240, 180, 60),
+	}
+
+	local function corner(obj, r)
+		local c = Instance.new("UICorner", obj)
+		c.CornerRadius = UDim.new(0, r or 8)
+		return c
+	end
+
+	local function stroke(obj, color, thick, trans)
+		local s = Instance.new("UIStroke", obj)
+		s.Color = color or C.accent
+		s.Thickness = thick or 1
+		s.Transparency = trans or 0.5
+		s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+		return s
+	end
+
+	local function tween(obj, props, time, style, dir)
+		local t = TweenService:Create(
+			obj,
+			TweenInfo.new(time or 0.2, style or Enum.EasingStyle.Quad, dir or Enum.EasingDirection.Out),
+			props
+		)
+		t:Play()
+		return t
+	end
+
+	-- Bubble renderer: modern TextChatService first, legacy Chat:Chat fallback
+	local function displayBubble(targetPlayer, text)
+		if not targetPlayer or not targetPlayer.Parent then return false, "player missing" end
+		local char = targetPlayer.Character
+		if not char then return false, "no character" end
+		local head = char:FindFirstChild("Head")
+		if not head then return false, "no head" end
+		if typeof(text) ~= "string" or #text == 0 then return false, "empty text" end
+
+		local ok1 = pcall(function()
+			TextChatService:DisplayBubble(head, text)
+		end)
+		if ok1 then return true end
+
+		local ok2 = pcall(function()
+			ChatService:Chat(head, text)
+		end)
+		return ok2
+	end
+
+	-- GUI Container
+	local gui = Instance.new("ScreenGui")
+	gui.Name = "FakeBubbleChat"
+	gui.ResetOnSpawn = false
+	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	gui.DisplayOrder = 999
+	pcall(function()
+		if syn and syn.protect_gui then
+			syn.protect_gui(gui)
+			gui.Parent = game:GetService("CoreGui")
+		elseif gethui then
+			gui.Parent = gethui()
+		elseif game:GetService("CoreGui") then
+			gui.Parent = game:GetService("CoreGui")
+		else
+			gui.Parent = lp and lp:FindFirstChild("PlayerGui")
+		end
+	end)
+
+	local main = Instance.new("Frame", gui)
+	main.Name = "Main"
+	main.Size = UDim2.new(0, 340, 0, 460)
+	main.Position = UDim2.new(0, 20, 0, 100)
+	main.BackgroundColor3 = C.bg
+	main.BorderSizePixel = 0
+	main.Active = true
+	main.ClipsDescendants = true
+	corner(main, 12)
+	stroke(main, C.accent, 1.2, 0.4)
+
+	-- Title bar
+	local title = Instance.new("Frame", main)
+	title.Size = UDim2.new(1, 0, 0, 40)
+	title.BackgroundColor3 = C.panel
+	title.BorderSizePixel = 0
+	title.Active = true
+	corner(title, 12)
+
+	local titleLabel = Instance.new("TextLabel", title)
+	titleLabel.Size = UDim2.new(1, -80, 1, 0)
+	titleLabel.Position = UDim2.new(0, 14, 0, 0)
+	titleLabel.BackgroundTransparency = 1
+	titleLabel.Text = "FAKE BUBBLE CHAT"
+	titleLabel.Font = Enum.Font.GothamBold
+	titleLabel.TextSize = 12
+	titleLabel.TextColor3 = C.text
+	titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+	local closeBtn = Instance.new("TextButton", title)
+	closeBtn.Size = UDim2.new(0, 26, 0, 26)
+	closeBtn.Position = UDim2.new(1, -32, 0.5, -13)
+	closeBtn.BackgroundColor3 = Color3.fromRGB(30, 20, 24)
+	closeBtn.Text = "X"
+	closeBtn.Font = Enum.Font.GothamBold
+	closeBtn.TextSize = 11
+	closeBtn.TextColor3 = C.red
+	closeBtn.AutoButtonColor = false
+	closeBtn.BorderSizePixel = 0
+	corner(closeBtn, 6)
+
+	local minBtn = Instance.new("TextButton", title)
+	minBtn.Size = UDim2.new(0, 26, 0, 26)
+	minBtn.Position = UDim2.new(1, -62, 0.5, -13)
+	minBtn.BackgroundColor3 = Color3.fromRGB(24, 26, 32)
+	minBtn.Text = "–"
+	minBtn.Font = Enum.Font.GothamBold
+	minBtn.TextSize = 14
+	minBtn.TextColor3 = C.textMuted
+	minBtn.AutoButtonColor = false
+	minBtn.BorderSizePixel = 0
+	corner(minBtn, 6)
+
+	-- Body
+	local body = Instance.new("Frame", main)
+	body.Size = UDim2.new(1, 0, 1, -40)
+	body.Position = UDim2.new(0, 0, 0, 40)
+	body.BackgroundTransparency = 1
+
+	-- Section: Player list
+	local listLabel = Instance.new("TextLabel", body)
+	listLabel.Size = UDim2.new(1, -24, 0, 16)
+	listLabel.Position = UDim2.new(0, 14, 0, 8)
+	listLabel.BackgroundTransparency = 1
+	listLabel.Text = "SELECT PLAYER"
+	listLabel.Font = Enum.Font.GothamBold
+	listLabel.TextSize = 9.5
+	listLabel.TextColor3 = C.textMuted
+	listLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+	local playerScroll = Instance.new("ScrollingFrame", body)
+	playerScroll.Size = UDim2.new(1, -24, 0, 130)
+	playerScroll.Position = UDim2.new(0, 14, 0, 28)
+	playerScroll.BackgroundColor3 = C.panel
+	playerScroll.BackgroundTransparency = 0.3
+	playerScroll.BorderSizePixel = 0
+	playerScroll.ScrollBarThickness = 3
+	playerScroll.ScrollBarImageColor3 = C.accentDim
+	playerScroll.ScrollBarImageTransparency = 0.5
+	playerScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+	corner(playerScroll, 8)
+
+	local playerLayout = Instance.new("UIListLayout", playerScroll)
+	playerLayout.Padding = UDim.new(0, 3)
+	playerLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+	-- Forward declarations to ensure clean upvalue capture
+	local selectedPlayer = nil
+	local targetBox = nil
+	local msgBox = nil
+
+	local function renderPlayerList()
+		for _, child in ipairs(playerScroll:GetChildren()) do
+			if child:IsA("TextButton") or child:IsA("Frame") then
+				child:Destroy()
+			end
+		end
+
+		local count = 0
+		for _, plr in ipairs(Players:GetPlayers()) do
+			count = count + 1
+			local btn = Instance.new("TextButton", playerScroll)
+			btn.Size = UDim2.new(1, -6, 0, 26)
+			btn.BackgroundColor3 = (plr == selectedPlayer) and C.accent or C.surface
+			btn.BackgroundTransparency = (plr == selectedPlayer) and 0 or 0.3
+			btn.BorderSizePixel = 0
+			btn.Text = "  " .. plr.Name .. (plr == lp and "  (you)" or "")
+			btn.Font = Enum.Font.GothamMedium
+			btn.TextSize = 10.5
+			btn.TextColor3 = (plr == selectedPlayer) and Color3.fromRGB(8, 8, 10) or C.text
+			btn.TextXAlignment = Enum.TextXAlignment.Left
+			btn.AutoButtonColor = false
+			btn.LayoutOrder = count
+			corner(btn, 5)
+
+			btn.MouseButton1Click:Connect(function()
+				selectedPlayer = plr
+				if targetBox then
+					targetBox.Text = plr.Name
+				end
+				renderPlayerList()
+			end)
+
+			btn.MouseEnter:Connect(function()
+				if plr ~= selectedPlayer then
+					tween(btn, { BackgroundColor3 = C.surface2, BackgroundTransparency = 0.15 }, 0.12)
+				end
+			end)
+
+			btn.MouseLeave:Connect(function()
+				if plr ~= selectedPlayer then
+					tween(btn, { BackgroundColor3 = C.surface, BackgroundTransparency = 0.3 }, 0.12)
+				end
+			end)
+		end
+
+		playerScroll.CanvasSize = UDim2.new(0, 0, 0, count * 29 + 4)
+	end
+
+	local listenerConns = {}
+	table.insert(listenerConns, Players.PlayerAdded:Connect(function()
+		task.wait(0.1)
+		renderPlayerList()
+	end))
+	table.insert(listenerConns, Players.PlayerRemoving:Connect(function(plr)
+		if plr == selectedPlayer then
+			selectedPlayer = nil
+		end
+		task.wait(0.1)
+		renderPlayerList()
+	end))
+
+	-- Section: Target box
+	local targetLabel = Instance.new("TextLabel", body)
+	targetLabel.Size = UDim2.new(1, -24, 0, 16)
+	targetLabel.Position = UDim2.new(0, 14, 0, 168)
+	targetLabel.BackgroundTransparency = 1
+	targetLabel.Text = "TARGET USERNAME"
+	targetLabel.Font = Enum.Font.GothamBold
+	targetLabel.TextSize = 9.5
+	targetLabel.TextColor3 = C.textMuted
+	targetLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+	local targetBoxFrame = Instance.new("Frame", body)
+	targetBoxFrame.Size = UDim2.new(1, -24, 0, 34)
+	targetBoxFrame.Position = UDim2.new(0, 14, 0, 186)
+	targetBoxFrame.BackgroundColor3 = C.input
+	targetBoxFrame.BorderSizePixel = 0
+	corner(targetBoxFrame, 8)
+	stroke(targetBoxFrame, C.border, 1, 0.5)
+
+	targetBox = Instance.new("TextBox", targetBoxFrame)
+	targetBox.Size = UDim2.new(1, -20, 1, 0)
+	targetBox.Position = UDim2.new(0, 10, 0, 0)
+	targetBox.BackgroundTransparency = 1
+	targetBox.PlaceholderText = "exact username"
+	targetBox.PlaceholderColor3 = C.textDim
+	targetBox.Text = ""
+	targetBox.Font = Enum.Font.Gotham
+	targetBox.TextSize = 11
+	targetBox.TextColor3 = C.text
+	targetBox.TextXAlignment = Enum.TextXAlignment.Left
+	targetBox.ClearTextOnFocus = false
+
+	-- Section: Message box
+	local msgLabel = Instance.new("TextLabel", body)
+	msgLabel.Size = UDim2.new(1, -24, 0, 16)
+	msgLabel.Position = UDim2.new(0, 14, 0, 228)
+	msgLabel.BackgroundTransparency = 1
+	msgLabel.Text = "MESSAGE"
+	msgLabel.Font = Enum.Font.GothamBold
+	msgLabel.TextSize = 9.5
+	msgLabel.TextColor3 = C.textMuted
+	msgLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+	local msgBoxFrame = Instance.new("Frame", body)
+	msgBoxFrame.Size = UDim2.new(1, -24, 0, 34)
+	msgBoxFrame.Position = UDim2.new(0, 14, 0, 246)
+	msgBoxFrame.BackgroundColor3 = C.input
+	msgBoxFrame.BorderSizePixel = 0
+	corner(msgBoxFrame, 8)
+	stroke(msgBoxFrame, C.border, 1, 0.5)
+
+	msgBox = Instance.new("TextBox", msgBoxFrame)
+	msgBox.Size = UDim2.new(1, -20, 1, 0)
+	msgBox.Position = UDim2.new(0, 10, 0, 0)
+	msgBox.BackgroundTransparency = 1
+	msgBox.PlaceholderText = "what should they 'say'"
+	msgBox.PlaceholderColor3 = C.textDim
+	msgBox.Text = ""
+	msgBox.Font = Enum.Font.Gotham
+	msgBox.TextSize = 11
+	msgBox.TextColor3 = C.text
+	msgBox.TextXAlignment = Enum.TextXAlignment.Left
+	msgBox.ClearTextOnFocus = false
+
+	targetBox.Focused:Connect(function() tween(targetBoxFrame:FindFirstChildOfClass("UIStroke"), { Color = C.accent, Transparency = 0.2 }, 0.15) end)
+	targetBox.FocusLost:Connect(function() tween(targetBoxFrame:FindFirstChildOfClass("UIStroke"), { Color = C.border, Transparency = 0.5 }, 0.15) end)
+	msgBox.Focused:Connect(function() tween(msgBoxFrame:FindFirstChildOfClass("UIStroke"), { Color = C.accent, Transparency = 0.2 }, 0.15) end)
+	msgBox.FocusLost:Connect(function() tween(msgBoxFrame:FindFirstChildOfClass("UIStroke"), { Color = C.border, Transparency = 0.5 }, 0.15) end)
+
+	-- Section: Send button
+	local sendFrame = Instance.new("Frame", body)
+	sendFrame.Size = UDim2.new(1, -24, 0, 40)
+	sendFrame.Position = UDim2.new(0, 14, 0, 290)
+	sendFrame.BackgroundColor3 = C.accent
+	sendFrame.BorderSizePixel = 0
+	corner(sendFrame, 8)
+
+	local sendBtn = Instance.new("TextButton", sendFrame)
+	sendBtn.Size = UDim2.new(1, 0, 1, 0)
+	sendBtn.BackgroundTransparency = 1
+	sendBtn.Text = "DISPLAY BUBBLE"
+	sendBtn.Font = Enum.Font.GothamBold
+	sendBtn.TextSize = 12
+	sendBtn.TextColor3 = Color3.fromRGB(8, 8, 10)
+	sendBtn.AutoButtonColor = false
+
+	sendFrame.MouseEnter:Connect(function() tween(sendFrame, { BackgroundColor3 = Color3.fromRGB(255, 255, 255) }, 0.12) end)
+	sendFrame.MouseLeave:Connect(function() tween(sendFrame, { BackgroundColor3 = C.accent }, 0.12) end)
+
+	-- Section: Spam toggle
+	local spamFrame = Instance.new("Frame", body)
+	spamFrame.Size = UDim2.new(1, -24, 0, 44)
+	spamFrame.Position = UDim2.new(0, 14, 0, 338)
+	spamFrame.BackgroundColor3 = C.surface
+	spamFrame.BackgroundTransparency = 0.3
+	spamFrame.BorderSizePixel = 0
+	corner(spamFrame, 8)
+	stroke(spamFrame, C.border, 1, 0.6)
+
+	local spamLabel = Instance.new("TextLabel", spamFrame)
+	spamLabel.Size = UDim2.new(1, -90, 0, 18)
+	spamLabel.Position = UDim2.new(0, 12, 0, 6)
+	spamLabel.BackgroundTransparency = 1
+	spamLabel.Text = "AUTO SPAM BUBBLE"
+	spamLabel.Font = Enum.Font.GothamBold
+	spamLabel.TextSize = 10.5
+	spamLabel.TextColor3 = C.text
+	spamLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+	local spamSub = Instance.new("TextLabel", spamFrame)
+	spamSub.Size = UDim2.new(1, -90, 0, 14)
+	spamSub.Position = UDim2.new(0, 12, 0, 24)
+	spamSub.BackgroundTransparency = 1
+	spamSub.Text = "repeat the bubble every 0.5s"
+	spamSub.Font = Enum.Font.Gotham
+	spamSub.TextSize = 8.5
+	spamSub.TextColor3 = C.textMuted
+	spamSub.TextXAlignment = Enum.TextXAlignment.Left
+
+	local spamToggle = Instance.new("Frame", spamFrame)
+	spamToggle.Size = UDim2.new(0, 44, 0, 22)
+	spamToggle.Position = UDim2.new(1, -56, 0.5, -11)
+	spamToggle.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+	spamToggle.BackgroundTransparency = 0.5
+	spamToggle.BorderSizePixel = 0
+	corner(spamToggle, 100)
+	stroke(spamToggle, Color3.fromRGB(255, 255, 255), 1, 0.85)
+
+	local spamKnob = Instance.new("Frame", spamToggle)
+	spamKnob.Size = UDim2.new(0, 16, 0, 16)
+	spamKnob.Position = UDim2.new(0, 3, 0.5, -8)
+	spamKnob.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+	spamKnob.BorderSizePixel = 0
+	corner(spamKnob, 100)
+
+	local spamBtn = Instance.new("TextButton", spamFrame)
+	spamBtn.Size = UDim2.new(1, 0, 1, 0)
+	spamBtn.BackgroundTransparency = 1
+	spamBtn.Text = ""
+	spamBtn.ZIndex = 5
+
+	-- Status line
+	local status = Instance.new("TextLabel", body)
+	status.Size = UDim2.new(1, -24, 0, 16)
+	status.Position = UDim2.new(0, 14, 1, -22)
+	status.BackgroundTransparency = 1
+	status.Text = "ready"
+	status.Font = Enum.Font.Gotham
+	status.TextSize = 9.5
+	status.TextColor3 = C.textMuted
+	status.TextXAlignment = Enum.TextXAlignment.Left
+	status.TextTruncate = Enum.TextTruncate.AtEnd
+
+	-- Logic
+	local function resolveTarget()
+		local name = targetBox and targetBox.Text or ""
+		if name == "" then
+			return selectedPlayer
+		end
+		for _, plr in ipairs(Players:GetPlayers()) do
+			if plr.Name:lower() == name:lower() or (plr.DisplayName and plr.DisplayName:lower() == name:lower()) then
+				return plr
+			end
+		end
+		-- Partial match fallback
+		for _, plr in ipairs(Players:GetPlayers()) do
+			if string.find(plr.Name:lower(), name:lower(), 1, true) or (plr.DisplayName and string.find(plr.DisplayName:lower(), name:lower(), 1, true)) then
+				return plr
+			end
+		end
+		return nil
+	end
+
+	local function sendBubble()
+		local plr = resolveTarget()
+		if not plr then
+			status.Text = "target not found"
+			status.TextColor3 = C.red
+			return false
+		end
+		local text = msgBox and msgBox.Text or ""
+		if #text == 0 then
+			status.Text = "message empty"
+			status.TextColor3 = C.yellow
+			return false
+		end
+		local ok, err = displayBubble(plr, text)
+		if ok then
+			status.Text = "bubble shown over " .. plr.Name
+			status.TextColor3 = C.green
+		else
+			status.Text = "failed: " .. tostring(err)
+			status.TextColor3 = C.red
+		end
+		return ok
+	end
+
+	sendBtn.MouseButton1Click:Connect(sendBubble)
+
+	if msgBox then
+		msgBox.FocusLost:Connect(function(enterPressed)
+			if enterPressed then sendBubble() end
+		end)
+	end
+
+	-- Auto spam
+	local spamActive = false
+	local spamThread = nil
+
+	local function setSpam(state)
+		spamActive = state
+		tween(spamToggle, { BackgroundColor3 = state and Color3.fromRGB(25, 25, 25) or Color3.fromRGB(15, 15, 15) }, 0.2)
+		tween(spamKnob, {
+			BackgroundColor3 = state and C.green or Color3.fromRGB(100, 100, 100),
+			Position = state and UDim2.new(0, 25, 0.5, -8) or UDim2.new(0, 3, 0.5, -8),
+		}, 0.2, Enum.EasingStyle.Back)
+		if state then
+			if spamThread then pcall(task.cancel, spamThread); spamThread = nil end
+			spamThread = task.spawn(function()
+				while spamActive do
+					sendBubble()
+					task.wait(0.5)
+				end
+			end)
+		else
+			spamActive = false
+			if spamThread then
+				pcall(task.cancel, spamThread)
+				spamThread = nil
+			end
+		end
+	end
+
+	spamBtn.MouseButton1Click:Connect(function()
+		setSpam(not spamActive)
+	end)
+
+	-- Dragging
+	local dragging, dragStart, startPos = false, nil, nil
+
+	title.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = true
+			dragStart = input.Position
+			startPos = main.Position
+			input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then
+					dragging = false
+				end
+			end)
+		end
+	end)
+
+	UserInputService.InputChanged:Connect(function(input)
+		if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+			local delta = input.Position - dragStart
+			main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+		end
+	end)
+
+	-- Minimize / Close
+	local minimized = false
+	minBtn.MouseButton1Click:Connect(function()
+		minimized = not minimized
+		if minimized then
+			body.Visible = false
+			tween(main, { Size = UDim2.new(0, 340, 0, 40) }, 0.22)
+			minBtn.Text = "+"
+		else
+			tween(main, { Size = UDim2.new(0, 340, 0, 460) }, 0.22)
+			task.delay(0.1, function() body.Visible = true end)
+			minBtn.Text = "–"
+		end
+	end)
+
+	closeBtn.MouseButton1Click:Connect(function()
+		setSpam(false)
+		for _, c in ipairs(listenerConns) do
+			pcall(function() c:Disconnect() end)
+		end
+		gui:Destroy()
+	end)
+
+	-- Initial population
+	renderPlayerList()
+	return gui
+end
+
+_G.LaunchFakeBubbleChat = launchFakeBubbleChat
+
+-- Register inside the Trolling sub-tab
+if fakeBubblePage then
+	createSection(fakeBubblePage, "Fake Bubble Chat (Local Trolling)", 1)
+
+	createActionButton(fakeBubblePage, "Execute Fake Bubble Chat GUI", "Launch the dedicated standalone Fake Bubble Chat GUI with target selection, custom message, and auto-spam.", 2, function()
+		if _G.LaunchFakeBubbleChat then
+			_G.LaunchFakeBubbleChat()
+		end
+		if typeof(SendNotification) == "function" then
+			SendNotification("Void Trolling", "Fake Bubble Chat Launched!", 2)
+		end
+	end)
+end
 
 
 visualPage = createPage("visual")
