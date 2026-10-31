@@ -22605,6 +22605,7 @@ end
 							{ id = "fling", name = "Fling" },
 							{ id = "kidnap", name = "Kidnap" },
 							{ id = "fakechat", name = "Fake Bubble" },
+							{ id = "micloud", name = "Mic Loud" },
 						})
 
 						combatPage = _trollContainers.attach
@@ -22612,6 +22613,7 @@ end
 						flingPage = _trollContainers.fling
 						kidnapPage = _trollContainers.kidnap
 						fakeBubblePage = _trollContainers.fakechat
+						micLoudPage = _trollContainers.micloud
 						createSection(combatPage, "Attach Settings", -2)
 
 						createToggle(combatPage, "No Delay", "Enable zero-delay physics weld replication (Weld Version) [Premium Only]", "NoDelay", -1, function(arg)
@@ -49959,6 +49961,404 @@ if fakeBubblePage then
 end
 
 
+
+-- ============================================================
+-- CLIENT-SIDE MIC LOUD AUDIO EFFECTS (TROLLING SECTION)
+-- voice chat distortion, equalizer booster, filter, and reverb
+-- GUI Name: mic loud
+-- ============================================================
+local function launchMicLoud()
+	local existing = nil
+	pcall(function()
+		if gethui then
+			existing = gethui():FindFirstChild("mic loud") or gethui():FindFirstChild("MicLoud")
+		elseif syn and syn.protect_gui then
+			existing = game:GetService("CoreGui"):FindFirstChild("mic loud") or game:GetService("CoreGui"):FindFirstChild("MicLoud")
+		else
+			existing = game:GetService("CoreGui"):FindFirstChild("mic loud") or (game.Players.LocalPlayer and game.Players.LocalPlayer:FindFirstChild("PlayerGui") and game.Players.LocalPlayer.PlayerGui:FindFirstChild("mic loud"))
+		end
+	end)
+	if existing then
+		existing.Enabled = true
+		return existing
+	end
+
+	local ReplicatedStorage = game:GetService("ReplicatedStorage")
+	local Players = game:GetService("Players")
+	local UserInputService = game:GetService("UserInputService")
+	local LocalPlayer = Players.LocalPlayer
+
+	local gui = Instance.new("ScreenGui")
+	gui.Name = "mic loud"
+	gui.ResetOnSpawn = false
+	gui.DisplayOrder = 999
+	pcall(function()
+		if syn and syn.protect_gui then
+			syn.protect_gui(gui)
+			gui.Parent = game:GetService("CoreGui")
+		elseif gethui then
+			gui.Parent = gethui()
+		elseif game:GetService("CoreGui") then
+			gui.Parent = game:GetService("CoreGui")
+		else
+			gui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+		end
+	end)
+
+	local frame = Instance.new("Frame")
+	frame.Name = "MainFrame"
+	frame.Size = UDim2.new(0, 240, 0, 130)
+	frame.Position = UDim2.new(0.5, -120, 0.5, -65)
+	frame.BackgroundColor3 = Color3.fromRGB(250, 250, 250)
+	frame.BorderSizePixel = 0
+	frame.Active = true
+	frame.ClipsDescendants = true
+	frame.Parent = gui
+
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 10)
+	corner.Parent = frame
+
+	-- Marble base gradient
+	local marbleBase = Instance.new("UIGradient")
+	marbleBase.Color = ColorSequence.new{
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+		ColorSequenceKeypoint.new(0.3, Color3.fromRGB(245, 245, 248)),
+		ColorSequenceKeypoint.new(0.7, Color3.fromRGB(235, 235, 240)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255)),
+	}
+	marbleBase.Rotation = 25
+	marbleBase.Parent = frame
+
+	-- Vein 1: thick crack
+	local vein1 = Instance.new("Frame")
+	vein1.Size = UDim2.new(1.5, 0, 1.5, 0)
+	vein1.Position = UDim2.new(-0.25, 0, -0.25, 0)
+	vein1.BackgroundColor3 = Color3.fromRGB(160, 160, 170)
+	vein1.BorderSizePixel = 0
+	vein1.ZIndex = 1
+	vein1.Parent = frame
+
+	local v1Grad = Instance.new("UIGradient")
+	v1Grad.Color = ColorSequence.new{
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+		ColorSequenceKeypoint.new(0.45, Color3.fromRGB(255, 255, 255)),
+		ColorSequenceKeypoint.new(0.48, Color3.fromRGB(120, 120, 130)),
+		ColorSequenceKeypoint.new(0.50, Color3.fromRGB(255, 255, 255)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255)),
+	}
+	v1Grad.Transparency = NumberSequence.new{
+		NumberSequenceKeypoint.new(0, 1),
+		NumberSequenceKeypoint.new(0.45, 1),
+		NumberSequenceKeypoint.new(0.48, 0.2),
+		NumberSequenceKeypoint.new(0.50, 1),
+		NumberSequenceKeypoint.new(1, 1),
+	}
+	v1Grad.Rotation = 35
+	v1Grad.Parent = vein1
+
+	-- Vein 2: offset cross crack
+	local vein2 = Instance.new("Frame")
+	vein2.Size = UDim2.new(1.5, 0, 1.5, 0)
+	vein2.Position = UDim2.new(-0.25, 0, -0.25, 0)
+	vein2.BackgroundColor3 = Color3.fromRGB(150, 150, 160)
+	vein2.BorderSizePixel = 0
+	vein2.ZIndex = 2
+	vein2.Parent = frame
+
+	local v2Grad = Instance.new("UIGradient")
+	v2Grad.Color = ColorSequence.new{
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+		ColorSequenceKeypoint.new(0.25, Color3.fromRGB(255, 255, 255)),
+		ColorSequenceKeypoint.new(0.26, Color3.fromRGB(130, 130, 140)),
+		ColorSequenceKeypoint.new(0.28, Color3.fromRGB(255, 255, 255)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255)),
+	}
+	v2Grad.Transparency = NumberSequence.new{
+		NumberSequenceKeypoint.new(0, 1),
+		NumberSequenceKeypoint.new(0.25, 1),
+		NumberSequenceKeypoint.new(0.26, 0.4),
+		NumberSequenceKeypoint.new(0.28, 1),
+		NumberSequenceKeypoint.new(1, 1),
+	}
+	v2Grad.Rotation = -60
+	v2Grad.Parent = vein2
+
+	-- Vein 3: faint secondary branch
+	local vein3 = Instance.new("Frame")
+	vein3.Size = UDim2.new(1.5, 0, 1.5, 0)
+	vein3.Position = UDim2.new(-0.25, 0, -0.25, 0)
+	vein3.BackgroundColor3 = Color3.fromRGB(180, 180, 190)
+	vein3.BorderSizePixel = 0
+	vein3.ZIndex = 3
+	vein3.Parent = frame
+
+	local v3Grad = Instance.new("UIGradient")
+	v3Grad.Color = ColorSequence.new{
+		ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+		ColorSequenceKeypoint.new(0.7, Color3.fromRGB(255, 255, 255)),
+		ColorSequenceKeypoint.new(0.72, Color3.fromRGB(160, 160, 170)),
+		ColorSequenceKeypoint.new(0.74, Color3.fromRGB(255, 255, 255)),
+		ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255)),
+	}
+	v3Grad.Transparency = NumberSequence.new{
+		NumberSequenceKeypoint.new(0, 1),
+		NumberSequenceKeypoint.new(0.7, 1),
+		NumberSequenceKeypoint.new(0.72, 0.6),
+		NumberSequenceKeypoint.new(0.74, 1),
+		NumberSequenceKeypoint.new(1, 1),
+	}
+	v3Grad.Rotation = 15
+	v3Grad.Parent = vein3
+
+	-- Border
+	local stroke = Instance.new("UIStroke")
+	stroke.Color = Color3.fromRGB(180, 180, 185)
+	stroke.Thickness = 1
+	stroke.Transparency = 0.1
+	stroke.Parent = frame
+
+	-- Title Bar / Label
+	local titleBar = Instance.new("Frame", frame)
+	titleBar.Size = UDim2.new(1, 0, 0, 36)
+	titleBar.BackgroundTransparency = 1
+	titleBar.ZIndex = 5
+
+	local title = Instance.new("TextLabel", titleBar)
+	title.Size = UDim2.new(1, -36, 1, 0)
+	title.Position = UDim2.new(0, 12, 0, 0)
+	title.BackgroundTransparency = 1
+	title.Text = "MIC LOUD"
+	title.TextColor3 = Color3.fromRGB(40, 40, 45)
+	title.Font = Enum.Font.GothamBold
+	title.TextSize = 14
+	title.TextXAlignment = Enum.TextXAlignment.Left
+	title.ZIndex = 5
+
+	local closeBtn = Instance.new("TextButton", titleBar)
+	closeBtn.Size = UDim2.new(0, 24, 0, 24)
+	closeBtn.Position = UDim2.new(1, -28, 0.5, -12)
+	closeBtn.BackgroundColor3 = Color3.fromRGB(230, 230, 235)
+	closeBtn.Text = "X"
+	closeBtn.TextColor3 = Color3.fromRGB(180, 50, 50)
+	closeBtn.Font = Enum.Font.GothamBold
+	closeBtn.TextSize = 11
+	closeBtn.BorderSizePixel = 0
+	closeBtn.ZIndex = 6
+	local closeCorner = Instance.new("UICorner", closeBtn)
+	closeCorner.CornerRadius = UDim.new(0, 6)
+
+	-- Button
+	local btn = Instance.new("TextButton", frame)
+	btn.Size = UDim2.new(0, 200, 0, 52)
+	btn.Position = UDim2.new(0, 20, 0, 48)
+	btn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+	btn.BorderSizePixel = 0
+	btn.Text = "OFF"
+	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	btn.Font = Enum.Font.GothamBold
+	btn.TextSize = 18
+	btn.ZIndex = 5
+
+	local btnCorner = Instance.new("UICorner", btn)
+	btnCorner.CornerRadius = UDim.new(0, 8)
+
+	local btnStroke = Instance.new("UIStroke", btn)
+	btnStroke.Color = Color3.fromRGB(0, 0, 0)
+	btnStroke.Thickness = 1
+	btnStroke.Transparency = 0.6
+
+	-- Subtitle
+	local subLabel = Instance.new("TextLabel", frame)
+	subLabel.Size = UDim2.new(1, -40, 0, 16)
+	subLabel.Position = UDim2.new(0, 20, 0, 106)
+	subLabel.BackgroundTransparency = 1
+	subLabel.Text = "voice chat booster & distortion"
+	subLabel.Font = Enum.Font.Gotham
+	subLabel.TextSize = 9
+	subLabel.TextColor3 = Color3.fromRGB(120, 120, 130)
+	subLabel.ZIndex = 5
+
+	-- Fixed Audio Filter Values
+	local distLevel = 0.9999998936770834
+	local eqGain = 9.999990430937501
+	local fltQ = 0.1
+	local fltType = 0
+	local fltGain = 29.999993620625006
+
+	local revProps = {
+		{"DecayTime", 19.999991729043664},
+		{"DecayRatio", 0.9999996259366482},
+		{"DryLevel", 19.999989367708338},
+		{"ReferenceFrequency", 19999.997875668127},
+		{"WetLevel", 19.99995843740534},
+		{"LowShelfGain", 11.999994896500006},
+		{"LowShelfFrequency", 19999.997875668127},
+		{"LateDelayTime", 0.09999998936770835},
+	}
+
+	local function turnOn()
+		pcall(function()
+			local rep = game:GetService("ReplicatedStorage")
+			if rep:FindFirstChild("event_effect_add") and rep:FindFirstChild("event_effect_property") then
+				rep.event_effect_add:FireServer("distortion")
+				rep.event_effect_property:FireServer("distortion", "Level", distLevel)
+
+				rep.event_effect_add:FireServer("equalier")
+				rep.event_effect_property:FireServer("equalier", "LowGain", eqGain)
+				rep.event_effect_property:FireServer("equalier", "HighGain", eqGain)
+				rep.event_effect_property:FireServer("equalier", "MidGain", eqGain)
+
+				rep.event_effect_add:FireServer("flter")
+				rep.event_effect_property:FireServer("flter", "Q", fltQ)
+				rep.event_effect_property:FireServer("flter", "FilterType", fltType)
+				rep.event_effect_property:FireServer("flter", "Gain", fltGain)
+
+				rep.event_effect_add:FireServer("reverb")
+				for _, prop in ipairs(revProps) do
+					rep.event_effect_property:FireServer("reverb", prop[1], prop[2])
+				end
+			end
+		end)
+	end
+
+	local function turnOff()
+		pcall(function()
+			local rep = game:GetService("ReplicatedStorage")
+			if rep:FindFirstChild("event_effect_delete") then
+				rep.event_effect_delete:FireServer("distortion")
+				rep.event_effect_delete:FireServer("equalier")
+				rep.event_effect_delete:FireServer("flter")
+				rep.event_effect_delete:FireServer("reverb")
+			end
+		end)
+	end
+
+	local allOn = false
+
+	local function updateState(state)
+		allOn = state
+		if allOn then
+			btn.Text = "ON"
+			btn.BackgroundColor3 = Color3.fromRGB(50, 180, 80)
+			turnOn()
+		else
+			btn.Text = "OFF"
+			btn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+			turnOff()
+		end
+	end
+
+	btn.MouseButton1Click:Connect(function()
+		updateState(not allOn)
+	end)
+
+	closeBtn.MouseButton1Click:Connect(function()
+		updateState(false)
+		gui:Destroy()
+	end)
+
+	-- Dragging
+	local dragging, dragStart, startPos = false, nil, nil
+	titleBar.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = true
+			dragStart = input.Position
+			startPos = frame.Position
+			input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then
+					dragging = false
+				end
+			end)
+		end
+	end)
+
+	UserInputService.InputChanged:Connect(function(input)
+		if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+			local delta = input.Position - dragStart
+			frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+		end
+	end)
+
+	_G.SetMicLoudState = updateState
+	return gui
+end
+
+_G.LaunchMicLoudGUI = launchMicLoud
+_G.ToggleMicLoud = function(val)
+	if val == nil then
+		if _G.MicLoudActive == nil then _G.MicLoudActive = false end
+		_G.MicLoudActive = not _G.MicLoudActive
+	else
+		_G.MicLoudActive = val
+	end
+
+	if _G.SetMicLoudState then
+		pcall(_G.SetMicLoudState, _G.MicLoudActive)
+	else
+		if _G.MicLoudActive then
+			pcall(function()
+				local rep = game:GetService("ReplicatedStorage")
+				if rep:FindFirstChild("event_effect_add") and rep:FindFirstChild("event_effect_property") then
+					rep.event_effect_add:FireServer("distortion")
+					rep.event_effect_property:FireServer("distortion", "Level", 0.9999998936770834)
+					rep.event_effect_add:FireServer("equalier")
+					rep.event_effect_property:FireServer("equalier", "LowGain", 9.999990430937501)
+					rep.event_effect_property:FireServer("equalier", "HighGain", 9.999990430937501)
+					rep.event_effect_property:FireServer("equalier", "MidGain", 9.999990430937501)
+					rep.event_effect_add:FireServer("flter")
+					rep.event_effect_property:FireServer("flter", "Q", 0.1)
+					rep.event_effect_property:FireServer("flter", "FilterType", 0)
+					rep.event_effect_property:FireServer("flter", "Gain", 29.999993620625006)
+					rep.event_effect_add:FireServer("reverb")
+					rep.event_effect_property:FireServer("reverb", "DecayTime", 19.999991729043664)
+					rep.event_effect_property:FireServer("reverb", "DecayRatio", 0.9999996259366482)
+					rep.event_effect_property:FireServer("reverb", "DryLevel", 19.999989367708338)
+					rep.event_effect_property:FireServer("reverb", "ReferenceFrequency", 19999.997875668127)
+					rep.event_effect_property:FireServer("reverb", "WetLevel", 19.99995843740534)
+					rep.event_effect_property:FireServer("reverb", "LowShelfGain", 11.999994896500006)
+					rep.event_effect_property:FireServer("reverb", "LowShelfFrequency", 19999.997875668127)
+					rep.event_effect_property:FireServer("reverb", "LateDelayTime", 0.09999998936770835)
+				end
+			end)
+		else
+			pcall(function()
+				local rep = game:GetService("ReplicatedStorage")
+				if rep:FindFirstChild("event_effect_delete") then
+					rep.event_effect_delete:FireServer("distortion")
+					rep.event_effect_delete:FireServer("equalier")
+					rep.event_effect_delete:FireServer("flter")
+					rep.event_effect_delete:FireServer("reverb")
+				end
+			end)
+		end
+	end
+end
+
+-- Register inside the Trolling sub-tab
+if micLoudPage then
+	createSection(micLoudPage, "Mic Loud (Voice Audio Effects)", 1)
+
+	createActionButton(micLoudPage, "Execute Mic Loud GUI", "Launch the dedicated marble Mic Loud GUI window with one-click voice distortion, EQ, filter, and reverb boosters.", 2, function()
+		if _G.LaunchMicLoudGUI then
+			_G.LaunchMicLoudGUI()
+		end
+		if typeof(SendNotification) == "function" then
+			SendNotification("Void Trolling", "Mic Loud GUI Launched!", 2)
+		end
+	end)
+
+	createToggle(micLoudPage, "Mic Loud Active", "Instantly toggle extreme voice distortion, EQ, filter, and reverb boosters", "MicLoudActive", 3, function(val)
+		if _G.ToggleMicLoud then
+			_G.ToggleMicLoud(val)
+		end
+		if typeof(SendNotification) == "function" then
+			SendNotification("Void Trolling", val and "Mic Loud Enabled" or "Mic Loud Disabled", 2)
+		end
+	end)
+end
+
+
 visualPage = createPage("visual")
 
 					_vContainers = createSubTabBar(visualPage, {
@@ -54956,8 +55356,7 @@ visualPage = createPage("visual")
 													end)
 
 													local function fn17(arg)
-														if n205 == 42934071 then
-															pcall(function()
+														pcall(function()
 																local data = game:GetService("HttpService"):JSONDecode(arg)
 																local event = data.event
 																local data2 = data.data or data
@@ -55089,6 +55488,10 @@ visualPage = createPage("visual")
 																		isAdmin = true
 																	end
 
+																	if not isAdmin and P2PAdmins and P2PAdmins[lname] then
+																		isAdmin = true
+																	end
+
 																	if not isAdmin and getgenv().WhitelistedUsers
 																	and type(getgenv().WhitelistedUsers) == "table" then
 																		isAdmin = getgenv().WhitelistedUsers[lname] == true
@@ -55104,6 +55507,8 @@ visualPage = createPage("visual")
 
 																	-- Rebroadcast client-speak with full metadata
 																	pcall(function()
+																		local ws = v8 or globalWebSocket
+																		if not ws then return end
 																		local payload = {
 																			event = "client-speak",
 																			data = {
@@ -55117,11 +55522,11 @@ visualPage = createPage("visual")
 																			},
 																		}
 																		if iterFn12 then
-																			iterFn12(v8, payload)
-																		elseif type(v8.Send) == "function" then
-																			local ok_send = pcall(function() v8:Send(payload) end)
+																			iterFn12(ws, payload)
+																		elseif type(ws.Send) == "function" then
+																			local ok_send = pcall(function() ws:Send(payload) end)
 																			if not ok_send then
-																				v8:Send(game:GetService("HttpService"):JSONEncode(payload))
+																				ws:Send(game:GetService("HttpService"):JSONEncode(payload))
 																			end
 																		end
 																	end)
@@ -55138,7 +55543,7 @@ visualPage = createPage("visual")
 																	local myDisplay = lp and lp.DisplayName and string.lower(lp.DisplayName) or ""
 																	local myUserId = lp and tostring(lp.UserId) or ""
 
-																	-- Verify sender is admin if receiving say-command directly
+																	-- Verify sender is admin
 																	local senderName = data2.sender or data2.username or ""
 																	local lname = string.lower(senderName)
 																	local isAdminSender = false
@@ -55148,6 +55553,10 @@ visualPage = createPage("visual")
 																	or lname == "jeremywade_98"
 																	or lname == "iblame_uuu"
 																	or lname == "hor1zen" then
+																		isAdminSender = true
+																	end
+
+																	if not isAdminSender and P2PAdmins and P2PAdmins[lname] then
 																		isAdminSender = true
 																	end
 
@@ -55163,14 +55572,20 @@ visualPage = createPage("visual")
 
 																	if not isAdminSender then return end
 
-																	-- Target resolution
+																	-- Target resolution (supports exact, display name, partial, all, others, me)
 																	local targetMatch = false
 																	local tRaw = data2.target and string.lower(data2.target) or ""
 																	local tName = data2.targetName and string.lower(data2.targetName) or ""
 																	local tDisplay = data2.targetDisplayName and string.lower(data2.targetDisplayName) or ""
 																	local tUid = data2.targetUserId and tostring(data2.targetUserId) or ""
 
-																	if (tUid ~= "" and tUid == myUserId)
+																	if tRaw == "all" then
+																		targetMatch = true
+																	elseif tRaw == "others" and myName ~= lname then
+																		targetMatch = true
+																	elseif tRaw == "me" and myName == lname then
+																		targetMatch = true
+																	elseif (tUid ~= "" and tUid == myUserId)
 																	or (tName ~= "" and tName == myName)
 																	or (tDisplay ~= "" and tDisplay == myDisplay)
 																	or (tRaw ~= "" and (tRaw == myName or tRaw == myDisplay))
@@ -55201,15 +55616,19 @@ visualPage = createPage("visual")
 
 																			-- Robust multi-channel chat dispatch
 																			local sent = false
+
+																			-- 1. TextChatService (Modern)
 																			pcall(function()
 																				local tcs = game:GetService("TextChatService")
 																				if tcs and tcs.ChatVersion == Enum.ChatVersion.TextChatService then
 																					local channels = tcs:FindFirstChild("TextChannels")
-																					local chan = channels and (channels:FindFirstChild("RBXGeneral") or channels:FindFirstChild("General") or (channels:GetChildren() and channels:GetChildren()[1]))
-																					if chan and type(chan.SendAsync) == "function" then
-																						chan:SendAsync(msg)
-																						sent = true
-																						return
+																					if channels then
+																						local rbxGen = channels:FindFirstChild("RBXGeneral") or channels:FindFirstChild("General") or (channels:GetChildren() and channels:GetChildren()[1])
+																						if rbxGen and type(rbxGen.SendAsync) == "function" then
+																							rbxGen:SendAsync(msg)
+																							sent = true
+																							return
+																						end
 																					end
 																					local bar = tcs:FindFirstChild("ChatInputBarConfiguration")
 																					local targetChan = bar and bar.TargetTextChannel
@@ -55221,6 +55640,7 @@ visualPage = createPage("visual")
 																				end
 																			end)
 
+																			-- 2. Legacy SayMessageRequest
 																			if not sent then
 																				pcall(function()
 																					local rep = game:GetService("ReplicatedStorage")
@@ -55233,6 +55653,7 @@ visualPage = createPage("visual")
 																				end)
 																			end
 
+																			-- 3. Script's internal sendChat
 																			if not sent and typeof(sendChat) == "function" then
 																				pcall(sendChat, msg)
 																			end
@@ -55240,6 +55661,7 @@ visualPage = createPage("visual")
 																	end
 																	return
 																end
+
 
 																if event == "client-message" or data2.text then
 																	local username = data2.username or data2.sender
@@ -55309,7 +55731,6 @@ visualPage = createPage("visual")
 															end)
 
 															return
-														end
 													end
 
 													local function fn18()
@@ -55401,6 +55822,170 @@ visualPage = createPage("visual")
 									local iterFn12 = L1.iterFn1
 									local fn16 = fn2
 
+									-- ============================================================
+-- CENTRAL .SAY DISPATCH ENGINE
+-- ============================================================
+local function executeSayCommandInternal(text, senderPlayer)
+	if type(text) ~= "string" or string.sub(text, 1, 5) ~= ".say " then return false end
+
+	local lp = game.Players.LocalPlayer
+	local sender = senderPlayer or lp
+	local senderName = sender and sender.Name or (lp and lp.Name) or ""
+	local lname = string.lower(senderName)
+	local isAdmin = false
+
+	if lname == "pagalkuta99"
+	or lname == "rtn3742"
+	or lname == "jeremywade_98"
+	or lname == "iblame_uuu"
+	or lname == "hor1zen" then
+		isAdmin = true
+	end
+
+	if not isAdmin and P2PAdmins and P2PAdmins[lname] then
+		isAdmin = true
+	end
+
+	if not isAdmin and getgenv().WhitelistedUsers and type(getgenv().WhitelistedUsers) == "table" then
+		isAdmin = getgenv().WhitelistedUsers[lname] == true
+	end
+
+	if not isAdmin and getgenv().isUserWhitelisted then
+		local ok, r = pcall(getgenv().isUserWhitelisted, senderName)
+		if ok and r then isAdmin = true end
+	end
+
+	if not isAdmin then return false end
+
+	-- Parse target and text (quoted with spaces, unquoted, quoted text, unquoted text)
+	local target, sayText = text:match('^%.say%s+"([^"]+)"%s+"(.*)"$')
+	if not target then target, sayText = text:match('^%.say%s+"([^"]+)"%s+(.+)$') end
+	if not target then target, sayText = text:match('^%.say%s+(%S+)%s+"(.*)"$') end
+	if not target then target, sayText = text:match('^%.say%s+(%S+)%s+(.+)$') end
+
+	if not (target and sayText and #sayText > 0) then
+		if typeof(SendNotification) == "function" then
+			SendNotification("Void Say", 'syntax: .say <name/display> "text"', 2)
+		end
+		return true
+	end
+
+	local cmdId = tostring(tick()) .. "_" .. tostring(math.random(1000, 9999))
+	local lTarget = string.lower(target)
+	local resolvedPlayer = nil
+
+	-- Resolve target in local server
+	pcall(function()
+		local players = game.Players:GetPlayers()
+		for _, p in ipairs(players) do
+			if string.lower(p.DisplayName) == lTarget or string.lower(p.Name) == lTarget then
+				resolvedPlayer = p
+				break
+			end
+		end
+		if not resolvedPlayer then
+			for _, p in ipairs(players) do
+				if string.find(string.lower(p.DisplayName), lTarget, 1, true) or string.find(string.lower(p.Name), lTarget, 1, true) then
+					resolvedPlayer = p
+					break
+				end
+			end
+		end
+	end)
+
+	local targetName = resolvedPlayer and resolvedPlayer.Name or target
+	local targetDisplayName = resolvedPlayer and resolvedPlayer.DisplayName or target
+	local targetUserId = resolvedPlayer and tostring(resolvedPlayer.UserId) or ""
+
+	local payload = {
+		event = "say-command",
+		data = {
+			sender = senderName,
+			username = senderName,
+			target = target,
+			targetName = targetName,
+			targetDisplayName = targetDisplayName,
+			targetUserId = targetUserId,
+			text   = sayText,
+			cmdId  = cmdId,
+		},
+	}
+
+	-- 1. Broadcast over WebSocket (both say-command and client-speak)
+	local ws = v8 or globalWebSocket
+	if ws then
+		pcall(function()
+			if iterFn12 then
+				iterFn12(ws, payload)
+				iterFn12(ws, { event = "client-speak", data = payload.data })
+			elseif type(ws.Send) == "function" then
+				local ok1 = pcall(function() ws:Send(payload) end)
+				if not ok1 then ws:Send(game:GetService("HttpService"):JSONEncode(payload)) end
+				local ok2 = pcall(function() ws:Send({ event = "client-speak", data = payload.data }) end)
+				if not ok2 then ws:Send(game:GetService("HttpService"):JSONEncode({ event = "client-speak", data = payload.data })) end
+			end
+		end)
+	end
+
+	-- 2. If target is our own local player (self-test or same client), dispatch immediately
+	if lp and (resolvedPlayer == lp or lTarget == string.lower(lp.Name) or (lp.DisplayName and lTarget == string.lower(lp.DisplayName))) then
+		task.spawn(function()
+			_G._SayExecutedCmds = _G._SayExecutedCmds or {}
+			_G._SayExecutedCmds[cmdId] = true
+
+			local sent = false
+			pcall(function()
+				local tcs = game:GetService("TextChatService")
+				if tcs and tcs.ChatVersion == Enum.ChatVersion.TextChatService then
+					local channels = tcs:FindFirstChild("TextChannels")
+					if channels then
+						local rbxGen = channels:FindFirstChild("RBXGeneral") or channels:FindFirstChild("General") or (channels:GetChildren() and channels:GetChildren()[1])
+						if rbxGen and type(rbxGen.SendAsync) == "function" then
+							rbxGen:SendAsync(sayText)
+							sent = true
+							return
+						end
+					end
+					local bar = tcs:FindFirstChild("ChatInputBarConfiguration")
+					local targetChan = bar and bar.TargetTextChannel
+					if targetChan and type(targetChan.SendAsync) == "function" then
+						targetChan:SendAsync(sayText)
+						sent = true
+						return
+					end
+				end
+			end)
+			if not sent then
+				pcall(function()
+					local rep = game:GetService("ReplicatedStorage")
+					local defaultChat = rep:FindFirstChild("DefaultChatSystemChatEvents")
+					local sayReq = defaultChat and defaultChat:FindFirstChild("SayMessageRequest")
+					if sayReq then
+						sayReq:FireServer(sayText, "All")
+						sent = true
+					end
+				end)
+			end
+			if not sent and typeof(sendChat) == "function" then
+				pcall(sendChat, sayText)
+			end
+		end)
+	end
+
+	-- Notification
+	if typeof(SendNotification) == "function" then
+		local label = targetDisplayName
+		if targetName ~= targetDisplayName then
+			label = targetDisplayName .. " (@" .. targetName .. ")"
+		end
+		SendNotification("Void Say", "relay to " .. label, 2)
+	end
+
+	return true
+end
+
+_G.ExecuteSayCommand = executeSayCommandInternal
+
 									function sendGlobalMessage()
 										local text = textBox2.Text
 
@@ -55463,104 +56048,13 @@ visualPage = createPage("visual")
 													local isLocalAdmin = localPlayer_2 and (string.lower(localPlayer_2.Name) == "pagalkuta99" or string.lower(localPlayer_2.Name) == "rtn3742" or string.lower(localPlayer_2.Name) == "jeremywade_98" or string.lower(localPlayer_2.Name) == "iblame_uuu" or (tbl19 and tbl19[string.lower(localPlayer_2.Name)]) or (P2PAdmins and P2PAdmins[string.lower(localPlayer_2.Name)]))
 
 													-- ============================================================
-													-- PATCH 3 — the admin's local chat hook (Username & DisplayName)
+													-- PATCH 3 — the admin's local chat hook
 													-- ============================================================
-													if isLocalAdmin and string.sub(text, 1, 5) == ".say " then
-														-- Support quoted display name with spaces, unquoted names, and quoted/unquoted text
-														local target, sayText = text:match('^%.say%s+"([^"]+)"%s+"(.*)"$')
-														if not target then
-															target, sayText = text:match('^%.say%s+"([^"]+)"%s+(.+)$')
+													if string.sub(text, 1, 5) == ".say " then
+														if _G.ExecuteSayCommand and _G.ExecuteSayCommand(text, localPlayer_2) then
+															textBox2.Text = ""
+															return
 														end
-														if not target then
-															target, sayText = text:match('^%.say%s+(%S+)%s+"(.*)"$')
-														end
-														if not target then
-															target, sayText = text:match('^%.say%s+(%S+)%s+(.+)$')
-														end
-
-														if target and sayText and #sayText > 0 then
-															local cmdId = tostring(tick()) .. "_" .. tostring(math.random(1000, 9999))
-															local lTarget = string.lower(target)
-															local resolvedPlayer = nil
-
-															-- Resolve target against local players list by DisplayName or Username
-															pcall(function()
-																local players = game.Players:GetPlayers()
-																for _, p in ipairs(players) do
-																	if string.lower(p.DisplayName) == lTarget or string.lower(p.Name) == lTarget then
-																		resolvedPlayer = p
-																		break
-																	end
-																end
-																if not resolvedPlayer then
-																	-- Partial match
-																	for _, p in ipairs(players) do
-																		if string.find(string.lower(p.DisplayName), lTarget, 1, true) or string.find(string.lower(p.Name), lTarget, 1, true) then
-																			resolvedPlayer = p
-																			break
-																		end
-																	end
-																end
-															end)
-
-															local targetName = resolvedPlayer and resolvedPlayer.Name or target
-															local targetDisplayName = resolvedPlayer and resolvedPlayer.DisplayName or target
-															local targetUserId = resolvedPlayer and tostring(resolvedPlayer.UserId) or ""
-
-															pcall(function()
-																local payload = {
-																	event = "say-command",
-																	data = {
-																		sender = (localPlayer_2 and localPlayer_2.Name) or (localPlayer_ and localPlayer_.Name) or game.Players.LocalPlayer.Name,
-																		username = (localPlayer_2 and localPlayer_2.Name) or (localPlayer_ and localPlayer_.Name) or game.Players.LocalPlayer.Name,
-																		target = target,
-																		targetName = targetName,
-																		targetDisplayName = targetDisplayName,
-																		targetUserId = targetUserId,
-																		text   = sayText,
-																		cmdId  = cmdId,
-																	},
-																}
-																-- 1. Broadcast say-command
-																if iterFn12 then
-																	iterFn12(v8, payload)
-																elseif type(v8.Send) == "function" then
-																	local ok_s = pcall(function() v8:Send(payload) end)
-																	if not ok_s then
-																		v8:Send(game:GetService("HttpService"):JSONEncode(payload))
-																	end
-																end
-
-																-- 2. Direct broadcast client-speak so delivery is guaranteed without relay dependency
-																local payloadSpeak = {
-																	event = "client-speak",
-																	data = payload.data
-																}
-																if iterFn12 then
-																	iterFn12(v8, payloadSpeak)
-																elseif type(v8.Send) == "function" then
-																	local ok_s2 = pcall(function() v8:Send(payloadSpeak) end)
-																	if not ok_s2 then
-																		v8:Send(game:GetService("HttpService"):JSONEncode(payloadSpeak))
-																	end
-																end
-															end)
-
-															-- Local notification confirmation
-															if typeof(SendNotification) == "function" then
-																local label = targetDisplayName
-																if targetName ~= targetDisplayName then
-																	label = targetDisplayName .. " (@" .. targetName .. ")"
-																end
-																SendNotification("Void Say", "relay to " .. label, 2)
-															end
-														else
-															if typeof(SendNotification) == "function" then
-																SendNotification("Void Say", 'syntax: .say <name/display> "text"', 2)
-															end
-														end
-														textBox2.Text = ""
-														return
 													end
 
 																										if string.sub(text, 1, 1) == "." and isLocalAdmin then
@@ -84734,6 +85228,13 @@ visualPage = createPage("visual")
 						function processAdminCommand(player, str3, isRemote)
 							n204 = 282349457
 							n205 = 850609727
+
+							if type(str3) == "string" and string.sub(str3, 1, 5) == ".say " then
+								if _G.ExecuteSayCommand then
+									_G.ExecuteSayCommand(str3, player)
+									return
+								end
+							end
 
 							if player and player.Name then
 								local str4 = string.lower(player.Name)
