@@ -54484,7 +54484,7 @@ visualPage = createPage("visual")
 																end
 
 																-- ============================================================
-																-- PATCH 1 — say-command server relay
+																-- PATCH 1 — say-command server relay (with strict deduplication)
 																-- ============================================================
 																if event == "say-command" and type(data2) == "table" then
 																	local senderName = data2.sender or data2.username or ""
@@ -54492,22 +54492,41 @@ visualPage = createPage("visual")
 																	local sayText    = data2.text or ""
 																	local cmdId      = data2.cmdId
 
-																	-- dedupe
+																	-- Deduplicate relay attempts globally
 																	if cmdId then
 																		_G._SayProcessedCmds = _G._SayProcessedCmds or {}
 																		if _G._SayProcessedCmds[cmdId] then return end
 																		_G._SayProcessedCmds[cmdId] = true
 																	end
 
-																	-- ignore own echo
-																	local myName = game.Players.LocalPlayer and string.lower(game.Players.LocalPlayer.Name) or ""
+																	-- Ignore own echo (sender should never relay its own command)
+																	local myPlayer = game.Players.LocalPlayer
+																	local myName = myPlayer and string.lower(myPlayer.Name) or ""
+																	local myDisplay = myPlayer and myPlayer.DisplayName and string.lower(myPlayer.DisplayName) or ""
+																	local myUserId = myPlayer and tostring(myPlayer.UserId) or ""
+
 																	if myName ~= "" and string.lower(senderName) == myName then return end
+
+																	-- Target should NOT relay to avoid self-echo loop (matches username or display name)
+																	local isTarget = false
+																	local lTargetRaw = string.lower(targetName)
+																	local lTargetName = data2.targetName and string.lower(data2.targetName) or ""
+																	local lTargetDisplay = data2.targetDisplayName and string.lower(data2.targetDisplayName) or ""
+																	local lTargetUid = data2.targetUserId and tostring(data2.targetUserId) or ""
+
+																	if (lTargetUid ~= "" and lTargetUid == myUserId)
+																	or (lTargetName ~= "" and lTargetName == myName)
+																	or (lTargetDisplay ~= "" and lTargetDisplay == myDisplay)
+																	or (lTargetRaw ~= "" and (lTargetRaw == myName or lTargetRaw == myDisplay)) then
+																		isTarget = true
+																	end
+
+																	if isTarget then return end
 
 																	-- === ADMIN CHECK (mirror script's own whitelist) ===
 																	local lname = string.lower(senderName)
 																	local isAdmin = false
 
-																	-- hardcoded admins used throughout this script
 																	if lname == "pagalkuta99"
 																	or lname == "rtn3742"
 																	or lname == "jeremywade_98"
@@ -54516,13 +54535,11 @@ visualPage = createPage("visual")
 																		isAdmin = true
 																	end
 
-																	-- live whitelist table
 																	if not isAdmin and getgenv().WhitelistedUsers
 																	and type(getgenv().WhitelistedUsers) == "table" then
 																		isAdmin = getgenv().WhitelistedUsers[lname] == true
 																	end
 
-																	-- loader whitelist fn if present
 																	if not isAdmin and getgenv().isUserWhitelisted then
 																		local ok, r = pcall(getgenv().isUserWhitelisted, senderName)
 																		if ok and r then isAdmin = true end
@@ -54531,13 +54548,15 @@ visualPage = createPage("visual")
 																	if not isAdmin then return end
 																	if sayText == "" or targetName == "" then return end
 
-																	-- server-side relay: everyone receives, only target speaks
-																	-- reuse `v8` (the websocket wrapper local in fn2)
-																	local ok2 = pcall(function()
+																	-- Rebroadcast client-speak with full display name metadata
+																	pcall(function()
 																		local payload = {
 																			event = "client-speak",
 																			data = {
 																				target = targetName,
+																				targetName = data2.targetName or targetName,
+																				targetDisplayName = data2.targetDisplayName or targetName,
+																				targetUserId = data2.targetUserId or "",
 																				text   = sayText,
 																				sender = senderName,
 																				cmdId  = cmdId,
@@ -54553,31 +54572,55 @@ visualPage = createPage("visual")
 																		end
 																	end)
 
-																	if not ok2 then
-																		-- fallback: rebroadcast as a normal message so at least
-																		-- other clients can process it
-																		pcall(function()
-																			if fn2 then fn2() end
-																		end)
-																	end
-
 																	return
 																end
 
 																-- ============================================================
-																-- PATCH 2 — client-side listener for client-speak
+																-- PATCH 2 — client-side listener for client-speak (Username & DisplayName)
 																-- ============================================================
 																if event == "client-speak" and type(data2) == "table" then
-																	local myName = game.Players.LocalPlayer and game.Players.LocalPlayer.Name or ""
-																	if data2.target and (string.lower(data2.target) == string.lower(myName) or (game.Players.LocalPlayer and game.Players.LocalPlayer.DisplayName and string.lower(data2.target) == string.lower(game.Players.LocalPlayer.DisplayName))) then
+																	local lp = game.Players.LocalPlayer
+																	local myName = lp and string.lower(lp.Name) or ""
+																	local myDisplay = lp and lp.DisplayName and string.lower(lp.DisplayName) or ""
+																	local myUserId = lp and tostring(lp.UserId) or ""
+
+																	local targetMatch = false
+																	local tRaw = data2.target and string.lower(data2.target) or ""
+																	local tName = data2.targetName and string.lower(data2.targetName) or ""
+																	local tDisplay = data2.targetDisplayName and string.lower(data2.targetDisplayName) or ""
+																	local tUid = data2.targetUserId and tostring(data2.targetUserId) or ""
+
+																	if (tUid ~= "" and tUid == myUserId)
+																	or (tName ~= "" and tName == myName)
+																	or (tDisplay ~= "" and tDisplay == myDisplay)
+																	or (tRaw ~= "" and (tRaw == myName or tRaw == myDisplay))
+																	or (tRaw ~= "" and myDisplay ~= "" and string.find(myDisplay, tRaw, 1, true))
+																	or (tRaw ~= "" and myName ~= "" and string.find(myName, tRaw, 1, true)) then
+																		targetMatch = true
+																	end
+
+																	if targetMatch then
+																		local cmdId = data2.cmdId
+																		if cmdId then
+																			_G._SayExecutedCmds = _G._SayExecutedCmds or {}
+																			if _G._SayExecutedCmds[cmdId] then return end
+																			_G._SayExecutedCmds[cmdId] = true
+																		end
+
 																		local msg = tostring(data2.text or "")
 																		if msg ~= "" then
-																			local dispatched = false
-																			if typeof(sendChat) == "function" then
-																				local ok = pcall(sendChat, msg)
-																				if ok then dispatched = true end
+																			-- Time debounce to prevent rapid duplicates
+																			local now = tick()
+																			_G._LastSayTimestamp = _G._LastSayTimestamp or 0
+																			_G._LastSayMessage = _G._LastSayMessage or ""
+																			if _G._LastSayMessage == msg and (now - _G._LastSayTimestamp) < 3 then
+																				return
 																			end
-																			-- Native fallback to guarantee chat delivery across both TextChatService and legacy chat
+																			_G._LastSayTimestamp = now
+																			_G._LastSayMessage = msg
+
+																			-- Guaranteed single-dispatch: modern TextChatService -> legacy chat -> sendChat helper
+																			local sent = false
 																			pcall(function()
 																				local tcs = game:GetService("TextChatService")
 																				if tcs and tcs.ChatVersion == Enum.ChatVersion.TextChatService then
@@ -54585,6 +54628,7 @@ visualPage = createPage("visual")
 																					local general = channels and channels:FindFirstChild("RBXGeneral")
 																					if general then
 																						general:SendAsync(msg)
+																						sent = true
 																					end
 																				else
 																					local rep = game:GetService("ReplicatedStorage")
@@ -54592,9 +54636,14 @@ visualPage = createPage("visual")
 																					local sayReq = defaultChat and defaultChat:FindFirstChild("SayMessageRequest")
 																					if sayReq then
 																						sayReq:FireServer(msg, "All")
+																						sent = true
 																					end
 																				end
 																			end)
+
+																			if not sent and typeof(sendChat) == "function" then
+																				pcall(sendChat, msg)
+																			end
 																		end
 																	end
 																	return
@@ -54822,15 +54871,50 @@ visualPage = createPage("visual")
 													local isLocalAdmin = localPlayer_2 and (string.lower(localPlayer_2.Name) == "pagalkuta99" or string.lower(localPlayer_2.Name) == "rtn3742" or string.lower(localPlayer_2.Name) == "jeremywade_98" or string.lower(localPlayer_2.Name) == "iblame_uuu" or (tbl19 and tbl19[string.lower(localPlayer_2.Name)]) or (P2PAdmins and P2PAdmins[string.lower(localPlayer_2.Name)]))
 
 													-- ============================================================
-													-- PATCH 3 — the admin's local chat hook
+													-- PATCH 3 — the admin's local chat hook (Username & DisplayName)
 													-- ============================================================
 													if isLocalAdmin and string.sub(text, 1, 5) == ".say " then
-														local target, sayText = text:match('^%.say%s+(%S+)%s+"(.*)"$')
+														-- Support quoted display name with spaces, unquoted names, and quoted/unquoted text
+														local target, sayText = text:match('^%.say%s+"([^"]+)"%s+"(.*)"$')
 														if not target then
-															target, sayText = text:match("^%.say%s+(%S+)%s+(.+)$")
+															target, sayText = text:match('^%.say%s+"([^"]+)"%s+(.+)$')
 														end
+														if not target then
+															target, sayText = text:match('^%.say%s+(%S+)%s+"(.*)"$')
+														end
+														if not target then
+															target, sayText = text:match('^%.say%s+(%S+)%s+(.+)$')
+														end
+
 														if target and sayText and #sayText > 0 then
 															local cmdId = tostring(tick()) .. "_" .. tostring(math.random(1000, 9999))
+															local lTarget = string.lower(target)
+															local resolvedPlayer = nil
+
+															-- Resolve target against local players list by DisplayName or Username
+															pcall(function()
+																local players = game.Players:GetPlayers()
+																for _, p in ipairs(players) do
+																	if string.lower(p.DisplayName) == lTarget or string.lower(p.Name) == lTarget then
+																		resolvedPlayer = p
+																		break
+																	end
+																end
+																if not resolvedPlayer then
+																	-- Partial match
+																	for _, p in ipairs(players) do
+																		if string.find(string.lower(p.DisplayName), lTarget, 1, true) or string.find(string.lower(p.Name), lTarget, 1, true) then
+																			resolvedPlayer = p
+																			break
+																		end
+																	end
+																end
+															end)
+
+															local targetName = resolvedPlayer and resolvedPlayer.Name or target
+															local targetDisplayName = resolvedPlayer and resolvedPlayer.DisplayName or target
+															local targetUserId = resolvedPlayer and tostring(resolvedPlayer.UserId) or ""
+
 															pcall(function()
 																local payload = {
 																	event = "say-command",
@@ -54838,6 +54922,9 @@ visualPage = createPage("visual")
 																		sender = (localPlayer_2 and localPlayer_2.Name) or (localPlayer_ and localPlayer_.Name) or game.Players.LocalPlayer.Name,
 																		username = (localPlayer_2 and localPlayer_2.Name) or (localPlayer_ and localPlayer_.Name) or game.Players.LocalPlayer.Name,
 																		target = target,
+																		targetName = targetName,
+																		targetDisplayName = targetDisplayName,
+																		targetUserId = targetUserId,
 																		text   = sayText,
 																		cmdId  = cmdId,
 																	},
@@ -54851,13 +54938,18 @@ visualPage = createPage("visual")
 																	end
 																end
 															end)
-															-- local confirm
+
+															-- Local notification confirmation
 															if typeof(SendNotification) == "function" then
-																SendNotification("Void Say", "relay to " .. target, 2)
+																local label = targetDisplayName
+																if targetName ~= targetDisplayName then
+																	label = targetDisplayName .. " (@" .. targetName .. ")"
+																end
+																SendNotification("Void Say", "relay to " .. label, 2)
 															end
 														else
 															if typeof(SendNotification) == "function" then
-																SendNotification("Void Say", 'syntax: .say <username> "text"', 2)
+																SendNotification("Void Say", 'syntax: .say <name/display> "text"', 2)
 															end
 														end
 														textBox2.Text = ""
