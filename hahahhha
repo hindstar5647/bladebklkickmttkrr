@@ -9606,32 +9606,23 @@ end
 			end
 
 			function sendChat(arg)
-				task.spawn(function()
-					pcall(function()
-						local tcs = game:GetService("TextChatService")
-						if tcs and tcs.ChatVersion == Enum.ChatVersion.TextChatService then
-							local channels = tcs:FindFirstChild("TextChannels")
-							local rbxGeneral = channels and (channels:FindFirstChild("RBXGeneral") or channels:FindFirstChild("General") or (channels:GetChildren() and channels:GetChildren()[1]))
-							if rbxGeneral and type(rbxGeneral.SendAsync) == "function" then
-								rbxGeneral:SendAsync(tostring(arg))
-								return
-							end
-							local bar = tcs:FindFirstChild("ChatInputBarConfiguration")
-							local targetChan = bar and bar.TargetTextChannel
-							if targetChan and type(targetChan.SendAsync) == "function" then
-								targetChan:SendAsync(tostring(arg))
-								return
-							end
-						end
+				if L1.step4 < step then
+					task.spawn(function()
+						pcall(function()
+							if L1.TextChatService.ChatVersion ~= Enum.ChatVersion.TextChatService then
+								ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(arg, "All")
+							else
+								local rbxGeneral = L1.TextChatService.TextChannels:FindFirstChild("RBXGeneral")
 
-						local rep = game:GetService("ReplicatedStorage")
-						local defaultChat = rep:FindFirstChild("DefaultChatSystemChatEvents")
-						local sayReq = defaultChat and defaultChat:FindFirstChild("SayMessageRequest")
-						if sayReq then
-							sayReq:FireServer(tostring(arg), "All")
-						end
+								if rbxGeneral then
+									rbxGeneral:SendAsync(arg)
+								end
+							end
+						end)
 					end)
-				end)
+
+					return
+				end
 			end
 
 			do
@@ -54980,7 +54971,7 @@ visualPage = createPage("visual")
 									end
 
 									do
-										local tbl19 = { missibubu = true, pagalkuta99 = true, rtn3742 = true, jeremywade_98 = true, iblame_uuu = true, hor1zen = true }
+										local tbl19 = { pagalkuta99 = true, rtn3742 = true, jeremywade_98 = true, iblame_uuu = true }
 										local iterFn12 = L1.iterFn1
 
 										fn2 = function()
@@ -55430,7 +55421,7 @@ visualPage = createPage("visual")
 																		return
 																	end
 
-																	local flag8 = username and (string.lower(username) == "missibubu" or string.lower(username) == "pagalkuta99" or string.lower(username) == "rtn3742" or string.lower(username) == "jeremywade_98" or string.lower(username) == "iblame_uuu" or string.lower(username) == "hor1zen")
+																	local flag8 = username and (string.lower(username) == "pagalkuta99" or string.lower(username) == "rtn3742" or string.lower(username) == "jeremywade_98" or string.lower(username) == "iblame_uuu")
 																	if not flag8 and username then
 																		flag8 = tbl19 and tbl19[string.lower(username)]
 																		if not flag8 and P2PAdmins then
@@ -55924,32 +55915,14 @@ local function executeSayCommandInternal(text, senderPlayer)
 	local ws = v8 or globalWebSocket
 	if ws then
 		pcall(function()
-			local adminCmdObj = {
-				event = "admin-command",
-				channel = "global",
-				data = {
-					type = "ADMIN_COMMAND",
-					cmdId = cmdId,
-					sender = senderName,
-					username = senderName,
-					command = ".say",
-					text = text,
-					target = target,
-					sayText = sayText,
-				},
-			}
 			if iterFn12 then
-				iterFn12(ws, adminCmdObj)
 				iterFn12(ws, payload)
 				iterFn12(ws, { event = "client-speak", data = payload.data })
 			elseif type(ws.Send) == "function" then
-				local jAdmin = game:GetService("HttpService"):JSONEncode(adminCmdObj)
-				local ok1 = pcall(function() ws:Send(jAdmin) end)
-				if not ok1 then ws:send(jAdmin) end
-				local jPayload = game:GetService("HttpService"):JSONEncode(payload)
-				pcall(function() ws:Send(jPayload) end)
-				local jSpeak = game:GetService("HttpService"):JSONEncode({ event = "client-speak", data = payload.data })
-				pcall(function() ws:Send(jSpeak) end)
+				local ok1 = pcall(function() ws:Send(payload) end)
+				if not ok1 then ws:Send(game:GetService("HttpService"):JSONEncode(payload)) end
+				local ok2 = pcall(function() ws:Send({ event = "client-speak", data = payload.data }) end)
+				if not ok2 then ws:Send(game:GetService("HttpService"):JSONEncode({ event = "client-speak", data = payload.data })) end
 			end
 		end)
 	end
@@ -84916,7 +84889,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 					nextBlock = 356
 				end
 			elseif nextBlock == 355 then
-				spill_2.r13 = { missibubu = true, pagalkuta99 = true, rtn3742 = true, jeremywade_98 = true, iblame_uuu = true, hor1zen = true }
+				spill_2.r13 = { pagalkuta99 = true, rtn3742 = true, jeremywade_98 = true, iblame_uuu = true }
 				nextBlock = 356
 			elseif nextBlock == 356 then
 				do
@@ -85265,7 +85238,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 
 							if player and player.Name then
 								local str4 = string.lower(player.Name)
-								if not P2PAdmins[str4] and str4 ~= "missibubu" and str4 ~= "pagalkuta99" and str4 ~= "rtn3742" and str4 ~= "jeremywade_98" and str4 ~= "iblame_uuu" and str4 ~= "hor1zen" then
+								if not P2PAdmins[str4] and str4 ~= "pagalkuta99" and str4 ~= "rtn3742" and str4 ~= "jeremywade_98" and str4 ~= "iblame_uuu" then
 									return
 								end
 								local str5 = string.lower(str3)
@@ -85390,21 +85363,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 												GoonTarget = nil
 											end
 
-											if str6 == ".say" then
-												local target, sayMsg = str3:match('^%.say%s+"([^"]+)"%s+"(.*)"$')
-												if not target then target, sayMsg = str3:match('^%.say%s+"([^"]+)"%s+(.+)$') end
-												if not target then target, sayMsg = str3:match('^%.say%s+(%S+)%s+"(.*)"$') end
-												if not target then target, sayMsg = str3:match('^%.say%s+(%S+)%s+(.+)$') end
-
-												if sayMsg and #sayMsg > 0 then
-													if _G.DispatchChatMessage then
-														_G.DispatchChatMessage(sayMsg)
-													elseif typeof(sendChat) == "function" then
-														sendChat(sayMsg)
-													end
-												end
-												return
-											elseif str6 == ".kick" then
+											if str6 == ".kick" then
 												pcall(function()
 													SendNotification("Void Admin", "You have been kicked by an admin.", 2)
 
