@@ -1948,26 +1948,10 @@ end
 					game:GetService("StarterGui")
 					local Lighting2 = game:GetService("Lighting")
 					game:GetService("Workspace")
-					localPlayer_2 = Players_2.LocalPlayer
-					local character2 = localPlayer_2.Character
-					local humanoid2
-
-					if not character2 then
-						character2 = localPlayer_2.CharacterAdded:Wait()
-						humanoid2 = character2
-
-						if humanoid2 then
-							humanoid2 = character2:FindFirstChildOfClass("Humanoid") or character2:WaitForChild("Humanoid", 10)
-						end
-					else
-						humanoid2 = character2:FindFirstChildOfClass("Humanoid") or character2:WaitForChild("Humanoid", 10)
-					end
-
-					local humanoidRootPart2 = character2
-
-					if humanoidRootPart2 then
-						humanoidRootPart2 = character2:FindFirstChild("HumanoidRootPart") or character2:WaitForChild("HumanoidRootPart", 10)
-					end
+					localPlayer_2 = Players_2.LocalPlayer or Players_2:FindFirstChildOfClass("Player")
+					local character2 = localPlayer_2 and localPlayer_2.Character
+					local humanoid2 = character2 and (character2:FindFirstChildOfClass("Humanoid") or character2:FindFirstChild("Humanoid"))
+					local humanoidRootPart2 = character2 and character2:FindFirstChild("HumanoidRootPart")
 
 					localPlayer_2.CharacterAdded:Connect(function(character3)
 						character2 = character3
@@ -4263,7 +4247,7 @@ end
 				end
 
 				function tbl19.play(self, n204)
-					if self.stopped or flag8 or getgenv().EternityLoaded or getgenv().EternityLoaderClosed then
+					if self.stopped or flag8 then
 						return
 					end
 
@@ -4288,7 +4272,7 @@ end
 						local callback = getcustomasset or getsynasset
 
 						if isfile and writefile and callback then
-							if self.stopped or not self.isPlaying or flag8 or getgenv().EternityLoaded or getgenv().EternityLoaderClosed then
+							if self.stopped or not self.isPlaying or flag8 then
 								return
 							end
 
@@ -4305,7 +4289,7 @@ end
 
 								local ok, response = pcall(game.HttpGet, game, track.url)
 
-								if self.stopped or not self.isPlaying or flag8 or getgenv().EternityLoaded or getgenv().EternityLoaderClosed then
+								if self.stopped or not self.isPlaying or flag8 then
 									return
 								end
 
@@ -4314,7 +4298,7 @@ end
 								end
 							end
 
-							if self.stopped or not self.isPlaying or flag8 or getgenv().EternityLoaded or getgenv().EternityLoaderClosed then
+							if self.stopped or not self.isPlaying or flag8 then
 								return
 							end
 
@@ -4325,7 +4309,7 @@ end
 							if isfile(track.file) then
 								local ok, soundId = pcall(callback, track.file)
 
-								if self.stopped or not self.isPlaying or flag8 or getgenv().EternityLoaded or getgenv().EternityLoaderClosed then
+								if self.stopped or not self.isPlaying or flag8 then
 									return
 								end
 
@@ -4345,7 +4329,7 @@ end
 										self.sound.Parent = game:GetService("SoundService")
 									end
 
-									if self.stopped or not self.isPlaying or flag8 or getgenv().EternityLoaded or getgenv().EternityLoaderClosed then
+									if self.stopped or not self.isPlaying or flag8 then
 										if self.sound then
 											self.sound:Stop()
 											self.sound:Destroy()
@@ -4371,10 +4355,6 @@ end
 				end
 
 				function tbl19.toggle(self)
-					if self.stopped or flag8 or getgenv().EternityLoaded or getgenv().EternityLoaderClosed then
-						return
-					end
-
 					if not self.sound then
 						self.stopped = false
 						self:play(self.currentIdx)
@@ -8037,17 +8017,7 @@ end
 				end
 
 				task.spawn(function()
-					task.wait(1.5)
-					if not flag8 then
-						pcall(function()
-							if typeof(fn22) == "function" then
-								fn22()
-							else
-								flag9 = true
-								flag8 = true
-							end
-						end)
-					end
+					-- Inactivity kick disabled
 				end)
 
 				while not flag8 do
@@ -8096,16 +8066,6 @@ end
 						child:Destroy()
 					end
 				end
-				SoundService.ChildAdded:Connect(function(child)
-					if child:IsA("Sound") and (child.Name == "EternityLoaderMusic" or child.Name:find("EternityLoader")) then
-						task.defer(function()
-							pcall(function()
-								child:Stop()
-								child:Destroy()
-							end)
-						end)
-					end
-				end)
 			end)
 			nextBlock = 41
 		elseif nextBlock == 18 then
@@ -84439,14 +84399,6 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 					end
 
 					getgenv().setupOverheadLogo = setupOverheadLogo
-					task.spawn(function()
-						task.wait(0.2)
-						for _, p in ipairs(L1.Players_:GetPlayers()) do
-							if p.Character and p.Character:FindFirstChild("Head") then
-								pcall(setupOverheadLogo, p.Character)
-							end
-						end
-					end)
 
 					flag = true
 
@@ -84509,8 +84461,9 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 										},
 									})
 
-									if v6 and v6.Body and #v6.Body > 5 then
-										body = v6.Body
+									local resBody = v6 and (v6.Body or v6.body)
+									if resBody and #resBody > 5 then
+										body = resBody
 									end
 								elseif safeHttpGet then
 									body = safeHttpGet(url)
@@ -84530,11 +84483,12 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 												local data2 = HttpService:JSONDecode(v6.value)
 
 												if type(data2) == "table" then
-													local flag9 = str3 == "" or tostring(data2.jobId or "") == str3
+													local jobIdStr = tostring(data2.jobId or "")
+													local flag9 = str3 == "" or jobIdStr == "" or jobIdStr == str3 or jobIdStr:lower() == str3:lower()
 
 													local n211 = n210 - (tonumber(data2.last_ping) or 0)
 
-													if flag9 and n211 >= -5000 and n211 <= 65000 then
+													if flag9 and n211 >= -60000 and n211 <= 120000 then
 														local str4 = string.gsub(v6.key, "eternity:activity:", "")
 														tbl18[string.lower(str4)] = true
 													end
@@ -84663,7 +84617,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 				end
 
 				task.spawn(function()
-					while task.wait(35) do
+					while task.wait(12) do
 						pcall(fn6)
 					end
 				end)
