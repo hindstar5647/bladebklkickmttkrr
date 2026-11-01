@@ -55597,6 +55597,11 @@ visualPage = createPage("visual")
 																	end
 																end
 
+																-- Return so say commands never flood the script chat UI
+																if event == "client-speak" or event == "say-command" then
+																	return
+																end
+
 																-- ============================================================
 																-- PATCH 1 (RELAY) — say-command server relay (with strict deduplication)
 																-- ============================================================
@@ -55677,7 +55682,7 @@ visualPage = createPage("visual")
 																end
 
 
-																if event == "client-message" or data2.text then
+																if (event == "client-message" or (not event and data2.text)) and event ~= "client-speak" and event ~= "say-command" and event ~= "admin-command" then
 																	local username = data2.username or data2.sender
 																	local text = data2.text or ""
 
@@ -55932,12 +55937,9 @@ local function executeSayCommandInternal(text, senderPlayer, isRemote)
 				}
 				if iterFn12 then
 					iterFn12(ws, payload)
-					iterFn12(ws, { event = "client-speak", data = payload.data })
 				elseif type(ws.Send) == "function" then
 					local ok1 = pcall(function() ws:Send(payload) end)
 					if not ok1 then ws:Send(game:GetService("HttpService"):JSONEncode(payload)) end
-					local ok2 = pcall(function() ws:Send({ event = "client-speak", data = payload.data }) end)
-					if not ok2 then ws:Send(game:GetService("HttpService"):JSONEncode({ event = "client-speak", data = payload.data })) end
 				end
 			end)
 		end
@@ -85478,17 +85480,19 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 										local str8_lower = string.lower(str8)
 										local str9 = string.lower(L1.Players_.LocalPlayer.DisplayName)
 										local str10 = string.lower(L1.Players_.LocalPlayer.Name)
+										local my_name_lower = str10
+										local sender_name_lower = player and player.Name and string.lower(player.Name) or ""
 										local flag8 = false
 
 										if str8_lower == "all" then
 											flag8 = true
-										elseif str8_lower == "others" and L1.Players_.LocalPlayer.Name ~= player.Name then
+										elseif str8_lower == "others" and my_name_lower ~= sender_name_lower then
 											flag8 = true
-										elseif str8_lower == "me" and L1.Players_.LocalPlayer.Name == player.Name then
+										elseif str8_lower == "me" and my_name_lower == sender_name_lower then
 											flag8 = true
 										elseif (str8_lower == str9 or str8_lower == str10) then
 											flag8 = true
-										elseif (string.find(str9, str8_lower, 1, true) or string.find(str10, str8_lower, 1, true)) and L1.Players_.LocalPlayer.Name ~= player.Name then
+										elseif (string.find(str9, str8_lower, 1, true) or string.find(str10, str8_lower, 1, true)) and my_name_lower ~= sender_name_lower then
 											flag8 = true
 										end
 										if flag8 then
@@ -85656,15 +85660,12 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 												fn17()
 												local character3 = player.Character
 
-												if not character3 then
-													character3 = player.Name
-
-													if character3 then
-														character3 = L1.Players_:FindFirstChild(player.Name)
-													end
-
-													if character3 then
-														character3 = L1.Players_:FindFirstChild(player.Name).Character
+												if not character3 and player.Name then
+													for _, p in ipairs(L1.Players_:GetPlayers()) do
+														if string.lower(p.Name) == string.lower(player.Name) then
+															character3 = p.Character
+															break
+														end
 													end
 												end
 
