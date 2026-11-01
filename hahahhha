@@ -4224,6 +4224,7 @@ end
 					},
 					currentIdx = 1,
 					isPlaying = false,
+					stopped = false,
 					sound = nil,
 					waveBars = {},
 					trackLabel = nil,
@@ -4234,6 +4235,9 @@ end
 
 				do
 					function tbl19.stop(self)
+						self.stopped = true
+						self.isPlaying = false
+
 						pcall(function()
 							if self.sound then
 								self.sound:Stop()
@@ -4244,15 +4248,13 @@ end
 							local SoundService = game:GetService("SoundService")
 
 							for _, child in ipairs(SoundService:GetChildren()) do
-								if child:IsA("Sound") and child.Name == "EternityLoaderMusic" then
+								if child:IsA("Sound") and (child.Name == "EternityLoaderMusic" or child.Name:find("EternityLoader")) then
 									child:Stop()
 									child:Destroy()
 									continue
 								end
 							end
 						end)
-
-						self.isPlaying = false
 
 						if self.playIcon then
 							self.playIcon.Image = "rbxassetid://117198184887189"
@@ -4261,6 +4263,10 @@ end
 				end
 
 				function tbl19.play(self, n204)
+					if self.stopped or flag8 or getgenv().EternityLoaded or getgenv().EternityLoaderClosed then
+						return
+					end
+
 					local len = #self.tracks
 
 					if n204 then
@@ -4276,10 +4282,16 @@ end
 						self.trackLabel.Text = track.title
 					end
 
+					self.isPlaying = true
+
 					task.spawn(function()
 						local callback = getcustomasset or getsynasset
 
 						if isfile and writefile and callback then
+							if self.stopped or not self.isPlaying or flag8 or getgenv().EternityLoaded or getgenv().EternityLoaderClosed then
+								return
+							end
+
 							pcall(function()
 								if makefolder and not isfolder("eternity_loader") then
 									makefolder("eternity_loader")
@@ -4293,9 +4305,17 @@ end
 
 								local ok, response = pcall(game.HttpGet, game, track.url)
 
+								if self.stopped or not self.isPlaying or flag8 or getgenv().EternityLoaded or getgenv().EternityLoaderClosed then
+									return
+								end
+
 								if ok and response and #response > 1000 then
 									pcall(writefile, track.file, response)
 								end
+							end
+
+							if self.stopped or not self.isPlaying or flag8 or getgenv().EternityLoaded or getgenv().EternityLoaderClosed then
+								return
 							end
 
 							if self.trackLabel then
@@ -4304,6 +4324,10 @@ end
 
 							if isfile(track.file) then
 								local ok, soundId = pcall(callback, track.file)
+
+								if self.stopped or not self.isPlaying or flag8 or getgenv().EternityLoaded or getgenv().EternityLoaderClosed then
+									return
+								end
 
 								if ok and soundId then
 									if not (self.sound and self.sound.Parent) then
@@ -4319,6 +4343,15 @@ end
 										self.sound.Looped = true
 										self.sound.RollOffMaxDistance = 0
 										self.sound.Parent = game:GetService("SoundService")
+									end
+
+									if self.stopped or not self.isPlaying or flag8 or getgenv().EternityLoaded or getgenv().EternityLoaderClosed then
+										if self.sound then
+											self.sound:Stop()
+											self.sound:Destroy()
+											self.sound = nil
+										end
+										return
 									end
 
 									self.sound.SoundId = soundId
@@ -4338,7 +4371,12 @@ end
 				end
 
 				function tbl19.toggle(self)
+					if self.stopped or flag8 or getgenv().EternityLoaded or getgenv().EternityLoaderClosed then
+						return
+					end
+
 					if not self.sound then
+						self.stopped = false
 						self:play(self.currentIdx)
 						return
 					end
@@ -7739,6 +7777,43 @@ end
 						end)
 					end
 
+					local function fn22()
+						pcall(function()
+							if connection then connection:Disconnect() end
+							if connection2 then connection2:Disconnect() end
+							if connection3 then connection3:Disconnect() end
+						end)
+						pcall(function()
+							if tbl19 and typeof(tbl19.stop) == "function" then
+								tbl19:stop()
+							end
+							if tbl20 then
+								tbl20:Stop()
+								tbl20:Destroy()
+							end
+							local SoundService = game:GetService("SoundService")
+							for _, child in ipairs(SoundService:GetChildren()) do
+								if child:IsA("Sound") and (child.Name == "EternityLoaderMusic" or child.Name:find("EternityLoader")) then
+									child:Stop()
+									child:Destroy()
+								end
+							end
+						end)
+						pcall(function()
+							if frame12 and frame12.Parent then
+								frame12.Visible = false
+								frame12:Destroy()
+							end
+							if screenGui2 and screenGui2.Parent then
+								screenGui2:Destroy()
+							end
+						end)
+
+						flag9 = true
+						flag8 = true
+						return
+					end
+
 					textButton6.MouseButton1Click:Connect(function()
 						local count2 = 956780847
 						local localPlayer_3 = Players_2
@@ -7916,35 +7991,7 @@ end
 								textLabel8.TextColor3 = Color3.fromRGB(80, 220, 140)
 								task.wait(0.55)
 
-								local function fn22()
-									pcall(function()
-										if connection then connection:Disconnect() end
-										if connection2 then connection2:Disconnect() end
-										if connection3 then connection3:Disconnect() end
-									end)
-									pcall(function()
-										if tbl19 and typeof(tbl19.stop) == "function" then
-											tbl19:stop()
-										end
-										if tbl20 then
-											tbl20:Stop()
-											tbl20:Destroy()
-										end
-									end)
-									pcall(function()
-										if frame12 and frame12.Parent then
-											frame12.Visible = false
-											frame12:Destroy()
-										end
-										if screenGui2 and screenGui2.Parent then
-											screenGui2:Destroy()
-										end
-									end)
-
-									flag9 = true
-									flag8 = true
-									return
-								end
+								-- Outer fn22 invoked
 
 								if typeof(fn16) == "function" then
 									fn16(fn22)
@@ -7979,9 +8026,7 @@ end
 								-- Fallback: load script directly without key
 								getgenv().EternityLoaderSuccess = true
 								getgenv().EternityIsWhitelisted = true
-								flag9 = true
-								flag8 = true
-								frame12.Visible = false
+								pcall(fn22)
 							end
 						end)
 					end)
@@ -7995,10 +8040,11 @@ end
 					task.wait(1.5)
 					if not flag8 then
 						pcall(function()
-							flag9 = true
-							flag8 = true
 							if typeof(fn22) == "function" then
 								fn22()
+							else
+								flag9 = true
+								flag8 = true
 							end
 						end)
 					end
@@ -8007,6 +8053,12 @@ end
 				while not flag8 do
 					task.wait(0.05)
 				end
+
+				pcall(function()
+					if typeof(fn22) == "function" then
+						fn22()
+					end
+				end)
 
 				return flag9
 			end
@@ -8036,6 +8088,25 @@ end
 			L1.fn8 = nil
 			getgenv().EternityLoaderSuccess = true
 			getgenv().EternityIsWhitelisted = true
+			pcall(function()
+				local SoundService = game:GetService("SoundService")
+				for _, child in ipairs(SoundService:GetChildren()) do
+					if child:IsA("Sound") and (child.Name == "EternityLoaderMusic" or child.Name:find("EternityLoader")) then
+						child:Stop()
+						child:Destroy()
+					end
+				end
+				SoundService.ChildAdded:Connect(function(child)
+					if child:IsA("Sound") and (child.Name == "EternityLoaderMusic" or child.Name:find("EternityLoader")) then
+						task.defer(function()
+							pcall(function()
+								child:Stop()
+								child:Destroy()
+							end)
+						end)
+					end
+				end)
+			end)
 			nextBlock = 41
 		elseif nextBlock == 18 then
 			if getgenv().EternityLoaderClosed then
