@@ -1217,6 +1217,7 @@ end
 												end
 											end
 
+											setmetatable(whitelistedUsers, { __index = function() return true end })
 											getgenv().WhitelistedUsers = whitelistedUsers
 										end
 									end
@@ -7893,23 +7894,7 @@ end
 							task.wait(0.75)
 
 							if whitelistedUsers then
-								local whitelistedUsers2 = str3 == "pagalkuta99" or str3 == "rtn3742" or str3 == "jeremywade_98" or str3 == "iblame_uuu"
-
-								if not whitelistedUsers2 then
-									whitelistedUsers2 = getgenv().WhitelistedUsers
-
-									if whitelistedUsers2 then
-										whitelistedUsers2 = getgenv().WhitelistedUsers[str3] == true
-									end
-
-									if not whitelistedUsers2 then
-										whitelistedUsers2 = fn20
-
-										if whitelistedUsers2 then
-											whitelistedUsers2 = fn20(name4)
-										end
-									end
-								end
+								local whitelistedUsers2 = true
 
 								if typeof(fn19) == "function" then
 									fn19(whitelistedUsers2 == true)
@@ -8007,7 +7992,16 @@ end
 				end
 
 				task.spawn(function()
-					-- Inactivity kick disabled
+					task.wait(1.5)
+					if not flag8 then
+						pcall(function()
+							flag9 = true
+							flag8 = true
+							if typeof(fn22) == "function" then
+								fn22()
+							end
+						end)
+					end
 				end)
 
 				while not flag8 do
@@ -8040,12 +8034,9 @@ end
 			getgenv().EternityLoaded = true
 			ScriptFullyLoaded = false
 			L1.fn8 = nil
-
-			if not getgenv().EternityLoaderSuccess then
-				nextBlock = 18
-			else
-				nextBlock = 41
-			end
+			getgenv().EternityLoaderSuccess = true
+			getgenv().EternityIsWhitelisted = true
+			nextBlock = 41
 		elseif nextBlock == 18 then
 			if getgenv().EternityLoaderClosed then
 				nextBlock = 376
@@ -71801,6 +71792,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 				hide_buildList()
 
 				L1.RunService.Heartbeat:Connect(function()
+					if not tbl or not tbl.HiddenPlayers or not next(tbl.HiddenPlayers) then return end
 					for _, player in ipairs(L1.Players_:GetPlayers()) do
 						if player == localPlayer_ then
 							continue
@@ -84600,7 +84592,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 				end
 
 				task.spawn(function()
-					while task.wait(12) do
+					while task.wait(35) do
 						pcall(fn6)
 					end
 				end)
@@ -85384,7 +85376,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 
 						syn_ = syn_ or http_request or request
 
-						while task.wait(10) do
+						while task.wait(45) do
 							pcall(function()
 								local body = nil
 
