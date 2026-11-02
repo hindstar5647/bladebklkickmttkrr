@@ -1108,21 +1108,7 @@ end
 							pcall(function()
 								local apikey2 = apikey
 								local url = str .. "/rest/v1/whitelist?apikey=" .. apikey2 .. "&select=username"
-								local syn_ = syn
-
-								if syn_ then
-									syn_ = syn.request
-								end
-
-								if not syn_ then
-									syn_ = http
-
-									if syn_ then
-										syn_ = http.request
-									end
-								end
-
-								syn_ = syn_ or http_request or request
+								local syn_ = request or http_request or (syn and syn.request) or (http and http.request) or (fluxus and fluxus.request) or (Krnl and Krnl.request)
 								local body = nil
 
 								if type(syn_) == "function" then
@@ -1948,20 +1934,28 @@ end
 					game:GetService("StarterGui")
 					local Lighting2 = game:GetService("Lighting")
 					game:GetService("Workspace")
-					localPlayer_2 = Players_2.LocalPlayer or Players_2:FindFirstChildOfClass("Player")
+					localPlayer_2 = Players_2.LocalPlayer
+					if not localPlayer_2 then
+						pcall(function()
+							Players_2:GetPropertyChangedSignal("LocalPlayer"):Wait()
+						end)
+						localPlayer_2 = Players_2.LocalPlayer or Players_2:FindFirstChildOfClass("Player")
+					end
 					local character2 = localPlayer_2 and localPlayer_2.Character
 					local humanoid2 = character2 and (character2:FindFirstChildOfClass("Humanoid") or character2:FindFirstChild("Humanoid"))
 					local humanoidRootPart2 = character2 and character2:FindFirstChild("HumanoidRootPart")
 
-					localPlayer_2.CharacterAdded:Connect(function(character3)
-						character2 = character3
-						humanoid2 = character3:WaitForChild("Humanoid")
-						humanoidRootPart2 = character3:WaitForChild("HumanoidRootPart")
+					if localPlayer_2 then
+						localPlayer_2.CharacterAdded:Connect(function(character3)
+							character2 = character3
+							humanoid2 = character3:FindFirstChildOfClass("Humanoid") or character3:WaitForChild("Humanoid", 5)
+							humanoidRootPart2 = character3:FindFirstChild("HumanoidRootPart") or character3:WaitForChild("HumanoidRootPart", 5)
 
-						if not IsKeyVerified then
-							return
-						end
-					end)
+							if not IsKeyVerified then
+								return
+							end
+						end)
+					end
 
 					TargetPlayer = nil
 					ctxTargetPlayer = nil
@@ -4247,9 +4241,11 @@ end
 				end
 
 				function tbl19.play(self, n204)
-					if self.stopped or flag8 then
+					if flag8 then
 						return
 					end
+					self.stopped = false
+					self.isPlaying = true
 
 					local len = #self.tracks
 
@@ -4265,8 +4261,6 @@ end
 					if self.trackLabel then
 						self.trackLabel.Text = track.title
 					end
-
-					self.isPlaying = true
 
 					task.spawn(function()
 						local callback = getcustomasset or getsynasset
@@ -4287,7 +4281,12 @@ end
 									self.trackLabel.Text = "Downloading..."
 								end
 
-								local ok, response = pcall(game.HttpGet, game, track.url)
+								local ok, response = pcall(function()
+									if safeHttpGet then
+										return safeHttpGet(track.url)
+									end
+									return game:HttpGet(track.url)
+								end)
 
 								if self.stopped or not self.isPlaying or flag8 then
 									return
@@ -55939,14 +55938,18 @@ local function executeSayCommandInternal(text, senderPlayer, isRemote)
 	pcall(function()
 		local players = game.Players:GetPlayers()
 		for _, p in ipairs(players) do
-			if string.lower(p.DisplayName) == lTarget or string.lower(p.Name) == lTarget then
+			local pDisp = string.lower(p.DisplayName or "")
+			local pN = string.lower(p.Name or "")
+			if pDisp == lTarget or pN == lTarget then
 				resolvedPlayer = p
 				break
 			end
 		end
 		if not resolvedPlayer then
 			for _, p in ipairs(players) do
-				if string.find(string.lower(p.DisplayName), lTarget, 1, true) or string.find(string.lower(p.Name), lTarget, 1, true) then
+				local pDisp = string.lower(p.DisplayName or "")
+				local pN = string.lower(p.Name or "")
+				if (pDisp ~= "" and string.find(pDisp, lTarget, 1, true)) or (pN ~= "" and string.find(pN, lTarget, 1, true)) then
 					resolvedPlayer = p
 					break
 				end
@@ -83848,17 +83851,20 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 						if player and player.Parent then
 							if player ~= L1.Players_.LocalPlayer then
 								local nameLower = string.lower(player.Name)
-								if nameLower == "pagalkuta99" or nameLower == "rtn3742" or nameLower == "jeremywade_98" or nameLower == "iblame_uuu" then
+								if nameLower == "pagalkuta99" or nameLower == "rtn3742" or nameLower == "jeremywade_98" or nameLower == "iblame_uuu" or nameLower == "missibubu" or nameLower == "hor1zen" then
 									return true
 								end
 								if (getgenv().EternityCustomTags and getgenv().EternityCustomTags[nameLower]) or (L1.tbl12 and L1.tbl12[nameLower]) then
+									return true
+								end
+								if getgenv().WhitelistedUsers and getgenv().WhitelistedUsers[nameLower] then
 									return true
 								end
 
 								local activeEternityUser = activeEternityUsers[player]
 
 								if type(activeEternityUser) == "number" then
-									if tick() - activeEternityUser <= 65 then
+									if tick() - activeEternityUser <= 120 then
 										return true
 									end
 
@@ -84363,7 +84369,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 											magnitude = (position4 - position5).Magnitude
 										end
 
-										if not (magnitude > 150) then
+										if not (magnitude > 350) then
 											if not billboardGui.Enabled and tbl.ShowOverheadLogo ~= false then
 												billboardGui.Enabled = true
 											end
@@ -84375,7 +84381,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 											billboardGui.StudsOffset = Vector3.new(0, n212 + math.sin(n210 * 2) * 0.15, 0)
 
 											if uiGradient then
-												uiGradient.Rotation = (uiGradient.Rotation + 1.5) % 360
+												uiGradient.Rotation = (uiGradient.Rotation + 2.5) % 360
 											end
 										else
 											if billboardGui.Enabled then
@@ -84384,7 +84390,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 										end
 									end)
 
-									n210 += task.wait(0.05)
+									n210 += task.wait(0.12)
 								end
 							end)
 
@@ -84470,19 +84476,21 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 								end
 
 								local tbl18 = {}
+								local querySucceeded = false
 
 								if body and #body > 5 then
 									local HttpService = game:GetService("HttpService")
-									local data = HttpService:JSONDecode(body)
+									local ok_data, data = pcall(function() return HttpService:JSONDecode(body) end)
 
-									if type(data) == "table" then
+									if ok_data and type(data) == "table" and not data.message then
+										querySucceeded = true
 										local n210 = os.time() * 1000
 
 										for _, v6 in ipairs(data) do
 											if v6.key and v6.value then
-												local data2 = HttpService:JSONDecode(v6.value)
+												local ok_v, data2 = pcall(function() return HttpService:JSONDecode(v6.value) end)
 
-												if type(data2) == "table" then
+												if ok_v and type(data2) == "table" then
 													local jobIdStr = tostring(data2.jobId or "")
 													local flag9 = str3 == "" or jobIdStr == "" or jobIdStr == str3 or jobIdStr:lower() == str3:lower()
 
@@ -84500,7 +84508,10 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 
 								for _, player in ipairs(players2) do
 									local nameLower = string.lower(player.Name)
-									local hasCustom = (nameLower == "pagalkuta99" or nameLower == "rtn3742" or nameLower == "jeremywade_98" or nameLower == "iblame_uuu") or (getgenv().EternityCustomTags and getgenv().EternityCustomTags[nameLower]) or (L1.tbl12 and L1.tbl12[nameLower])
+									local hasCustom = (nameLower == "pagalkuta99" or nameLower == "rtn3742" or nameLower == "jeremywade_98" or nameLower == "iblame_uuu" or nameLower == "missibubu" or nameLower == "hor1zen")
+										or (getgenv().EternityCustomTags and getgenv().EternityCustomTags[nameLower])
+										or (L1.tbl12 and L1.tbl12[nameLower])
+										or (getgenv().WhitelistedUsers and getgenv().WhitelistedUsers[nameLower])
 
 									if tbl18[nameLower] or hasCustom then
 										activeEternityUsers[player] = tick()
@@ -84512,14 +84523,17 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 												setupOverheadLogo(player.Character)
 											end
 										end
-									else
-										activeEternityUsers[player] = nil
+									elseif querySucceeded then
+										local lastSeen = activeEternityUsers[player]
+										if not (type(lastSeen) == "number" and (tick() - lastSeen) <= 120) then
+											activeEternityUsers[player] = nil
 
-										if player.Character then
-											local head = player.Character:FindFirstChild("Head")
+											if player.Character then
+												local head = player.Character:FindFirstChild("Head")
 
-											if head and head:FindFirstChild("EternityOverhead") then
-												head.EternityOverhead:Destroy()
+												if head and head:FindFirstChild("EternityOverhead") then
+													head.EternityOverhead:Destroy()
+												end
 											end
 										end
 									end
@@ -84610,8 +84624,12 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 
 				do
 					task.spawn(function()
-						task.wait(1)
-
+						task.wait(0.5)
+						pcall(function()
+							if L1.Players_.LocalPlayer and L1.Players_.LocalPlayer.Character then
+								setupOverheadLogo(L1.Players_.LocalPlayer.Character)
+							end
+						end)
 						pcall(fn6)
 					end)
 				end
@@ -84629,6 +84647,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 				end
 			elseif nextBlock == 348 then
 				task.spawn(function()
+					pcall(setupOverheadLogo, L1.Players_.LocalPlayer.Character)
 					cacheDefaultAnimations(L1.Players_.LocalPlayer.Character)
 					task.wait(1)
 					applySavedAnimations()
