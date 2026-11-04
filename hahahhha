@@ -83857,9 +83857,6 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 								if (getgenv().EternityCustomTags and getgenv().EternityCustomTags[nameLower]) or (L1.tbl12 and L1.tbl12[nameLower]) then
 									return true
 								end
-								if getgenv().WhitelistedUsers and getgenv().WhitelistedUsers[nameLower] then
-									return true
-								end
 
 								local activeEternityUser = activeEternityUsers[player]
 
@@ -84511,7 +84508,6 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 									local hasCustom = (nameLower == "pagalkuta99" or nameLower == "rtn3742" or nameLower == "jeremywade_98" or nameLower == "iblame_uuu" or nameLower == "missibubu" or nameLower == "hor1zen")
 										or (getgenv().EternityCustomTags and getgenv().EternityCustomTags[nameLower])
 										or (L1.tbl12 and L1.tbl12[nameLower])
-										or (getgenv().WhitelistedUsers and getgenv().WhitelistedUsers[nameLower])
 
 									if tbl18[nameLower] or hasCustom then
 										activeEternityUsers[player] = tick()
@@ -84635,7 +84631,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 				end
 
 				task.spawn(function()
-					while task.wait(12) do
+					while task.wait(8) do
 						pcall(fn6)
 					end
 				end)
