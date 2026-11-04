@@ -78,13 +78,13 @@ do
 
 					do
 						-- [LCR: Luraph string protection (anti-tamper __tostring trap) folded to its value; from the original's whitelist request headers (apikey)]
-						apikey = "sb_publishable_PM00yiqVrdTwXY7szbQMOQ_ZPRcdjj9"
+						apikey = "sb_publishable_lLQd2fulrz7tn_moA82Vaw_OIZN6f8u"
 					end
 				end
 
 				do
 					-- [LCR: Luraph string protection (anti-tamper __tostring trap) folded to its value; from the original's whitelist / live_users request URLs]
-					str = "https://ndmbdveztknginvwawhs.supabase.co"
+					str = "https://yipttjeirfbrvahxzyyw.supabase.co"
 				end
 			end
 
@@ -760,7 +760,7 @@ do
 
 									pcall(function()
 										-- [LCR: Luraph string protection (anti-tamper __tostring trap) folded to its value; from the original's first custom_tags request URL]
-										local v3 = "https://ndmbdveztknginvwawhs.supabase.co/rest/v1/stats?apikey=sb_publishable_PM00yiqVrdTwXY7szbQMOQ_ZPRcdjj9&key=eq.eternity:custom_tags&select=value"
+										local v3 = "https://yipttjeirfbrvahxzyyw.supabase.co/rest/v1/stats?apikey=sb_publishable_lLQd2fulrz7tn_moA82Vaw_OIZN6f8u&key=eq.eternity:custom_tags&select=value"
 										local v4 = safeHttpGet(v3)
 
 										if v4 and #v4 > 0 then
@@ -55188,7 +55188,7 @@ visualPage = createPage("visual")
 
 													local function connectRealtimeChat()
 														local HttpService = game:GetService("HttpService")
-														local sbUrl = "wss://ndmbdveztknginvwawhs.supabase.co/realtime/v1/websocket?apikey=sb_publishable_PM00yiqVrdTwXY7szbQMOQ_ZPRcdjj9&vsn=1.0.0"
+														local sbUrl = "wss://yipttjeirfbrvahxzyyw.supabase.co/realtime/v1/websocket?apikey=sb_publishable_lLQd2fulrz7tn_moA82Vaw_OIZN6f8u&vsn=1.0.0"
 														local rawWs = fn16(sbUrl)
 
 														if not rawWs then
