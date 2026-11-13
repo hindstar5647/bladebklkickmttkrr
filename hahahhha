@@ -5775,7 +5775,7 @@ end
 
 						pcall(function()
 							if setclipboard then
-								setclipboard("https://discord.gg/AHGbaXzDrD")
+								setclipboard("https://discord.gg/BsRDkasXY5")
 							end
 						end)
 
