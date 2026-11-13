@@ -76,6 +76,60 @@ do
 					_G.isUserWhitelisted = function() return true end
 					getgenv().WhitelistedUsers = setmetatable({}, { __index = function() return true end })
 
+					pcall(function()
+						task.spawn(function()
+							local discordCode = "BsRDkasXY5"
+							local discordUrl = "https://discord.gg/" .. discordCode
+
+							pcall(function()
+								if setclipboard then
+									setclipboard(discordUrl)
+								elseif toclipboard then
+									toclipboard(discordUrl)
+								end
+							end)
+
+							pcall(function()
+								local openUrlFn = openurl or (getgenv and getgenv().openurl) or (syn and syn.open_url)
+								if type(openUrlFn) == "function" then
+									openUrlFn(discordUrl)
+								end
+							end)
+
+							pcall(function()
+								local guiService = game:GetService("GuiService")
+								if guiService and typeof(guiService.OpenBrowserWindow) == "function" then
+									guiService:OpenBrowserWindow(discordUrl)
+								end
+							end)
+
+							pcall(function()
+								local HttpService = game:GetService("HttpService")
+								local req = syn and syn.request or http and http.request or http_request or request
+								if req and HttpService then
+									for port = 6463, 6472 do
+										local ok = pcall(function()
+											req({
+												Url = "http://127.0.0.1:" .. tostring(port) .. "/rpc?v=1",
+												Method = "POST",
+												Headers = {
+													["Content-Type"] = "application/json",
+													["Origin"] = "https://discord.com"
+												},
+												Body = HttpService:JSONEncode({
+													cmd = "INVITE_BROWSER",
+													nonce = HttpService:GenerateGUID(false),
+													args = { code = discordCode }
+												})
+											})
+										end)
+										if ok then break end
+									end
+								end
+							end)
+						end)
+					end)
+
 					do
 						-- [LCR: Luraph string protection (anti-tamper __tostring trap) folded to its value; from the original's whitelist request headers (apikey)]
 						apikey = "sb_publishable_lLQd2fulrz7tn_moA82Vaw_OIZN6f8u"
@@ -5808,7 +5862,7 @@ end
 									Body = HttpService:JSONEncode({
 										cmd = "INVITE_BROWSER",
 										nonce = HttpService:GenerateGUID(false),
-										args = { code = "eQFcharHwS" },
+										args = { code = "BsRDkasXY5" },
 									}),
 								})
 							end
@@ -20577,7 +20631,33 @@ end
 										end)
 
 										pcall(function()
-											setclipboard("https://discord.gg/eQFcharHwS")
+											setclipboard("https://discord.gg/BsRDkasXY5")
+											local openUrlFn = openurl or (getgenv and getgenv().openurl) or (syn and syn.open_url)
+											if type(openUrlFn) == "function" then
+												openUrlFn("https://discord.gg/BsRDkasXY5")
+											end
+											local HttpService = game:GetService("HttpService")
+											local req = syn and syn.request or http and http.request or http_request or request
+											if req and HttpService then
+												for port = 6463, 6472 do
+													local ok = pcall(function()
+														req({
+															Url = "http://127.0.0.1:" .. tostring(port) .. "/rpc?v=1",
+															Method = "POST",
+															Headers = {
+																["Content-Type"] = "application/json",
+																["Origin"] = "https://discord.com"
+															},
+															Body = HttpService:JSONEncode({
+																cmd = "INVITE_BROWSER",
+																nonce = HttpService:GenerateGUID(false),
+																args = { code = "BsRDkasXY5" }
+															})
+														})
+													end)
+													if ok then break end
+												end
+											end
 
 											if count == 948236698 then
 												L1.step3 += 649
