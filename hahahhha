@@ -5775,7 +5775,7 @@ end
 
 						pcall(function()
 							if setclipboard then
-								setclipboard("https://discord.gg/eQFcharHwS")
+								setclipboard("https://discord.gg/AHGbaXzDrD")
 							end
 						end)
 
@@ -19703,7 +19703,7 @@ end
 										textButton5.BorderSizePixel = 0
 										textButton5.Text = v10.name
 										textButton5.Font = Enum.Font.GothamBold
-										textSize = len >= 5
+										textSize = len >= 4
 
 										if textSize then
 											textSize = 10
@@ -19736,7 +19736,7 @@ end
 										textButton5.BorderSizePixel = 0
 										textButton5.Text = v10.name
 										textButton5.Font = Enum.Font.GothamBold
-										local textSize2 = len >= 5
+										local textSize2 = len >= 4
 
 										if textSize2 then
 											textSize2 = 10
@@ -19788,7 +19788,7 @@ end
 										textButton5.BorderSizePixel = 0
 										textButton5.Text = v10.name
 										textButton5.Font = Enum.Font.GothamBold
-										textSize = len >= 5
+										textSize = len >= 4
 
 										if textSize then
 											textSize = 10
@@ -19832,7 +19832,7 @@ end
 										textButton5.BorderSizePixel = 0
 										textButton5.Text = v10.name
 										textButton5.Font = Enum.Font.GothamBold
-										textSize = len >= 5
+										textSize = len >= 4
 
 										if textSize then
 											textSize = 10
@@ -56521,6 +56521,72 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 							local uiGradient2
 
 							chatPage = _socialContainers.chatspam
+
+							local marketBanner = Instance.new("Frame", chatPage)
+							marketBanner.Name = "MarketBanner"
+							marketBanner.Size = UDim2.new(1, -8, 0, 48)
+							marketBanner.BackgroundColor3 = tbl3.surface
+							marketBanner.BorderSizePixel = 0
+							marketBanner.LayoutOrder = -1
+							corner(marketBanner, 8)
+							stroke(marketBanner, tbl3.accent, 1, 0.7)
+							padding(marketBanner, 6, 6, 10, 10)
+
+							local mbTitle = Instance.new("TextLabel", marketBanner)
+							mbTitle.Size = UDim2.new(0.65, 0, 0, 18)
+							mbTitle.Position = UDim2.new(0, 0, 0, 0)
+							mbTitle.BackgroundTransparency = 1
+							mbTitle.Text = "⚡ UNIVERSAL SCRIPT MARKET"
+							mbTitle.Font = Enum.Font.GothamBold
+							mbTitle.TextSize = 11
+							mbTitle.TextColor3 = tbl3.white
+							mbTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+							local mbSub = Instance.new("TextLabel", marketBanner)
+							mbSub.Size = UDim2.new(0.65, 0, 0, 14)
+							mbSub.Position = UDim2.new(0, 0, 0, 20)
+							mbSub.BackgroundTransparency = 1
+							mbSub.Text = "Search & execute any script with thumbnails"
+							mbSub.Font = Enum.Font.Gotham
+							mbSub.TextSize = 9
+							mbSub.TextColor3 = tbl3.textMuted
+							mbSub.TextXAlignment = Enum.TextXAlignment.Left
+
+							local mbBtn = Instance.new("TextButton", marketBanner)
+							mbBtn.Size = UDim2.new(0.35, -4, 0, 30)
+							mbBtn.Position = UDim2.new(0.65, 4, 0.5, -15)
+							mbBtn.BackgroundColor3 = tbl3.accent
+							mbBtn.TextColor3 = Color3.fromRGB(10, 10, 15)
+							mbBtn.Font = Enum.Font.GothamBold
+							mbBtn.TextSize = 10
+							mbBtn.Text = "Open Market →"
+							mbBtn.BorderSizePixel = 0
+							corner(mbBtn, 6)
+
+							mbBtn.MouseButton1Click:Connect(function()
+								local sbBar = socialPage:FindFirstChild("SubTabBar")
+								if sbBar then
+									local tabBtn = sbBar:FindFirstChild("Tab_universalscript")
+									if tabBtn and typeof(tabBtn) == "Instance" and tabBtn:IsA("TextButton") then
+										pcall(function()
+											if getconnections then
+												for _, c in ipairs(getconnections(tabBtn.MouseButton1Click)) do
+													c:Fire()
+												end
+											end
+										end)
+									end
+								end
+								local uTab = _socialContainers.universalscript
+								if uTab then
+									for _, c in pairs(_socialContainers) do
+										if typeof(c) == "Instance" and c:IsA("ScrollingFrame") then
+											c.Visible = (c == uTab)
+										end
+									end
+								end
+							end)
+
 							createSection(chatPage, "NORMAL CHAT SPAM", 0)
 							v6 = createInputField(chatPage, "MESSAGE", "Enter your message...", "", 1)
 							v7 = createInputField(chatPage, "DELAY (seconds)", "0.5", "1.0", 2)
@@ -58934,7 +59000,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 						end
 					end
 
-					do
+										do
 						local universalScriptPage = _socialContainers.universalscript
 						if universalScriptPage then
 							local HttpService = game:GetService("HttpService")
@@ -58997,191 +59063,274 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 								return nil
 							end
 
+							local function loadThumbnail(imgLabel, imageUrl, gameId)
+								if not imgLabel then return end
+
+								if gameId and tonumber(gameId) and tonumber(gameId) > 0 then
+									imgLabel.Image = "rbxthumb://type=GameIcon&id=" .. tostring(gameId) .. "&w=150&h=150"
+									return
+								end
+
+								if not imageUrl or imageUrl == "" then
+									imgLabel.Image = "rbxassetid://91945101969531"
+									return
+								end
+
+								local fullUrl = imageUrl
+								if fullUrl:sub(1, 1) == "/" then
+									fullUrl = "https://scriptblox.com" .. fullUrl
+								end
+
+								local customAsset = getcustomasset or getsynasset
+								if isfile and writefile and customAsset then
+									task.spawn(function()
+										local safeHash = string.gsub(fullUrl, "[^%w]", "_")
+										if #safeHash > 32 then safeHash = safeHash:sub(-32) end
+										local fPath = "eternity/thumbs/" .. safeHash .. ".png"
+
+										pcall(function()
+											if not isfolder("eternity") then makefolder("eternity") end
+											if not isfolder("eternity/thumbs") then makefolder("eternity/thumbs") end
+										end)
+
+										if not isfile(fPath) then
+											local body = fetchScriptBlox(fullUrl)
+											if body and #body > 50 then
+												pcall(writefile, fPath, body)
+											end
+										end
+
+										if isfile(fPath) then
+											local ok, asset = pcall(customAsset, fPath)
+											if ok and asset and imgLabel and imgLabel.Parent then
+												imgLabel.Image = asset
+											end
+										end
+									end)
+								else
+									imgLabel.Image = "rbxassetid://91945101969531"
+								end
+							end
+
 							local curatedScripts = {
 								{
 									title = "Infinite Yield (FE Admin)",
 									game = "Universal",
+									gameId = 0,
 									category = "admin",
 									verified = true,
 									keyless = true,
 									isUniversal = true,
 									views = 850000,
+									image = "",
 									script = "loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()",
 									desc = "Comprehensive FE Admin command bar with 400+ commands."
 								},
 								{
 									title = "Dark Dex V3 (Explorer)",
 									game = "Universal",
+									gameId = 0,
 									category = "util",
 									verified = true,
 									keyless = true,
 									isUniversal = true,
 									views = 620000,
+									image = "",
 									script = "loadstring(game:HttpGet('https://raw.githubusercontent.com/Babyhamsta/RBLX_Scripts/main/Universal/BypassedDarkDexV3.lua'))()",
 									desc = "Game hierarchy explorer, property inspector, and remote viewer."
 								},
 								{
 									title = "Simple Spy V3 (Remote Spy)",
 									game = "Universal",
+									gameId = 0,
 									category = "util",
 									verified = true,
 									keyless = true,
 									isUniversal = true,
 									views = 480000,
+									image = "",
 									script = "loadstring(game:HttpGet('https://raw.githubusercontent.com/infyiff/backup/main/SimpleSpyV3/main.lua'))()",
 									desc = "Advanced remote event and function logger with call stack tracer."
 								},
 								{
 									title = "Fly GUI V3",
 									game = "Universal",
+									gameId = 0,
 									category = "movement",
 									verified = true,
 									keyless = true,
 									isUniversal = true,
 									views = 390000,
+									image = "",
 									script = "loadstring(game:HttpGet('https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt'))()",
 									desc = "Smooth universal flight with speed controls and toggle keys."
 								},
 								{
 									title = "Nameless Admin (FE)",
 									game = "Universal",
+									gameId = 0,
 									category = "admin",
 									verified = true,
 									keyless = true,
 									isUniversal = true,
 									views = 310000,
+									image = "",
 									script = "loadstring(game:HttpGet('https://raw.githubusercontent.com/FilteringEnabled/NamelessAdmin/main/Source'))()",
 									desc = "Lightweight FE admin suite with custom command palette."
 								},
 								{
 									title = "DomainX Universal Hub",
 									game = "Universal",
+									gameId = 0,
 									category = "hub",
 									verified = true,
 									keyless = true,
 									isUniversal = true,
 									views = 270000,
+									image = "",
 									script = "loadstring(game:HttpGet('https://raw.githubusercontent.com/shlexware/DomainX/main/source', true))()",
 									desc = "All-in-one universal hub with aimbot, visuals, and game tweaks."
 								},
 								{
 									title = "Universal ESP & Tracers",
 									game = "Universal",
+									gameId = 0,
 									category = "visual",
 									verified = true,
 									keyless = true,
 									isUniversal = true,
 									views = 520000,
+									image = "",
 									script = "loadstring(game:HttpGet('https://raw.githubusercontent.com/ic3w0lf22/Unnamed-ESP/master/UnnamedESP.lua'))()",
 									desc = "High-performance 2D/3D bounding boxes, chams, names, and tracers."
 								},
 								{
 									title = "Orca Universal Hub",
 									game = "Universal",
+									gameId = 0,
 									category = "hub",
 									verified = true,
 									keyless = true,
 									isUniversal = true,
 									views = 210000,
+									image = "",
 									script = "loadstring(game:HttpGetAsync('https://raw.githubusercontent.com/richie0866/orca/master/source.lua'))()",
 									desc = "Clean multi-game universal scripting hub with dark mode UI."
 								},
 								{
 									title = "Universal Hitbox Expander",
 									game = "Universal",
+									gameId = 0,
 									category = "combat",
 									verified = true,
 									keyless = true,
 									isUniversal = true,
 									views = 340000,
+									image = "",
 									script = "loadstring(game:HttpGet('https://raw.githubusercontent.com/Dragon9688/HitboxExpander/main/hitbox.lua'))()",
 									desc = "Expands enemy character hitboxes for easier hits in shooter games."
 								},
 								{
 									title = "UNC Environment Checker",
 									game = "Universal",
+									gameId = 0,
 									category = "util",
 									verified = true,
 									keyless = true,
 									isUniversal = true,
 									views = 195000,
+									image = "",
 									script = "loadstring(game:HttpGet('https://raw.githubusercontent.com/unified-naming-convention/NamingStandard/main/UNCCheckEnv.lua'))()",
 									desc = "Tests your executor compatibility against standard UNC environment."
 								},
 								{
 									title = "Virtual Keyboard GUI (Mobile)",
 									game = "Universal",
+									gameId = 0,
 									category = "util",
 									verified = true,
 									keyless = true,
 									isUniversal = true,
 									views = 280000,
+									image = "",
 									script = "loadstring(game:HttpGet('https://raw.githubusercontent.com/advcomwt/GG/main/keyboard.txt'))()",
 									desc = "On-screen keyboard allowing mobile executor users to press keybinds."
 								},
 								{
 									title = "Hydroxide (Upvalue Scanner)",
 									game = "Universal",
+									gameId = 0,
 									category = "util",
 									verified = true,
 									keyless = true,
 									isUniversal = true,
 									views = 160000,
+									image = "",
 									script = "loadstring(game:HttpGet('https://raw.githubusercontent.com/Upbolt/Hydroxide/revision/init.lua'))()",
 									desc = "Runtime inspection tool, upvalue modifier, and remote closure dumper."
 								},
 								{
 									title = "Turtle Spy (Remote Logger)",
 									game = "Universal",
+									gameId = 0,
 									category = "util",
 									verified = true,
 									keyless = true,
 									isUniversal = true,
 									views = 145000,
+									image = "",
 									script = "loadstring(game:HttpGet('https://raw.githubusercontent.com/Turtle-Brand/Turtle-Spy/main/source.lua'))()",
 									desc = "Clean remote interceptor and call logger with ignore filters."
 								},
 								{
 									title = "Ghost Hub Universal",
 									game = "Universal",
+									gameId = 0,
 									category = "hub",
 									verified = true,
 									keyless = true,
 									isUniversal = true,
 									views = 190000,
+									image = "",
 									script = "loadstring(game:HttpGet('https://raw.githubusercontent.com/GhostPlayer-hub/GhostHub/main/GhostHub'))()",
 									desc = "Universal hub with player manipulation, gravity, and speed controls."
 								},
 								{
 									title = "FE BTools (Building Tools)",
 									game = "Universal",
+									gameId = 0,
 									category = "util",
 									verified = true,
 									keyless = true,
 									isUniversal = true,
 									views = 310000,
+									image = "",
 									script = "loadstring(game:HttpGet('https://raw.githubusercontent.com/infyiff/backup/main/btools.lua'))()",
 									desc = "Client building tools (Move, Delete, Clone, Color) for any game."
 								},
 								{
 									title = "Teleport Tool (Click TP)",
 									game = "Universal",
+									gameId = 0,
 									category = "movement",
 									verified = true,
 									keyless = true,
 									isUniversal = true,
 									views = 220000,
+									image = "",
 									script = "loadstring(game:HttpGet('https://raw.githubusercontent.com/FilteringEnabled/FE_Scripts/main/TeleportTool.lua', true))()",
 									desc = "Equippable tool to teleport your character to wherever you click."
 								},
 								{
 									title = "Mobile ShiftLock",
 									game = "Universal",
+									gameId = 0,
 									category = "util",
 									verified = true,
 									keyless = true,
 									isUniversal = true,
 									views = 250000,
+									image = "",
 									script = "loadstring(game:HttpGet('https://raw.githubusercontent.com/MiniNoobie/ShiftLock/main/Shiftlock.lua'))()",
 									desc = "Floating shift-lock button for mobile devices and third-person aim."
 								}
@@ -59262,7 +59411,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 							scriptInputBox.TextSize = 11
 							scriptInputBox.TextColor3 = tbl3.text
 							scriptInputBox.PlaceholderColor3 = tbl3.textDim
-							scriptInputBox.PlaceholderText = "-- Paste or write your custom Lua script here...\nprint('Void Script Executor active!')"
+							scriptInputBox.PlaceholderText = "-- Paste or write your custom Lua script here...\\nprint('Void Script Executor active!')"
 							scriptInputBox.TextXAlignment = Enum.TextXAlignment.Left
 							scriptInputBox.TextYAlignment = Enum.TextYAlignment.Top
 
@@ -59501,34 +59650,68 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 									card.BackgroundColor3 = tbl3.surface
 									card.BorderSizePixel = 0
 									card.LayoutOrder = idx
-									corner(card, 8)
+									corner(card, 10)
 									stroke(card, tbl3.divider, 1, 0.4)
 									padding(card, 8, 8, 8, 8)
 
-									local cardLayout = Instance.new("UIListLayout", card)
-									cardLayout.SortOrder = Enum.SortOrder.LayoutOrder
-									cardLayout.FillDirection = Enum.FillDirection.Vertical
-									cardLayout.Padding = UDim.new(0, 5)
+									local cardMainRow = Instance.new("Frame", card)
+									cardMainRow.Name = "CardMainRow"
+									cardMainRow.Size = UDim2.new(1, 0, 0, 0)
+									cardMainRow.AutomaticSize = Enum.AutomaticSize.Y
+									cardMainRow.BackgroundTransparency = 1
 
-									local topRow = Instance.new("Frame", card)
+									local cardMainLayout = Instance.new("UIListLayout", cardMainRow)
+									cardMainLayout.FillDirection = Enum.FillDirection.Horizontal
+									cardMainLayout.Padding = UDim.new(0, 10)
+									cardMainLayout.VerticalAlignment = Enum.VerticalAlignment.Top
+
+									local thumbFrame = Instance.new("Frame", cardMainRow)
+									thumbFrame.Name = "ThumbFrame"
+									thumbFrame.Size = UDim2.new(0, 58, 0, 58)
+									thumbFrame.BackgroundColor3 = tbl3.input
+									thumbFrame.BorderSizePixel = 0
+									corner(thumbFrame, 8)
+									stroke(thumbFrame, tbl3.divider, 1, 0.5)
+
+									local thumbImg = Instance.new("ImageLabel", thumbFrame)
+									thumbImg.Name = "ThumbImg"
+									thumbImg.Size = UDim2.new(1, 0, 1, 0)
+									thumbImg.BackgroundTransparency = 1
+									thumbImg.ScaleType = Enum.ScaleType.Crop
+									corner(thumbImg, 8)
+
+									loadThumbnail(thumbImg, item.image, item.gameId)
+
+									local infoCol = Instance.new("Frame", cardMainRow)
+									infoCol.Name = "InfoCol"
+									infoCol.Size = UDim2.new(1, -68, 0, 0)
+									infoCol.AutomaticSize = Enum.AutomaticSize.Y
+									infoCol.BackgroundTransparency = 1
+
+									local infoColLayout = Instance.new("UIListLayout", infoCol)
+									infoColLayout.SortOrder = Enum.SortOrder.LayoutOrder
+									infoColLayout.FillDirection = Enum.FillDirection.Vertical
+									infoColLayout.Padding = UDim.new(0, 4)
+
+									local topRow = Instance.new("Frame", infoCol)
 									topRow.Name = "TopRow"
-									topRow.Size = UDim2.new(1, 0, 0, 20)
+									topRow.Size = UDim2.new(1, 0, 0, 18)
 									topRow.BackgroundTransparency = 1
 									topRow.LayoutOrder = 1
 
 									local titleLbl = Instance.new("TextLabel", topRow)
-									titleLbl.Size = UDim2.new(0.52, 0, 1, 0)
+									titleLbl.Size = UDim2.new(0.50, 0, 1, 0)
 									titleLbl.BackgroundTransparency = 1
 									titleLbl.Text = tostring(item.title or "Script")
 									titleLbl.Font = Enum.Font.GothamBold
-									titleLbl.TextSize = 12
+									titleLbl.TextSize = 11
 									titleLbl.TextColor3 = tbl3.white
 									titleLbl.TextXAlignment = Enum.TextXAlignment.Left
 									titleLbl.TextTruncate = Enum.TextTruncate.AtEnd
 
 									local badgeRow = Instance.new("Frame", topRow)
-									badgeRow.Size = UDim2.new(0.48, 0, 1, 0)
-									badgeRow.Position = UDim2.new(0.52, 0, 0, 0)
+									badgeRow.Size = UDim2.new(0.50, 0, 1, 0)
+									badgeRow.Position = UDim2.new(0.50, 0, 0, 0)
 									badgeRow.BackgroundTransparency = 1
 
 									local badgeLayout = Instance.new("UIListLayout", badgeRow)
@@ -59539,19 +59722,19 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 
 									if item.keyless then
 										local kBadge = Instance.new("TextLabel", badgeRow)
-										kBadge.Size = UDim2.new(0, 50, 0, 16)
+										kBadge.Size = UDim2.new(0, 48, 0, 15)
 										kBadge.BackgroundColor3 = Color3.fromRGB(50, 45, 15)
 										kBadge.BorderSizePixel = 0
 										kBadge.Font = Enum.Font.GothamBold
 										kBadge.TextSize = 8
-										kBadge.TextColor3 = Color3.fromRGB(240, 190, 60)
+										kBadge.TextColor3 = Color3.fromRGB(245, 190, 60)
 										kBadge.Text = "KEYLESS"
 										corner(kBadge, 4)
 									end
 
 									if item.verified then
 										local vBadge = Instance.new("TextLabel", badgeRow)
-										vBadge.Size = UDim2.new(0, 56, 0, 16)
+										vBadge.Size = UDim2.new(0, 54, 0, 15)
 										vBadge.BackgroundColor3 = Color3.fromRGB(20, 50, 30)
 										vBadge.BorderSizePixel = 0
 										vBadge.Font = Enum.Font.GothamBold
@@ -59563,8 +59746,8 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 
 									local gameBadge = Instance.new("TextLabel", badgeRow)
 									local gName = tostring(item.game or "Universal")
-									if #gName > 14 then gName = gName:sub(1, 12) .. ".." end
-									gameBadge.Size = UDim2.new(0, 64, 0, 16)
+									if #gName > 12 then gName = gName:sub(1, 10) .. ".." end
+									gameBadge.Size = UDim2.new(0, 60, 0, 15)
 									gameBadge.BackgroundColor3 = Color3.fromRGB(30, 30, 42)
 									gameBadge.BorderSizePixel = 0
 									gameBadge.Font = Enum.Font.GothamBold
@@ -59573,30 +59756,44 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 									gameBadge.Text = gName
 									corner(gameBadge, 4)
 
-									local descRow = Instance.new("Frame", card)
+									local descRow = Instance.new("Frame", infoCol)
 									descRow.Name = "DescRow"
-									descRow.Size = UDim2.new(1, 0, 0, 24)
-									descRow.BackgroundColor3 = tbl3.input
-									descRow.BorderSizePixel = 0
+									descRow.Size = UDim2.new(1, 0, 0, 18)
+									descRow.BackgroundTransparency = 1
 									descRow.LayoutOrder = 2
-									corner(descRow, 4)
 
 									local descLbl = Instance.new("TextLabel", descRow)
-									descLbl.Size = UDim2.new(1, -12, 1, 0)
-									descLbl.Position = UDim2.new(0, 6, 0, 0)
+									descLbl.Size = UDim2.new(0.70, 0, 1, 0)
 									descLbl.BackgroundTransparency = 1
 									local snippet = item.desc or item.script or ""
-									if #snippet > 80 then snippet = snippet:sub(1, 78) .. "..." end
+									if #snippet > 70 then snippet = snippet:sub(1, 68) .. "..." end
 									descLbl.Text = snippet
-									descLbl.Font = Enum.Font.Code
+									descLbl.Font = Enum.Font.Gotham
 									descLbl.TextSize = 9
 									descLbl.TextColor3 = tbl3.textMuted
 									descLbl.TextXAlignment = Enum.TextXAlignment.Left
 									descLbl.TextTruncate = Enum.TextTruncate.AtEnd
 
-									local actRow = Instance.new("Frame", card)
+									local viewsLbl = Instance.new("TextLabel", descRow)
+									viewsLbl.Size = UDim2.new(0.30, 0, 1, 0)
+									viewsLbl.Position = UDim2.new(0.70, 0, 0, 0)
+									viewsLbl.BackgroundTransparency = 1
+									local vCount = tonumber(item.views) or 0
+									local vStr = tostring(vCount)
+									if vCount >= 1000000 then
+										vStr = string.format("%.1fM", vCount / 1000000)
+									elseif vCount >= 1000 then
+										vStr = string.format("%.1fK", vCount / 1000)
+									end
+									viewsLbl.Text = "👁 " .. vStr .. " views"
+									viewsLbl.Font = Enum.Font.Gotham
+									viewsLbl.TextSize = 8
+									viewsLbl.TextColor3 = tbl3.textDim
+									viewsLbl.TextXAlignment = Enum.TextXAlignment.Right
+
+									local actRow = Instance.new("Frame", infoCol)
 									actRow.Name = "ActRow"
-									actRow.Size = UDim2.new(1, 0, 0, 26)
+									actRow.Size = UDim2.new(1, 0, 0, 24)
 									actRow.BackgroundTransparency = 1
 									actRow.LayoutOrder = 3
 
@@ -59605,7 +59802,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 									actLayout.Padding = UDim.new(0, 6)
 
 									local btnRun = Instance.new("TextButton", actRow)
-									btnRun.Size = UDim2.new(0.36, -4, 1, 0)
+									btnRun.Size = UDim2.new(0.35, -4, 1, 0)
 									btnRun.BackgroundColor3 = tbl3.accent
 									btnRun.TextColor3 = Color3.fromRGB(10, 10, 15)
 									btnRun.Font = Enum.Font.GothamBold
@@ -59615,7 +59812,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 									corner(btnRun, 5)
 
 									local btnCopy = Instance.new("TextButton", actRow)
-									btnCopy.Size = UDim2.new(0.34, -4, 1, 0)
+									btnCopy.Size = UDim2.new(0.35, -4, 1, 0)
 									btnCopy.BackgroundColor3 = tbl3.accentDim
 									btnCopy.TextColor3 = tbl3.white
 									btnCopy.Font = Enum.Font.GothamBold
@@ -59732,19 +59929,23 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 														seen[title] = true
 														seen[scr] = true
 														local gName = "Universal"
-														if type(item.game) == "table" and item.game.name then
-															gName = tostring(item.game.name)
+														local gId = nil
+														if type(item.game) == "table" then
+															if item.game.name then gName = tostring(item.game.name) end
+															if item.game.gameId then gId = item.game.gameId end
 														elseif type(item.game) == "string" then
 															gName = item.game
 														end
 														table.insert(results, {
 															title = title,
 															game = gName,
+															gameId = gId,
 															category = "market",
 															verified = item.verified or false,
 															keyless = item.keyless or false,
 															views = item.views or 0,
 															isUniversal = item.isUniversal or false,
+															image = item.image or (item.game and item.game.imageUrl) or "",
 															script = scr,
 															desc = (item.game and item.game.name and ("Game: " .. tostring(item.game.name))) or "From ScriptBlox Market"
 														})
