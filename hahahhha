@@ -21580,7 +21580,7 @@ end
 
 <font color="rgb(80, 255, 100)">+</font> Divided Visuals page into sub-tabs (World, Character, Screen, Highlights).
 
-<font color="rgb(80, 255, 100)">+</font> Divided Social page into sub-tabs (Chat Spam, Script Chat, VC Bypass).
+<font color="rgb(80, 255, 100)">+</font> Divided Social page into sub-tabs (Chat Spam, Script Chat, Music, Universal Script).
 
 <font color="rgb(80, 255, 100)">+</font> Divided Trolling page into sub-tabs (Target, Attach).
 
@@ -54301,6 +54301,7 @@ visualPage = createPage("visual")
 					{ id = "chatspam", name = "Chat Spam" },
 					{ id = "scriptchat", name = "Script Chat" },
 					{ id = "music", name = "Music" },
+					{ id = "universalscript", name = "Universal Script" },
 				})
 
 				globalchatPage = _socialContainers.scriptchat
@@ -58930,6 +58931,891 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 							end
 
 							fn16()
+						end
+					end
+
+					do
+						local universalScriptPage = _socialContainers.universalscript
+						if universalScriptPage then
+							local HttpService = game:GetService("HttpService")
+
+							local function safeNotify(title, msg, dur)
+								local fn = SendNotification or (getgenv and getgenv().SendNotification)
+								if type(fn) == "function" then
+									pcall(fn, title, msg, dur or 3)
+								end
+							end
+
+							local function safeSetClipboard(str)
+								local fn = setclipboard or toclipboard or (syn and syn.write_clipboard) or (Clipboard and Clipboard.set)
+								if fn then
+									local ok = pcall(fn, str)
+									return ok
+								end
+								return false
+							end
+
+							local function safeGetClipboard()
+								local fn = getclipboard or get_clipboard or fromclipboard or (syn and syn.get_clipboard) or (Clipboard and Clipboard.get)
+								if fn then
+									local ok, res = pcall(fn)
+									if ok and res and type(res) == "string" then
+										return res
+									end
+								end
+								return nil
+							end
+
+							local function urlEncode(s)
+								if not s then return "" end
+								return (string.gsub(tostring(s), "([^%w%-%_%.%~])", function(c)
+									return string.format("%%%02X", string.byte(c))
+								end))
+							end
+
+							local function fetchScriptBlox(url)
+								local req = syn and syn.request or http and http.request or http_request or request
+								if type(req) == "function" then
+									local ok, res = pcall(req, {
+										Url = url,
+										Method = "GET",
+										Headers = {
+											["User-Agent"] = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+											["Accept"] = "application/json"
+										}
+									})
+									if ok and res and (res.StatusCode == 200 or res.Status == 200 or not res.StatusCode) and res.Body then
+										return res.Body
+									end
+								end
+								if type(safeHttpGet) == "function" then
+									local ok, res = pcall(safeHttpGet, url)
+									if ok and res and #res > 10 then return res end
+								end
+								local ok, res = pcall(game.HttpGet, game, url)
+								if ok and res and #res > 10 then return res end
+								return nil
+							end
+
+							local curatedScripts = {
+								{
+									title = "Infinite Yield (FE Admin)",
+									game = "Universal",
+									category = "admin",
+									verified = true,
+									keyless = true,
+									isUniversal = true,
+									views = 850000,
+									script = "loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()",
+									desc = "Comprehensive FE Admin command bar with 400+ commands."
+								},
+								{
+									title = "Dark Dex V3 (Explorer)",
+									game = "Universal",
+									category = "util",
+									verified = true,
+									keyless = true,
+									isUniversal = true,
+									views = 620000,
+									script = "loadstring(game:HttpGet('https://raw.githubusercontent.com/Babyhamsta/RBLX_Scripts/main/Universal/BypassedDarkDexV3.lua'))()",
+									desc = "Game hierarchy explorer, property inspector, and remote viewer."
+								},
+								{
+									title = "Simple Spy V3 (Remote Spy)",
+									game = "Universal",
+									category = "util",
+									verified = true,
+									keyless = true,
+									isUniversal = true,
+									views = 480000,
+									script = "loadstring(game:HttpGet('https://raw.githubusercontent.com/infyiff/backup/main/SimpleSpyV3/main.lua'))()",
+									desc = "Advanced remote event and function logger with call stack tracer."
+								},
+								{
+									title = "Fly GUI V3",
+									game = "Universal",
+									category = "movement",
+									verified = true,
+									keyless = true,
+									isUniversal = true,
+									views = 390000,
+									script = "loadstring(game:HttpGet('https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt'))()",
+									desc = "Smooth universal flight with speed controls and toggle keys."
+								},
+								{
+									title = "Nameless Admin (FE)",
+									game = "Universal",
+									category = "admin",
+									verified = true,
+									keyless = true,
+									isUniversal = true,
+									views = 310000,
+									script = "loadstring(game:HttpGet('https://raw.githubusercontent.com/FilteringEnabled/NamelessAdmin/main/Source'))()",
+									desc = "Lightweight FE admin suite with custom command palette."
+								},
+								{
+									title = "DomainX Universal Hub",
+									game = "Universal",
+									category = "hub",
+									verified = true,
+									keyless = true,
+									isUniversal = true,
+									views = 270000,
+									script = "loadstring(game:HttpGet('https://raw.githubusercontent.com/shlexware/DomainX/main/source', true))()",
+									desc = "All-in-one universal hub with aimbot, visuals, and game tweaks."
+								},
+								{
+									title = "Universal ESP & Tracers",
+									game = "Universal",
+									category = "visual",
+									verified = true,
+									keyless = true,
+									isUniversal = true,
+									views = 520000,
+									script = "loadstring(game:HttpGet('https://raw.githubusercontent.com/ic3w0lf22/Unnamed-ESP/master/UnnamedESP.lua'))()",
+									desc = "High-performance 2D/3D bounding boxes, chams, names, and tracers."
+								},
+								{
+									title = "Orca Universal Hub",
+									game = "Universal",
+									category = "hub",
+									verified = true,
+									keyless = true,
+									isUniversal = true,
+									views = 210000,
+									script = "loadstring(game:HttpGetAsync('https://raw.githubusercontent.com/richie0866/orca/master/source.lua'))()",
+									desc = "Clean multi-game universal scripting hub with dark mode UI."
+								},
+								{
+									title = "Universal Hitbox Expander",
+									game = "Universal",
+									category = "combat",
+									verified = true,
+									keyless = true,
+									isUniversal = true,
+									views = 340000,
+									script = "loadstring(game:HttpGet('https://raw.githubusercontent.com/Dragon9688/HitboxExpander/main/hitbox.lua'))()",
+									desc = "Expands enemy character hitboxes for easier hits in shooter games."
+								},
+								{
+									title = "UNC Environment Checker",
+									game = "Universal",
+									category = "util",
+									verified = true,
+									keyless = true,
+									isUniversal = true,
+									views = 195000,
+									script = "loadstring(game:HttpGet('https://raw.githubusercontent.com/unified-naming-convention/NamingStandard/main/UNCCheckEnv.lua'))()",
+									desc = "Tests your executor compatibility against standard UNC environment."
+								},
+								{
+									title = "Virtual Keyboard GUI (Mobile)",
+									game = "Universal",
+									category = "util",
+									verified = true,
+									keyless = true,
+									isUniversal = true,
+									views = 280000,
+									script = "loadstring(game:HttpGet('https://raw.githubusercontent.com/advcomwt/GG/main/keyboard.txt'))()",
+									desc = "On-screen keyboard allowing mobile executor users to press keybinds."
+								},
+								{
+									title = "Hydroxide (Upvalue Scanner)",
+									game = "Universal",
+									category = "util",
+									verified = true,
+									keyless = true,
+									isUniversal = true,
+									views = 160000,
+									script = "loadstring(game:HttpGet('https://raw.githubusercontent.com/Upbolt/Hydroxide/revision/init.lua'))()",
+									desc = "Runtime inspection tool, upvalue modifier, and remote closure dumper."
+								},
+								{
+									title = "Turtle Spy (Remote Logger)",
+									game = "Universal",
+									category = "util",
+									verified = true,
+									keyless = true,
+									isUniversal = true,
+									views = 145000,
+									script = "loadstring(game:HttpGet('https://raw.githubusercontent.com/Turtle-Brand/Turtle-Spy/main/source.lua'))()",
+									desc = "Clean remote interceptor and call logger with ignore filters."
+								},
+								{
+									title = "Ghost Hub Universal",
+									game = "Universal",
+									category = "hub",
+									verified = true,
+									keyless = true,
+									isUniversal = true,
+									views = 190000,
+									script = "loadstring(game:HttpGet('https://raw.githubusercontent.com/GhostPlayer-hub/GhostHub/main/GhostHub'))()",
+									desc = "Universal hub with player manipulation, gravity, and speed controls."
+								},
+								{
+									title = "FE BTools (Building Tools)",
+									game = "Universal",
+									category = "util",
+									verified = true,
+									keyless = true,
+									isUniversal = true,
+									views = 310000,
+									script = "loadstring(game:HttpGet('https://raw.githubusercontent.com/infyiff/backup/main/btools.lua'))()",
+									desc = "Client building tools (Move, Delete, Clone, Color) for any game."
+								},
+								{
+									title = "Teleport Tool (Click TP)",
+									game = "Universal",
+									category = "movement",
+									verified = true,
+									keyless = true,
+									isUniversal = true,
+									views = 220000,
+									script = "loadstring(game:HttpGet('https://raw.githubusercontent.com/FilteringEnabled/FE_Scripts/main/TeleportTool.lua', true))()",
+									desc = "Equippable tool to teleport your character to wherever you click."
+								},
+								{
+									title = "Mobile ShiftLock",
+									game = "Universal",
+									category = "util",
+									verified = true,
+									keyless = true,
+									isUniversal = true,
+									views = 250000,
+									script = "loadstring(game:HttpGet('https://raw.githubusercontent.com/MiniNoobie/ShiftLock/main/Shiftlock.lua'))()",
+									desc = "Floating shift-lock button for mobile devices and third-person aim."
+								}
+							}
+
+							createSection(universalScriptPage, "CUSTOM SCRIPT EXECUTOR", 1)
+
+							local execCard = Instance.new("Frame", universalScriptPage)
+							execCard.Name = "ScriptExecutorCard"
+							execCard.Size = UDim2.new(1, -8, 0, 0)
+							execCard.AutomaticSize = Enum.AutomaticSize.Y
+							execCard.BackgroundColor3 = tbl3.surface
+							execCard.BorderSizePixel = 0
+							execCard.LayoutOrder = 2
+							corner(execCard, 10)
+							stroke(execCard, tbl3.accent, 1, 0.7)
+							padding(execCard, 10, 10, 10, 10)
+
+							local execLayout = Instance.new("UIListLayout", execCard)
+							execLayout.SortOrder = Enum.SortOrder.LayoutOrder
+							execLayout.FillDirection = Enum.FillDirection.Vertical
+							execLayout.Padding = UDim.new(0, 8)
+
+							local execHeader = Instance.new("Frame", execCard)
+							execHeader.Name = "ExecHeader"
+							execHeader.Size = UDim2.new(1, 0, 0, 18)
+							execHeader.BackgroundTransparency = 1
+							execHeader.LayoutOrder = 1
+
+							local execTitle = Instance.new("TextLabel", execHeader)
+							execTitle.Size = UDim2.new(0.6, 0, 1, 0)
+							execTitle.BackgroundTransparency = 1
+							execTitle.Text = "LUA SCRIPT CONSOLE / EXECUTOR"
+							execTitle.Font = Enum.Font.GothamBold
+							execTitle.TextSize = 11
+							execTitle.TextColor3 = tbl3.white
+							execTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+							local execSub = Instance.new("TextLabel", execHeader)
+							execSub.Size = UDim2.new(0.4, 0, 1, 0)
+							execSub.Position = UDim2.new(0.6, 0, 0, 0)
+							execSub.BackgroundTransparency = 1
+							execSub.Text = "Execute custom code directly"
+							execSub.Font = Enum.Font.Gotham
+							execSub.TextSize = 9
+							execSub.TextColor3 = tbl3.textMuted
+							execSub.TextXAlignment = Enum.TextXAlignment.Right
+
+							local codeBoxFrame = Instance.new("Frame", execCard)
+							codeBoxFrame.Name = "CodeBoxFrame"
+							codeBoxFrame.Size = UDim2.new(1, 0, 0, 130)
+							codeBoxFrame.BackgroundColor3 = tbl3.input
+							codeBoxFrame.BorderSizePixel = 0
+							codeBoxFrame.LayoutOrder = 2
+							corner(codeBoxFrame, 6)
+							stroke(codeBoxFrame, tbl3.divider, 1, 0.4)
+
+							local codeScroll = Instance.new("ScrollingFrame", codeBoxFrame)
+							codeScroll.Name = "CodeScroll"
+							codeScroll.Size = UDim2.new(1, -12, 1, -8)
+							codeScroll.Position = UDim2.new(0, 6, 0, 4)
+							codeScroll.BackgroundTransparency = 1
+							codeScroll.BorderSizePixel = 0
+							codeScroll.ScrollBarThickness = 3
+							codeScroll.ScrollBarImageColor3 = tbl3.accent
+							codeScroll.AutomaticCanvasSize = Enum.AutomaticSize.XY
+							codeScroll.ScrollingDirection = Enum.ScrollingDirection.XY
+
+							local scriptInputBox = Instance.new("TextBox", codeScroll)
+							scriptInputBox.Name = "ScriptInputBox"
+							scriptInputBox.Size = UDim2.new(1, 0, 1, 0)
+							scriptInputBox.AutomaticSize = Enum.AutomaticSize.XY
+							scriptInputBox.BackgroundTransparency = 1
+							scriptInputBox.ClearTextOnFocus = false
+							scriptInputBox.MultiLine = true
+							scriptInputBox.TextWrapped = false
+							scriptInputBox.Font = Enum.Font.Code
+							scriptInputBox.TextSize = 11
+							scriptInputBox.TextColor3 = tbl3.text
+							scriptInputBox.PlaceholderColor3 = tbl3.textDim
+							scriptInputBox.PlaceholderText = "-- Paste or write your custom Lua script here...\nprint('Void Script Executor active!')"
+							scriptInputBox.TextXAlignment = Enum.TextXAlignment.Left
+							scriptInputBox.TextYAlignment = Enum.TextYAlignment.Top
+
+							local execBtnRow = Instance.new("Frame", execCard)
+							execBtnRow.Name = "ExecBtnRow"
+							execBtnRow.Size = UDim2.new(1, 0, 0, 32)
+							execBtnRow.BackgroundTransparency = 1
+							execBtnRow.LayoutOrder = 3
+
+							local execBtnLayout = Instance.new("UIListLayout", execBtnRow)
+							execBtnLayout.FillDirection = Enum.FillDirection.Horizontal
+							execBtnLayout.Padding = UDim.new(0, 6)
+							execBtnLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+
+							local btnExec = Instance.new("TextButton", execBtnRow)
+							btnExec.Name = "BtnExecute"
+							btnExec.Size = UDim2.new(0.38, -4, 1, 0)
+							btnExec.BackgroundColor3 = tbl3.accent
+							btnExec.TextColor3 = Color3.fromRGB(10, 10, 15)
+							btnExec.Font = Enum.Font.GothamBold
+							btnExec.TextSize = 11
+							btnExec.Text = "⚡ Execute"
+							btnExec.BorderSizePixel = 0
+							corner(btnExec, 6)
+
+							local btnClipExec = Instance.new("TextButton", execBtnRow)
+							btnClipExec.Name = "BtnClipExec"
+							btnClipExec.Size = UDim2.new(0.32, -4, 1, 0)
+							btnClipExec.BackgroundColor3 = tbl3.accentDim
+							btnClipExec.TextColor3 = tbl3.white
+							btnClipExec.Font = Enum.Font.GothamBold
+							btnClipExec.TextSize = 11
+							btnClipExec.Text = "📋 Clip Exec"
+							btnClipExec.BorderSizePixel = 0
+							corner(btnClipExec, 6)
+
+							local btnCopyCode = Instance.new("TextButton", execBtnRow)
+							btnCopyCode.Name = "BtnCopyCode"
+							btnCopyCode.Size = UDim2.new(0.15, -4, 1, 0)
+							btnCopyCode.BackgroundColor3 = tbl3.surfaceHover
+							btnCopyCode.TextColor3 = tbl3.text
+							btnCopyCode.Font = Enum.Font.GothamBold
+							btnCopyCode.TextSize = 10
+							btnCopyCode.Text = "Copy"
+							btnCopyCode.BorderSizePixel = 0
+							corner(btnCopyCode, 6)
+
+							local btnClearCode = Instance.new("TextButton", execBtnRow)
+							btnClearCode.Name = "BtnClearCode"
+							btnClearCode.Size = UDim2.new(0.15, -4, 1, 0)
+							btnClearCode.BackgroundColor3 = Color3.fromRGB(50, 20, 25)
+							btnClearCode.TextColor3 = tbl3.danger
+							btnClearCode.Font = Enum.Font.GothamBold
+							btnClearCode.TextSize = 10
+							btnClearCode.Text = "Clear"
+							btnClearCode.BorderSizePixel = 0
+							corner(btnClearCode, 6)
+
+							btnExec.MouseButton1Click:Connect(function()
+								local code = scriptInputBox.Text
+								if not code or code:gsub("%s+", "") == "" then
+									safeNotify("Executor", "Script editor is empty!", 2)
+									return
+								end
+								task.spawn(function()
+									local fn, compileErr = loadstring(code)
+									if not fn then
+										safeNotify("Syntax Error", tostring(compileErr):sub(1, 75), 4)
+										return
+									end
+									local tStart = os.clock()
+									local ok, runtimeErr = pcall(fn)
+									local elapsed = math.floor((os.clock() - tStart) * 1000)
+									if ok then
+										safeNotify("Executor", "Script executed in " .. tostring(elapsed) .. "ms!", 3)
+									else
+										safeNotify("Runtime Error", tostring(runtimeErr):sub(1, 75), 4)
+									end
+								end)
+							end)
+
+							btnClipExec.MouseButton1Click:Connect(function()
+								local clip = safeGetClipboard()
+								if clip and clip:gsub("%s+", "") ~= "" then
+									scriptInputBox.Text = clip
+									task.spawn(function()
+										local fn, compileErr = loadstring(clip)
+										if not fn then
+											safeNotify("Syntax Error", tostring(compileErr):sub(1, 75), 4)
+											return
+										end
+										local tStart = os.clock()
+										local ok, runtimeErr = pcall(fn)
+										local elapsed = math.floor((os.clock() - tStart) * 1000)
+										if ok then
+											safeNotify("Clipboard Exec", "Executed in " .. tostring(elapsed) .. "ms!", 3)
+										else
+											safeNotify("Runtime Error", tostring(runtimeErr):sub(1, 75), 4)
+										end
+									end)
+								else
+									safeNotify("Clipboard", "Clipboard is empty or unsupported!", 2)
+								end
+							end)
+
+							btnCopyCode.MouseButton1Click:Connect(function()
+								local code = scriptInputBox.Text
+								if code and #code > 0 then
+									safeSetClipboard(code)
+									safeNotify("Clipboard", "Script copied to clipboard!", 2)
+								else
+									safeNotify("Clipboard", "Nothing to copy!", 2)
+								end
+							end)
+
+							btnClearCode.MouseButton1Click:Connect(function()
+								scriptInputBox.Text = ""
+								safeNotify("Executor", "Editor cleared.", 1.5)
+							end)
+
+							createSection(universalScriptPage, "UNIVERSAL SCRIPT MARKET", 3)
+
+							local searchCard = Instance.new("Frame", universalScriptPage)
+							searchCard.Name = "MarketSearchCard"
+							searchCard.Size = UDim2.new(1, -8, 0, 0)
+							searchCard.AutomaticSize = Enum.AutomaticSize.Y
+							searchCard.BackgroundColor3 = tbl3.surface
+							searchCard.BorderSizePixel = 0
+							searchCard.LayoutOrder = 4
+							corner(searchCard, 10)
+							padding(searchCard, 8, 8, 8, 8)
+
+							local searchLayout = Instance.new("UIListLayout", searchCard)
+							searchLayout.SortOrder = Enum.SortOrder.LayoutOrder
+							searchLayout.FillDirection = Enum.FillDirection.Vertical
+							searchLayout.Padding = UDim.new(0, 6)
+
+							local searchBarRow = Instance.new("Frame", searchCard)
+							searchBarRow.Name = "SearchBarRow"
+							searchBarRow.Size = UDim2.new(1, 0, 0, 32)
+							searchBarRow.BackgroundTransparency = 1
+							searchBarRow.LayoutOrder = 1
+
+							local searchBarLayout = Instance.new("UIListLayout", searchBarRow)
+							searchBarLayout.FillDirection = Enum.FillDirection.Horizontal
+							searchBarLayout.Padding = UDim.new(0, 6)
+							searchBarLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+
+							local searchTextBox = Instance.new("TextBox", searchBarRow)
+							searchTextBox.Name = "SearchInput"
+							searchTextBox.Size = UDim2.new(1, -86, 1, 0)
+							searchTextBox.BackgroundColor3 = tbl3.input
+							searchTextBox.Font = Enum.Font.Gotham
+							searchTextBox.TextSize = 11
+							searchTextBox.TextColor3 = tbl3.text
+							searchTextBox.PlaceholderColor3 = tbl3.textDim
+							searchTextBox.PlaceholderText = "Search ScriptBlox market (Dex, Fly, ESP, Arsenal...)"
+							searchTextBox.ClearTextOnFocus = false
+							searchTextBox.BorderSizePixel = 0
+							corner(searchTextBox, 6)
+							padding(searchTextBox, 0, 0, 8, 8)
+
+							local btnSearch = Instance.new("TextButton", searchBarRow)
+							btnSearch.Name = "BtnSearch"
+							btnSearch.Size = UDim2.new(0, 80, 1, 0)
+							btnSearch.BackgroundColor3 = tbl3.accent
+							btnSearch.TextColor3 = Color3.fromRGB(10, 10, 15)
+							btnSearch.Font = Enum.Font.GothamBold
+							btnSearch.TextSize = 11
+							btnSearch.Text = "🔍 Search"
+							btnSearch.BorderSizePixel = 0
+							corner(btnSearch, 6)
+
+							local filterRow = Instance.new("Frame", searchCard)
+							filterRow.Name = "FilterRow"
+							filterRow.Size = UDim2.new(1, 0, 0, 24)
+							filterRow.BackgroundTransparency = 1
+							filterRow.LayoutOrder = 2
+
+							local filterLayout = Instance.new("UIListLayout", filterRow)
+							filterLayout.FillDirection = Enum.FillDirection.Horizontal
+							filterLayout.Padding = UDim.new(0, 4)
+							filterLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+
+							local statusLabel = Instance.new("TextLabel", universalScriptPage)
+							statusLabel.Name = "MarketStatusLabel"
+							statusLabel.Size = UDim2.new(1, -8, 0, 18)
+							statusLabel.BackgroundTransparency = 1
+							statusLabel.Font = Enum.Font.Gotham
+							statusLabel.TextSize = 10
+							statusLabel.TextColor3 = tbl3.textMuted
+							statusLabel.TextXAlignment = Enum.TextXAlignment.Left
+							statusLabel.LayoutOrder = 5
+							statusLabel.Text = "Loaded " .. tostring(#curatedScripts) .. " universal scripts from market"
+
+							local resultsContainer = Instance.new("Frame", universalScriptPage)
+							resultsContainer.Name = "MarketResultsContainer"
+							resultsContainer.Size = UDim2.new(1, -8, 0, 0)
+							resultsContainer.AutomaticSize = Enum.AutomaticSize.Y
+							resultsContainer.BackgroundTransparency = 1
+							resultsContainer.LayoutOrder = 6
+
+							local resultsLayout = Instance.new("UIListLayout", resultsContainer)
+							resultsLayout.SortOrder = Enum.SortOrder.LayoutOrder
+							resultsLayout.FillDirection = Enum.FillDirection.Vertical
+							resultsLayout.Padding = UDim.new(0, 6)
+
+							local function renderScripts(list)
+								for _, child in ipairs(resultsContainer:GetChildren()) do
+									if child:IsA("Frame") then
+										child:Destroy()
+									end
+								end
+
+								if #list == 0 then
+									local emptyCard = Instance.new("Frame", resultsContainer)
+									emptyCard.Size = UDim2.new(1, 0, 0, 48)
+									emptyCard.BackgroundColor3 = tbl3.surface
+									emptyCard.BorderSizePixel = 0
+									corner(emptyCard, 8)
+									local lbl = Instance.new("TextLabel", emptyCard)
+									lbl.Size = UDim2.new(1, 0, 1, 0)
+									lbl.BackgroundTransparency = 1
+									lbl.Text = "No scripts found matching query. Try another keyword."
+									lbl.Font = Enum.Font.Gotham
+									lbl.TextSize = 11
+									lbl.TextColor3 = tbl3.textMuted
+									return
+								end
+
+								for idx, item in ipairs(list) do
+									local card = Instance.new("Frame", resultsContainer)
+									card.Name = "ScriptCard_" .. tostring(idx)
+									card.Size = UDim2.new(1, 0, 0, 0)
+									card.AutomaticSize = Enum.AutomaticSize.Y
+									card.BackgroundColor3 = tbl3.surface
+									card.BorderSizePixel = 0
+									card.LayoutOrder = idx
+									corner(card, 8)
+									stroke(card, tbl3.divider, 1, 0.4)
+									padding(card, 8, 8, 8, 8)
+
+									local cardLayout = Instance.new("UIListLayout", card)
+									cardLayout.SortOrder = Enum.SortOrder.LayoutOrder
+									cardLayout.FillDirection = Enum.FillDirection.Vertical
+									cardLayout.Padding = UDim.new(0, 5)
+
+									local topRow = Instance.new("Frame", card)
+									topRow.Name = "TopRow"
+									topRow.Size = UDim2.new(1, 0, 0, 20)
+									topRow.BackgroundTransparency = 1
+									topRow.LayoutOrder = 1
+
+									local titleLbl = Instance.new("TextLabel", topRow)
+									titleLbl.Size = UDim2.new(0.52, 0, 1, 0)
+									titleLbl.BackgroundTransparency = 1
+									titleLbl.Text = tostring(item.title or "Script")
+									titleLbl.Font = Enum.Font.GothamBold
+									titleLbl.TextSize = 12
+									titleLbl.TextColor3 = tbl3.white
+									titleLbl.TextXAlignment = Enum.TextXAlignment.Left
+									titleLbl.TextTruncate = Enum.TextTruncate.AtEnd
+
+									local badgeRow = Instance.new("Frame", topRow)
+									badgeRow.Size = UDim2.new(0.48, 0, 1, 0)
+									badgeRow.Position = UDim2.new(0.52, 0, 0, 0)
+									badgeRow.BackgroundTransparency = 1
+
+									local badgeLayout = Instance.new("UIListLayout", badgeRow)
+									badgeLayout.FillDirection = Enum.FillDirection.Horizontal
+									badgeLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
+									badgeLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+									badgeLayout.Padding = UDim.new(0, 4)
+
+									if item.keyless then
+										local kBadge = Instance.new("TextLabel", badgeRow)
+										kBadge.Size = UDim2.new(0, 50, 0, 16)
+										kBadge.BackgroundColor3 = Color3.fromRGB(50, 45, 15)
+										kBadge.BorderSizePixel = 0
+										kBadge.Font = Enum.Font.GothamBold
+										kBadge.TextSize = 8
+										kBadge.TextColor3 = Color3.fromRGB(240, 190, 60)
+										kBadge.Text = "KEYLESS"
+										corner(kBadge, 4)
+									end
+
+									if item.verified then
+										local vBadge = Instance.new("TextLabel", badgeRow)
+										vBadge.Size = UDim2.new(0, 56, 0, 16)
+										vBadge.BackgroundColor3 = Color3.fromRGB(20, 50, 30)
+										vBadge.BorderSizePixel = 0
+										vBadge.Font = Enum.Font.GothamBold
+										vBadge.TextSize = 8
+										vBadge.TextColor3 = tbl3.success
+										vBadge.Text = "✓ VERIFIED"
+										corner(vBadge, 4)
+									end
+
+									local gameBadge = Instance.new("TextLabel", badgeRow)
+									local gName = tostring(item.game or "Universal")
+									if #gName > 14 then gName = gName:sub(1, 12) .. ".." end
+									gameBadge.Size = UDim2.new(0, 64, 0, 16)
+									gameBadge.BackgroundColor3 = Color3.fromRGB(30, 30, 42)
+									gameBadge.BorderSizePixel = 0
+									gameBadge.Font = Enum.Font.GothamBold
+									gameBadge.TextSize = 8
+									gameBadge.TextColor3 = tbl3.accent
+									gameBadge.Text = gName
+									corner(gameBadge, 4)
+
+									local descRow = Instance.new("Frame", card)
+									descRow.Name = "DescRow"
+									descRow.Size = UDim2.new(1, 0, 0, 24)
+									descRow.BackgroundColor3 = tbl3.input
+									descRow.BorderSizePixel = 0
+									descRow.LayoutOrder = 2
+									corner(descRow, 4)
+
+									local descLbl = Instance.new("TextLabel", descRow)
+									descLbl.Size = UDim2.new(1, -12, 1, 0)
+									descLbl.Position = UDim2.new(0, 6, 0, 0)
+									descLbl.BackgroundTransparency = 1
+									local snippet = item.desc or item.script or ""
+									if #snippet > 80 then snippet = snippet:sub(1, 78) .. "..." end
+									descLbl.Text = snippet
+									descLbl.Font = Enum.Font.Code
+									descLbl.TextSize = 9
+									descLbl.TextColor3 = tbl3.textMuted
+									descLbl.TextXAlignment = Enum.TextXAlignment.Left
+									descLbl.TextTruncate = Enum.TextTruncate.AtEnd
+
+									local actRow = Instance.new("Frame", card)
+									actRow.Name = "ActRow"
+									actRow.Size = UDim2.new(1, 0, 0, 26)
+									actRow.BackgroundTransparency = 1
+									actRow.LayoutOrder = 3
+
+									local actLayout = Instance.new("UIListLayout", actRow)
+									actLayout.FillDirection = Enum.FillDirection.Horizontal
+									actLayout.Padding = UDim.new(0, 6)
+
+									local btnRun = Instance.new("TextButton", actRow)
+									btnRun.Size = UDim2.new(0.36, -4, 1, 0)
+									btnRun.BackgroundColor3 = tbl3.accent
+									btnRun.TextColor3 = Color3.fromRGB(10, 10, 15)
+									btnRun.Font = Enum.Font.GothamBold
+									btnRun.TextSize = 10
+									btnRun.Text = "⚡ Execute"
+									btnRun.BorderSizePixel = 0
+									corner(btnRun, 5)
+
+									local btnCopy = Instance.new("TextButton", actRow)
+									btnCopy.Size = UDim2.new(0.34, -4, 1, 0)
+									btnCopy.BackgroundColor3 = tbl3.accentDim
+									btnCopy.TextColor3 = tbl3.white
+									btnCopy.Font = Enum.Font.GothamBold
+									btnCopy.TextSize = 10
+									btnCopy.Text = "📋 Copy Script"
+									btnCopy.BorderSizePixel = 0
+									corner(btnCopy, 5)
+
+									local btnLoad = Instance.new("TextButton", actRow)
+									btnLoad.Size = UDim2.new(0.30, -4, 1, 0)
+									btnLoad.BackgroundColor3 = tbl3.surfaceHover
+									btnLoad.TextColor3 = tbl3.text
+									btnLoad.Font = Enum.Font.GothamBold
+									btnLoad.TextSize = 10
+									btnLoad.Text = "✏️ Load Code"
+									btnLoad.BorderSizePixel = 0
+									corner(btnLoad, 5)
+
+									btnRun.MouseButton1Click:Connect(function()
+										local scr = item.script
+										if not scr or scr:gsub("%s+", "") == "" then
+											safeNotify("Market", "No script payload available!", 2)
+											return
+										end
+										task.spawn(function()
+											safeNotify("Executing", "Loading " .. tostring(item.title) .. "...", 2)
+											local fn, compileErr = loadstring(scr)
+											if not fn then
+												safeNotify("Compile Error", tostring(compileErr):sub(1, 75), 4)
+												return
+											end
+											local ok, runtimeErr = pcall(fn)
+											if ok then
+												safeNotify("Script Executed", tostring(item.title) .. " executed!", 3)
+											else
+												safeNotify("Runtime Error", tostring(runtimeErr):sub(1, 75), 4)
+											end
+										end)
+									end)
+
+									btnCopy.MouseButton1Click:Connect(function()
+										local scr = item.script
+										if scr and #scr > 0 then
+											safeSetClipboard(scr)
+											safeNotify("Clipboard", tostring(item.title) .. " copied!", 2)
+										end
+									end)
+
+									btnLoad.MouseButton1Click:Connect(function()
+										if item.script then
+											scriptInputBox.Text = item.script
+											safeNotify("Executor", "Loaded " .. tostring(item.title) .. " into editor!", 2)
+										end
+									end)
+								end
+							end
+
+							local function performSearch(query, cat)
+								local q = (query or ""):lower():gsub("^%s+", ""):gsub("%s+$", "")
+								statusLabel.Text = "Searching ScriptBlox market for '" .. (q ~= "" and q or "trending") .. "'..."
+
+								local results = {}
+								local seen = {}
+
+								for _, c in ipairs(curatedScripts) do
+									local match = false
+									if q == "" then
+										if not cat or cat == "all" or c.category == cat or (cat == "keyless" and c.keyless) then
+											match = true
+										end
+									else
+										local titleMatch = c.title:lower():find(q, 1, true)
+										local gameMatch = c.game:lower():find(q, 1, true)
+										local catMatch = c.category and c.category:lower():find(q, 1, true)
+										local descMatch = c.desc and c.desc:lower():find(q, 1, true)
+										if titleMatch or gameMatch or catMatch or descMatch then
+											if not cat or cat == "all" or c.category == cat or (cat == "keyless" and c.keyless) then
+												match = true
+											end
+										end
+									end
+									if match and not seen[c.title] then
+										seen[c.title] = true
+										table.insert(results, c)
+									end
+								end
+
+								renderScripts(results)
+
+								task.spawn(function()
+									local apiUrl
+									if q ~= "" then
+										apiUrl = "https://scriptblox.com/api/script/search?q=" .. urlEncode(q) .. "&max=25&mode=free"
+									else
+										apiUrl = "https://scriptblox.com/api/script/fetch?page=1&max=25"
+									end
+
+									local body = fetchScriptBlox(apiUrl)
+									if body and #body > 10 then
+										local ok, data = pcall(function()
+											return HttpService:JSONDecode(body)
+										end)
+
+										if ok and data and data.result and data.result.scripts then
+											for _, item in ipairs(data.result.scripts) do
+												local title = item.title or "Market Script"
+												local scr = item.script or ""
+												if scr ~= "" and not item.isPatched and not seen[title] and not seen[scr] then
+													local passFilter = true
+													if cat == "keyless" and not item.keyless then
+														passFilter = false
+													end
+													if passFilter then
+														seen[title] = true
+														seen[scr] = true
+														local gName = "Universal"
+														if type(item.game) == "table" and item.game.name then
+															gName = tostring(item.game.name)
+														elseif type(item.game) == "string" then
+															gName = item.game
+														end
+														table.insert(results, {
+															title = title,
+															game = gName,
+															category = "market",
+															verified = item.verified or false,
+															keyless = item.keyless or false,
+															views = item.views or 0,
+															isUniversal = item.isUniversal or false,
+															script = scr,
+															desc = (item.game and item.game.name and ("Game: " .. tostring(item.game.name))) or "From ScriptBlox Market"
+														})
+													end
+												end
+											end
+											renderScripts(results)
+											statusLabel.Text = "Showing " .. tostring(#results) .. " scripts from ScriptBlox market"
+										end
+									end
+								end)
+							end
+
+							local filterButtons = {
+								{ label = "🌟 All", cat = "all" },
+								{ label = "🔑 Keyless", cat = "keyless" },
+								{ label = "👑 Admin", cat = "admin" },
+								{ label = "👁️ Visual", cat = "visual" },
+								{ label = "🛠️ Utility", cat = "util" },
+								{ label = "🎮 This Game", cat = "game" }
+							}
+
+							for _, fb in ipairs(filterButtons) do
+								local fBtn = Instance.new("TextButton", filterRow)
+								fBtn.Size = UDim2.new(0, 68, 1, 0)
+								fBtn.BackgroundColor3 = tbl3.input
+								fBtn.TextColor3 = tbl3.textMuted
+								fBtn.Font = Enum.Font.GothamBold
+								fBtn.TextSize = 9
+								fBtn.Text = fb.label
+								fBtn.BorderSizePixel = 0
+								corner(fBtn, 100)
+
+								fBtn.MouseButton1Click:Connect(function()
+									for _, other in ipairs(filterRow:GetChildren()) do
+										if other:IsA("TextButton") then
+											other.BackgroundColor3 = tbl3.input
+											other.TextColor3 = tbl3.textMuted
+										end
+									end
+									fBtn.BackgroundColor3 = tbl3.accent
+									fBtn.TextColor3 = Color3.fromRGB(10, 10, 15)
+
+									if fb.cat == "game" then
+										local gName = ""
+										pcall(function()
+											local prod = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId)
+											if prod and prod.Name then gName = prod.Name end
+										end)
+										if gName == "" then gName = tostring(game.PlaceId) end
+										searchTextBox.Text = gName
+										performSearch(gName, "all")
+									else
+										performSearch(searchTextBox.Text, fb.cat)
+									end
+								end)
+							end
+
+							btnSearch.MouseButton1Click:Connect(function()
+								performSearch(searchTextBox.Text, "all")
+							end)
+
+							searchTextBox.FocusLost:Connect(function(enterPressed)
+								if enterPressed then
+									performSearch(searchTextBox.Text, "all")
+								end
+							end)
+
+							task.defer(function()
+								renderScripts(curatedScripts)
+							end)
 						end
 					end
 
