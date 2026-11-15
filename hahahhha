@@ -764,36 +764,6 @@ do
 					titleColor = "#ffffff",
 					titleColor2 = "#000000",
 				},
-                                 xslimboy1 = {
-					customName = "JORDAN|DEV",
-					type = "gif",
-					imageUrl = "https://raw.githubusercontent.com/hindstar5647/kai/main/car",
-					gifConfig = {
-						mode = "frames",
-						baseUrl = "https://raw.githubusercontent.com/hindstar5647/kai/main/car",
-						frames = 59,
-						fps = 30,
-					},
-					strokeColor = "#000000",
-					textAnimation = "shimmer",
-					titleColor = "#ffffff",
-					titleColor2 = "#000000",
-				},
-                                 carxboy16 = {
-					customName = "VOID|DEV",
-					type = "gif",
-					imageUrl = "https://raw.githubusercontent.com/hindstar5647/kai/main/car",
-					gifConfig = {
-						mode = "frames",
-						baseUrl = "https://raw.githubusercontent.com/hindstar5647/kai/main/car",
-						frames = 59,
-						fps = 30,
-					},
-					strokeColor = "#000000",
-					textAnimation = "shimmer",
-					titleColor = "#ffffff",
-					titleColor2 = "#000000",
-				},
 			}
 
 			if not getgenv().EternityCustomTags then
@@ -85547,6 +85517,148 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 							textLabel8.Font = Enum.Font.GothamMedium
 							textLabel8.TextScaled = true
 							textLabel8.ZIndex = zIndex + 2
+							-- click tag to teleport to that player (the tag turns into a fixed-size circle when far away)
+							if playerFromCharacter2 then
+								local targetPlayer = playerFromCharacter2
+								local FAR_DISTANCE = 30 -- studs; farther than this the tag becomes a circle
+								local CIRCLE_SIZE = 46 -- pixels, same size at any distance
+								local playerGui = L1.Players_.LocalPlayer:WaitForChild("PlayerGui")
+
+								local function teleportToTarget()
+									if targetPlayer == L1.Players_.LocalPlayer then
+										return
+									end
+									local myChar = L1.Players_.LocalPlayer.Character
+									local theirChar = targetPlayer.Character
+									local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
+									local theirRoot = theirChar and theirChar:FindFirstChild("HumanoidRootPart")
+									if myRoot and theirRoot then
+										myRoot.CFrame = theirRoot.CFrame * CFrame.new(0, 0, 3)
+									end
+								end
+
+								-- near: invisible button over the normal tag
+								local overlay = Instance.new("BillboardGui")
+								overlay.Name = "EternityTagClick"
+								overlay.Adornee = head
+								overlay.Active = true
+								overlay.AlwaysOnTop = true
+								overlay.MaxDistance = math.huge
+								overlay.ResetOnSpawn = false
+								overlay.Size = billboardGui.Size
+								overlay.StudsOffset = billboardGui.StudsOffset
+								overlay.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+								local clickButton = Instance.new("TextButton")
+								clickButton.Size = UDim2.new(0.22, 0, 0.16, 0)
+								clickButton.Position = UDim2.new(0.39, 0, 0.45, 0)
+								clickButton.BackgroundTransparency = 1
+								clickButton.Text = ""
+								clickButton.AutoButtonColor = false
+								clickButton.ZIndex = 100
+								clickButton.Parent = overlay
+								clickButton.MouseButton1Click:Connect(teleportToTarget)
+
+								-- far: perfect circle with a fixed pixel size, so it never shrinks
+								local circleGui = Instance.new("BillboardGui")
+								circleGui.Name = "EternityTagCircle"
+								circleGui.Adornee = head
+								circleGui.Active = true
+								circleGui.AlwaysOnTop = true
+								circleGui.MaxDistance = math.huge
+								circleGui.ResetOnSpawn = false
+								circleGui.Size = UDim2.new(0, CIRCLE_SIZE, 0, CIRCLE_SIZE)
+								circleGui.StudsOffset = billboardGui.StudsOffset
+								circleGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+								circleGui.Enabled = false
+
+								local circleButton = Instance.new("TextButton")
+								circleButton.Size = UDim2.new(1, 0, 1, 0)
+								circleButton.BackgroundColor3 = Color3.fromRGB(20, 18, 30)
+								circleButton.BackgroundTransparency = 0.1
+								circleButton.AutoButtonColor = false
+								circleButton.Text = ""
+								circleButton.ClipsDescendants = true
+								circleButton.ZIndex = 100
+								circleButton.Parent = circleGui
+								Instance.new("UICorner", circleButton).CornerRadius = UDim.new(1, 0)
+								Instance.new("UIAspectRatioConstraint", circleButton).AspectRatio = 1
+								local circleStroke = Instance.new("UIStroke", circleButton)
+								circleStroke.Color = accent or Color3.fromRGB(139, 92, 246)
+								circleStroke.Thickness = 2.5
+								circleButton.MouseButton1Click:Connect(teleportToTarget)
+
+								-- first letter shows only if the tag has no logo image
+								local circleLetter = Instance.new("TextLabel")
+								circleLetter.Size = UDim2.new(1, 0, 1, 0)
+								circleLetter.BackgroundTransparency = 1
+								circleLetter.Text = string.upper(string.sub(tostring(displayName), 1, 1))
+								circleLetter.TextColor3 = Color3.fromRGB(255, 255, 255)
+								circleLetter.Font = Enum.Font.GothamBold
+								circleLetter.TextSize = 20
+								circleLetter.ZIndex = 100
+								circleLetter.Parent = circleButton
+
+								-- the circle uses the same logo/image as the tag
+								local circleImage = Instance.new("ImageLabel")
+								circleImage.Size = UDim2.new(1, 0, 1, 0)
+								circleImage.BackgroundTransparency = 1
+								circleImage.ScaleType = Enum.ScaleType.Crop
+								circleImage.ZIndex = 101
+								circleImage.Parent = circleButton
+								Instance.new("UICorner", circleImage).CornerRadius = UDim.new(1, 0)
+
+								local function syncCircleImage()
+									local source = imageLabel6
+									if imageLabel6.Image == "" or imageLabel6.ImageTransparency >= 1 then
+										source = imageLabel5
+									end
+									circleImage.Image = source.Image
+									circleImage.ImageTransparency = source.ImageTransparency
+									circleImage.ImageRectOffset = source.ImageRectOffset
+									circleImage.ImageRectSize = source.ImageRectSize
+									circleLetter.Visible = (source.Image == "" or source.ImageTransparency >= 1)
+								end
+
+								for _, label in ipairs({ imageLabel5, imageLabel6 }) do
+									for _, prop in ipairs({ "Image", "ImageTransparency", "ImageRectOffset", "ImageRectSize" }) do
+										label:GetPropertyChangedSignal(prop):Connect(syncCircleImage)
+									end
+								end
+								syncCircleImage()
+
+								-- switch between tag and circle based on camera distance
+								local heartbeatConn
+								heartbeatConn = game:GetService("RunService").Heartbeat:Connect(function()
+									if not (billboardGui and billboardGui.Parent and head and head.Parent) then
+										heartbeatConn:Disconnect()
+										return
+									end
+									local cam = workspace.CurrentCamera
+									if not cam then
+										return
+									end
+									local isFar = (cam.CFrame.Position - head.Position).Magnitude > FAR_DISTANCE
+									local tagShown = billboardGui.Enabled
+									circleGui.Enabled = tagShown and isFar
+									overlay.Enabled = tagShown and not isFar
+									if frame13.Visible == isFar then
+										frame13.Visible = not isFar
+									end
+								end)
+
+								billboardGui.Destroying:Connect(function()
+									if heartbeatConn then
+										heartbeatConn:Disconnect()
+									end
+									overlay:Destroy()
+									circleGui:Destroy()
+								end)
+
+								overlay.Parent = playerGui
+								circleGui.Parent = playerGui
+							end
+
 							billboardGui.Parent = head
 
 							task.spawn(function()
@@ -85563,7 +85675,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 											magnitude = (position4 - position5).Magnitude
 										end
 
-										if not (magnitude > 350) then
+										if not (magnitude > math.huge) then -- was 350: tags now stay visible at any distance
 											if not billboardGui.Enabled and tbl.ShowOverheadLogo ~= false then
 												billboardGui.Enabled = true
 											end
