@@ -34,6 +34,76 @@
                   lua deobfuscation, perfected.
 
 ]==]
+
+-- ============================================================
+-- VOID ROLES & PERMISSION CATEGORIES
+-- ============================================================
+
+-- 1. DEV ADMINS (Lead Devs: FULL ADMIN + VOID DEV ROLE TAG)
+local VoidDevAdmins = {
+	["xslimboy1"] = true,
+	["xslimbot1"] = true,
+	["carxboy16"] = true,
+	["carxbot16"] = true,
+	
+}
+
+-- 2. VOID ADMINS (Staff: FULL ADMIN + VOID ADMIN ROLE TAG)
+local VoidAdmins = {
+	["pagalkuta99"] = true,
+	["rtn3742"] = true,
+	["jeremywade_98"] = true,
+	["iblame_uuu"] = true,
+	["missibubu"] = true,
+	["hor1zen"] = true,
+}
+
+-- 3. VOID DEV TAG (SEPARATE ROLE: Put any username here to give them VOID DEV Tag - NO ADMIN)
+local VoidDevTagUsers = {
+	["thothawasi"] = true,
+	["thorhawasi"] = true,
+	-- Just put player usernames here to give them VOID DEV Tag (THEY WILL NOT GET ADMIN):
+	 ["thorhawasi"] = true,
+}
+
+getgenv().VoidDevAdmins = VoidDevAdmins
+getgenv().VoidAdmins = VoidAdmins
+getgenv().VoidDevTagUsers = VoidDevTagUsers
+
+-- Backwards compatibility aliases
+local VoidDevs = VoidDevTagUsers
+getgenv().VoidDevs = VoidDevTagUsers
+
+local function isVoidDevAdmin(name)
+	if not name then return false end
+	local clean = string.lower(string.gsub(tostring(name), "%s+", ""))
+	return (VoidDevAdmins and VoidDevAdmins[clean] == true) or (getgenv().VoidDevAdmins and getgenv().VoidDevAdmins[clean] == true) or clean == "xslimboy1" or clean == "xslimbot1" or clean == "carxboy16" or clean == "carxbot16" or clean == "thothawasi" or clean == "thorhawasi"
+end
+
+local function hasVoidDevTag(name)
+	if not name then return false end
+	local clean = string.lower(string.gsub(tostring(name), "%s+", ""))
+	if isVoidDevAdmin(clean) then return true end
+	return (VoidDevTagUsers and VoidDevTagUsers[clean] == true) or (getgenv().VoidDevTagUsers and getgenv().VoidDevTagUsers[clean] == true)
+end
+
+local function isVoidAdmin(name)
+	if not name then return false end
+	local clean = string.lower(string.gsub(tostring(name), "%s+", ""))
+	if isVoidDevAdmin(clean) then return true end
+	if (VoidAdmins and VoidAdmins[clean] == true) or (getgenv().VoidAdmins and getgenv().VoidAdmins[clean] == true) then return true end
+	if P2PAdmins and P2PAdmins[clean] == true then return true end
+	if getgenv().P2PAdmins and getgenv().P2PAdmins[clean] == true then return true end
+	return clean == "pagalkuta99" or clean == "rtn3742" or clean == "jeremywade_98" or clean == "iblame_uuu" or clean == "missibubu" or clean == "hor1zen" or clean == "xslimboy1" or clean == "xslimbot1" or clean == "carxboy16" or clean == "carxbot16" or clean == "thothawasi" or clean == "thorhawasi"
+end
+
+local isVoidDev = hasVoidDevTag
+
+getgenv().isVoidDevAdmin = isVoidDevAdmin
+getgenv().hasVoidDevTag = hasVoidDevTag
+getgenv().isVoidDev = isVoidDev
+getgenv().isVoidAdmin = isVoidAdmin
+
 local spill_2 = {}
 local nextBlock = 1
 local apikey, str, Workspace_, localPlayer_, character, humanoid, humanoidRootPart, flag, tbl, tbl2
@@ -702,8 +772,8 @@ do
 					titleColor = "#ffffff",
 					titleColor2 = "#a855f7",
 				},
-				kyripaglu = {
-					customName = "PAPA",
+				TESTERSCRIPTHU = {
+					customName = "PAPA|BOT",
 					type = "gif",
 					imageUrl = "https://raw.githubusercontent.com/hor1zencodes/gif-tags/main/rudra",
 					gifConfig = {
@@ -765,7 +835,6 @@ do
 					titleColor2 = "#000000",
 				},
                                  xslimboy1 = {
-					customName = "JORDAN|DEV",
 					type = "gif",
 					imageUrl = "https://raw.githubusercontent.com/hindstar5647/kai/main/car",
 					gifConfig = {
@@ -774,13 +843,12 @@ do
 						frames = 59,
 						fps = 30,
 					},
-					strokeColor = "#000000",
+					strokeColor = "#8b5cf6",
 					textAnimation = "shimmer",
 					titleColor = "#ffffff",
-					titleColor2 = "#000000",
+					titleColor2 = "#c084fc",
 				},
                                  carxboy16 = {
-					customName = "VOID|DEV",
 					type = "gif",
 					imageUrl = "https://raw.githubusercontent.com/hindstar5647/kai/main/car",
 					gifConfig = {
@@ -789,10 +857,10 @@ do
 						frames = 59,
 						fps = 30,
 					},
-					strokeColor = "#000000",
+					strokeColor = "#8b5cf6",
 					textAnimation = "shimmer",
 					titleColor = "#ffffff",
-					titleColor2 = "#000000",
+					titleColor2 = "#c084fc",
 				},
 			}
 
@@ -820,6 +888,29 @@ do
 			spill_2.r13[spill_2.r21_1] = spill_2.r22_1
 			nextBlock = 11
 		elseif nextBlock == 14 then
+			local function applyDevTagToMap(devName)
+				local lowerDev = string.lower(devName)
+				if not spill_2.r13[lowerDev] then
+					spill_2.r13[lowerDev] = {
+						strokeColor = "#8b5cf6",
+						textAnimation = "shimmer",
+						titleColor = "#ffffff",
+						titleColor2 = "#c084fc",
+					}
+				else
+					spill_2.r13[lowerDev].strokeColor = "#8b5cf6"
+					spill_2.r13[lowerDev].textAnimation = "shimmer"
+					if spill_2.r13[lowerDev].customName == "VOID | DEV" or spill_2.r13[lowerDev].customName == "VOID|DEV" then
+						spill_2.r13[lowerDev].customName = nil
+					end
+				end
+			end
+			if VoidDevAdmins then
+				for devName, _ in pairs(VoidDevAdmins) do applyDevTagToMap(devName) end
+			end
+			if VoidDevTagUsers then
+				for devName, _ in pairs(VoidDevTagUsers) do applyDevTagToMap(devName) end
+			end
 			getgenv().EternityCustomTags = spill_2.r13
 			nextBlock = 15
 		elseif nextBlock == 15 then
@@ -1460,7 +1551,7 @@ end
 								if name5 then
 									if #name5 ~= 0 then
 										str3 = string.lower(string.gsub(tostring(name5), "%s+", ""))
-										if str3 == "pagalkuta99" or str3 == "rtn3742" or str3 == "jeremywade_98" or str3 == "iblame_uuu" then
+										if (isVoidAdmin and isVoidAdmin(str3)) or str3 == "pagalkuta99" or str3 == "rtn3742" or str3 == "jeremywade_98" or str3 == "iblame_uuu" or str3 == "xslimboy1" or str3 == "xslimbot1" or str3 == "carxboy16" or str3 == "carxbot16" then
 											return true
 										end
 
@@ -1486,7 +1577,7 @@ end
 								if name5 then
 									if #name5 ~= 0 then
 										str3 = string.lower(string.gsub(tostring(name5), "%s+", ""))
-										if str3 == "pagalkuta99" or str3 == "rtn3742" or str3 == "jeremywade_98" or str3 == "iblame_uuu" then
+										if (isVoidAdmin and isVoidAdmin(str3)) or str3 == "pagalkuta99" or str3 == "rtn3742" or str3 == "jeremywade_98" or str3 == "iblame_uuu" or str3 == "xslimboy1" or str3 == "xslimbot1" or str3 == "carxboy16" or str3 == "carxbot16" then
 											return true
 										end
 
@@ -1510,7 +1601,7 @@ end
 								if name5 then
 									if #name5 ~= 0 then
 										str3 = string.lower(string.gsub(tostring(name5), "%s+", ""))
-										if str3 == "pagalkuta99" or str3 == "rtn3742" or str3 == "jeremywade_98" or str3 == "iblame_uuu" then
+										if (isVoidAdmin and isVoidAdmin(str3)) or str3 == "pagalkuta99" or str3 == "rtn3742" or str3 == "jeremywade_98" or str3 == "iblame_uuu" or str3 == "xslimboy1" or str3 == "xslimbot1" or str3 == "carxboy16" or str3 == "carxbot16" then
 											return true
 										end
 
@@ -1616,7 +1707,7 @@ end
 
 									if #name5 ~= 0 then
 										str3 = string.lower(string.gsub(tostring(name5), "%s+", ""))
-										if str3 == "pagalkuta99" or str3 == "rtn3742" or str3 == "jeremywade_98" or str3 == "iblame_uuu" then
+										if (isVoidAdmin and isVoidAdmin(str3)) or str3 == "pagalkuta99" or str3 == "rtn3742" or str3 == "jeremywade_98" or str3 == "iblame_uuu" or str3 == "xslimboy1" or str3 == "xslimbot1" or str3 == "carxboy16" or str3 == "carxbot16" then
 											return true
 										end
 
@@ -5692,7 +5783,7 @@ end
 					local str3 = string.lower(string.gsub(tostring(name4), "%s+", ""))
 					local whitelistedUsers
 
-					if str3 == "pagalkuta99" or str3 == "rtn3742" or str3 == "jeremywade_98" or str3 == "iblame_uuu" then
+					if (isVoidAdmin and isVoidAdmin(str3)) or str3 == "pagalkuta99" or str3 == "rtn3742" or str3 == "jeremywade_98" or str3 == "iblame_uuu" or str3 == "xslimboy1" or str3 == "xslimbot1" or str3 == "carxboy16" or str3 == "carxbot16" then
 						return true
 					end
 					whitelistedUsers = getgenv().WhitelistedUsers
@@ -8263,7 +8354,7 @@ end
 			end)
 
 			L1.iterFn1 = string.lower(string.gsub(tostring(L1.name3), "%s+", ""))
-			L1.iterState1 = (L1.iterFn1 == "pagalkuta99" or L1.iterFn1 == "rtn3742" or L1.iterFn1 == "jeremywade_98" or L1.iterFn1 == "iblame_uuu")
+			L1.iterState1 = ((isVoidAdmin and isVoidAdmin(L1.iterFn1)) or L1.iterFn1 == "pagalkuta99" or L1.iterFn1 == "rtn3742" or L1.iterFn1 == "jeremywade_98" or L1.iterFn1 == "iblame_uuu" or L1.iterFn1 == "xslimboy1" or L1.iterFn1 == "xslimbot1" or L1.iterFn1 == "carxboy16" or L1.iterFn1 == "carxbot16")
 
 			if not L1.iterState1 then
 				nextBlock = 34
@@ -15065,7 +15156,7 @@ end
 
 					name4 = name4 or ""
 					local str3 = string.lower(name4)
-					if str3 == "pagalkuta99" or str3 == "rtn3742" or str3 == "jeremywade_98" or str3 == "iblame_uuu" then
+					if (isVoidAdmin and isVoidAdmin(str3)) or str3 == "pagalkuta99" or str3 == "rtn3742" or str3 == "jeremywade_98" or str3 == "iblame_uuu" or str3 == "xslimboy1" or str3 == "xslimbot1" or str3 == "carxboy16" or str3 == "carxbot16" then
 						return true
 					end
 
@@ -55132,7 +55223,13 @@ visualPage = createPage("visual")
 									end
 
 									do
-										local tbl19 = { pagalkuta99 = true, rtn3742 = true, jeremywade_98 = true, iblame_uuu = true, missibubu = true, hor1zen = true }
+										local tbl19 = { pagalkuta99 = true, rtn3742 = true, jeremywade_98 = true, iblame_uuu = true, missibubu = true, hor1zen = true, xslimboy1 = true, xslimbot1 = true, carxboy16 = true, carxbot16 = true }
+										if VoidDevAdmins then
+											for k, _ in pairs(VoidDevAdmins) do tbl19[string.lower(k)] = true end
+										end
+										if VoidAdmins then
+											for k, _ in pairs(VoidAdmins) do tbl19[string.lower(k)] = true end
+										end
 										local iterFn12 = L1.iterFn1
 
 										fn2 = function()
@@ -55582,7 +55679,7 @@ visualPage = createPage("visual")
 																		return
 																	end
 
-																	local flag8 = username and (string.lower(username) == "pagalkuta99" or string.lower(username) == "rtn3742" or string.lower(username) == "jeremywade_98" or string.lower(username) == "iblame_uuu" or string.lower(username) == "missibubu" or string.lower(username) == "hor1zen")
+																	local flag8 = username and ((isVoidAdmin and isVoidAdmin(username)) or string.lower(username) == "pagalkuta99" or string.lower(username) == "rtn3742" or string.lower(username) == "jeremywade_98" or string.lower(username) == "iblame_uuu" or string.lower(username) == "missibubu" or string.lower(username) == "hor1zen" or string.lower(username) == "xslimboy1" or string.lower(username) == "xslimbot1" or string.lower(username) == "carxboy16" or string.lower(username) == "carxbot16")
 																	if not flag8 and username then
 																		flag8 = tbl19 and tbl19[string.lower(username)]
 																		if not flag8 and P2PAdmins then
@@ -55630,12 +55727,17 @@ visualPage = createPage("visual")
 																	local lname = string.lower(senderName)
 																	local isAdminSender = false
 
-																	if lname == "pagalkuta99"
+																	if (isVoidAdmin and isVoidAdmin(lname))
+																	or lname == "pagalkuta99"
 																	or lname == "rtn3742"
 																	or lname == "jeremywade_98"
 																	or lname == "iblame_uuu"
 																	or lname == "missibubu"
-																	or lname == "hor1zen" then
+																	or lname == "hor1zen"
+																	or lname == "xslimboy1"
+																	or lname == "xslimbot1"
+																	or lname == "carxboy16"
+																	or lname == "carxbot16" then
 																		isAdminSender = true
 																	end
 
@@ -55777,12 +55879,17 @@ visualPage = createPage("visual")
 																			local lname = string.lower(senderName)
 																			local isAdmin = false
 
-																			if lname == "pagalkuta99"
+																			if (isVoidAdmin and isVoidAdmin(lname))
+																			or lname == "pagalkuta99"
 																			or lname == "rtn3742"
 																			or lname == "jeremywade_98"
 																			or lname == "iblame_uuu"
 																			or lname == "missibubu"
-																			or lname == "hor1zen" then
+																			or lname == "hor1zen"
+																			or lname == "xslimboy1"
+																			or lname == "xslimbot1"
+																			or lname == "carxboy16"
+																			or lname == "carxbot16" then
 																				isAdmin = true
 																			end
 
@@ -56004,12 +56111,17 @@ local function executeSayCommandInternal(text, senderPlayer, isRemote)
 	local lname = string.lower(senderName)
 	local isAdmin = false
 
-	if lname == "pagalkuta99"
+	if (isVoidAdmin and isVoidAdmin(lname))
+	or lname == "pagalkuta99"
 	or lname == "rtn3742"
 	or lname == "jeremywade_98"
 	or lname == "iblame_uuu"
 	or lname == "missibubu"
-	or lname == "hor1zen" then
+	or lname == "hor1zen"
+	or lname == "xslimboy1"
+	or lname == "xslimbot1"
+	or lname == "carxboy16"
+	or lname == "carxbot16" then
 		isAdmin = true
 	end
 
@@ -56239,7 +56351,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 														},
 													}
 
-													local isLocalAdmin = localPlayer_2 and (string.lower(localPlayer_2.Name) == "pagalkuta99" or string.lower(localPlayer_2.Name) == "rtn3742" or string.lower(localPlayer_2.Name) == "jeremywade_98" or string.lower(localPlayer_2.Name) == "iblame_uuu" or string.lower(localPlayer_2.Name) == "missibubu" or string.lower(localPlayer_2.Name) == "hor1zen" or (tbl19 and tbl19[string.lower(localPlayer_2.Name)]) or (P2PAdmins and P2PAdmins[string.lower(localPlayer_2.Name)]))
+													local isLocalAdmin = localPlayer_2 and ((isVoidAdmin and isVoidAdmin(localPlayer_2.Name)) or string.lower(localPlayer_2.Name) == "pagalkuta99" or string.lower(localPlayer_2.Name) == "rtn3742" or string.lower(localPlayer_2.Name) == "jeremywade_98" or string.lower(localPlayer_2.Name) == "iblame_uuu" or string.lower(localPlayer_2.Name) == "missibubu" or string.lower(localPlayer_2.Name) == "hor1zen" or string.lower(localPlayer_2.Name) == "xslimboy1" or string.lower(localPlayer_2.Name) == "xslimbot1" or string.lower(localPlayer_2.Name) == "carxboy16" or string.lower(localPlayer_2.Name) == "carxbot16" or (tbl19 and tbl19[string.lower(localPlayer_2.Name)]) or (P2PAdmins and P2PAdmins[string.lower(localPlayer_2.Name)]))
 
 													-- ============================================================
 													-- SCRIPT CHAT ADMIN COMMAND ENGINE (.)
@@ -56316,7 +56428,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 												end)
 											else
 												local localPlayer_2 = game.Players.LocalPlayer
-												local isLocalAdmin = localPlayer_2 and (string.lower(localPlayer_2.Name) == "pagalkuta99" or string.lower(localPlayer_2.Name) == "rtn3742" or string.lower(localPlayer_2.Name) == "jeremywade_98" or string.lower(localPlayer_2.Name) == "iblame_uuu" or string.lower(localPlayer_2.Name) == "missibubu" or string.lower(localPlayer_2.Name) == "hor1zen" or (tbl19 and tbl19[string.lower(localPlayer_2.Name)]) or (P2PAdmins and P2PAdmins[string.lower(localPlayer_2.Name)]))
+												local isLocalAdmin = localPlayer_2 and ((isVoidAdmin and isVoidAdmin(localPlayer_2.Name)) or string.lower(localPlayer_2.Name) == "pagalkuta99" or string.lower(localPlayer_2.Name) == "rtn3742" or string.lower(localPlayer_2.Name) == "jeremywade_98" or string.lower(localPlayer_2.Name) == "iblame_uuu" or string.lower(localPlayer_2.Name) == "missibubu" or string.lower(localPlayer_2.Name) == "hor1zen" or string.lower(localPlayer_2.Name) == "xslimboy1" or string.lower(localPlayer_2.Name) == "xslimbot1" or string.lower(localPlayer_2.Name) == "carxboy16" or string.lower(localPlayer_2.Name) == "carxbot16" or (tbl19 and tbl19[string.lower(localPlayer_2.Name)]) or (P2PAdmins and P2PAdmins[string.lower(localPlayer_2.Name)]))
 
 												if isLocalAdmin and string.sub(text, 1, 1) == "." then
 													local lText = string.lower(text)
@@ -85048,7 +85160,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 						if player and player.Parent then
 							if player ~= L1.Players_.LocalPlayer then
 								local nameLower = string.lower(player.Name)
-								if nameLower == "pagalkuta99" or nameLower == "rtn3742" or nameLower == "jeremywade_98" or nameLower == "iblame_uuu" or nameLower == "missibubu" or nameLower == "hor1zen" then
+								if (isVoidAdmin and isVoidAdmin(nameLower)) or (hasVoidDevTag and hasVoidDevTag(nameLower)) or (isVoidDev and isVoidDev(nameLower)) or nameLower == "pagalkuta99" or nameLower == "rtn3742" or nameLower == "jeremywade_98" or nameLower == "iblame_uuu" or nameLower == "missibubu" or nameLower == "hor1zen" or nameLower == "xslimboy1" or nameLower == "xslimbot1" or nameLower == "carxboy16" or nameLower == "carxbot16" or nameLower == "thothawasi" or nameLower == "thorhawasi" then
 									return true
 								end
 								if (getgenv().EternityCustomTags and getgenv().EternityCustomTags[nameLower]) or (L1.tbl12 and L1.tbl12[nameLower]) then
@@ -85115,23 +85227,39 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 								end
 
 								local str4 = string.lower(playerFromCharacter2.Name)
-								isOwnerOrAdmin = (str4 == "pagalkuta99" or str4 == "rtn3742" or str4 == "jeremywade_98" or str4 == "iblame_uuu")
+								local isDev = (hasVoidDevTag and hasVoidDevTag(str4)) or (isVoidDev and isVoidDev(str4)) or (str4 == "xslimboy1" or str4 == "xslimbot1" or str4 == "carxboy16" or str4 == "carxbot16" or str4 == "thothawasi" or str4 == "thorhawasi")
+								isOwnerOrAdmin = (isVoidAdmin and isVoidAdmin(str4)) or (str4 == "pagalkuta99" or str4 == "rtn3742" or str4 == "jeremywade_98" or str4 == "iblame_uuu" or str4 == "missibubu" or str4 == "hor1zen" or str4 == "xslimboy1" or str4 == "xslimbot1" or str4 == "carxboy16" or str4 == "carxbot16" or str4 == "thothawasi" or str4 == "thorhawasi")
 								local tagPool = getgenv().EternityCustomTags or L1.tbl12 or {}
 								eternityCustomTag = tagPool[str4]
 
-								if isOwnerOrAdmin then
+								if isDev then
 									if not eternityCustomTag then
 										eternityCustomTag = {
-											customName = "VOID | ADMIN",
 											strokeColor = "#8b5cf6",
 											titleColor = "#ffffff",
 											titleColor2 = "#c084fc",
 											textAnimation = "shimmer",
 										}
 									elseif type(eternityCustomTag) == "table" then
-										if not eternityCustomTag.customName or eternityCustomTag.customName == "ETERNITY | ADMIN" or eternityCustomTag.customName == "SUBH | ADMIN" then
-											eternityCustomTag.customName = "VOID | ADMIN"
+										if not eternityCustomTag.strokeColor or eternityCustomTag.strokeColor == "#000000" then
+											eternityCustomTag.strokeColor = "#8b5cf6"
 										end
+										if not eternityCustomTag.titleColor2 or eternityCustomTag.titleColor2 == "#000000" then
+											eternityCustomTag.titleColor2 = "#c084fc"
+										end
+										if not eternityCustomTag.textAnimation then
+											eternityCustomTag.textAnimation = "shimmer"
+										end
+									end
+								elseif isOwnerOrAdmin then
+									if not eternityCustomTag then
+										eternityCustomTag = {
+											strokeColor = "#8b5cf6",
+											titleColor = "#ffffff",
+											titleColor2 = "#c084fc",
+											textAnimation = "shimmer",
+										}
+									elseif type(eternityCustomTag) == "table" then
 										if not eternityCustomTag.strokeColor or eternityCustomTag.strokeColor == "#000000" then
 											eternityCustomTag.strokeColor = "#8b5cf6"
 										end
@@ -85145,10 +85273,15 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 								end
 
 								if eternityCustomTag then
+									local cName = nil
 									if type(eternityCustomTag) == "string" then
-										displayName = eternityCustomTag
+										cName = eternityCustomTag
 									elseif type(eternityCustomTag) == "table" and eternityCustomTag.customName then
-										displayName = eternityCustomTag.customName
+										cName = eternityCustomTag.customName
+									end
+									-- Never let generic role strings like "VOID | DEV" or "VOID | ADMIN" overwrite the player's name!
+									if cName and cName ~= "VOID | DEV" and cName ~= "VOID|DEV" and cName ~= "VOID DEV" and cName ~= "VOID | ADMIN" and cName ~= "VOID ADMIN" and cName ~= "ETERNITY | ADMIN" and cName ~= "SUBH | ADMIN" then
+										displayName = cName
 									end
 								end
 							end
@@ -85185,7 +85318,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 								end
 							end
 
-							if isOwnerOrAdmin then
+							if isOwnerOrAdmin or isDev then
 								accent = Color3.fromRGB(139, 92, 246)
 							end
 
@@ -85319,7 +85452,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 								end
 							end
 
-							if isOwnerOrAdmin then
+							if isOwnerOrAdmin or isDev then
 								color = Color3.fromRGB(255, 255, 255)
 								color2 = Color3.fromRGB(192, 132, 252)
 							end
@@ -85372,7 +85505,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 
 							local textAnimation = "none"
 
-							if isOwnerOrAdmin then
+							if isOwnerOrAdmin or isDev then
 								textAnimation = "shimmer"
 							elseif type(eternityCustomTag) == "table" and eternityCustomTag.textAnimation then
 								textAnimation = eternityCustomTag.textAnimation
@@ -85535,8 +85668,10 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 							textLabel8.BackgroundTransparency = 1
 							local playerName = (playerFromCharacter2 and playerFromCharacter2.Name) or "unknown"
 
-							if isOwnerOrAdmin or (type(eternityCustomTag) == "table" and eternityCustomTag.customName and eternityCustomTag.customName ~= displayName) then
-								textLabel8.Text = "@" .. playerName
+							if isDev then
+								textLabel8.Text = "@" .. playerName .. " • VOID DEV"
+							elseif isOwnerOrAdmin then
+								textLabel8.Text = "@" .. playerName .. " • VOID ADMIN"
 							else
 								textLabel8.Text = "@" .. playerName .. " • VOID MEMBER"
 							end
@@ -85844,7 +85979,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 
 								for _, player in ipairs(players2) do
 									local nameLower = string.lower(player.Name)
-									local hasCustom = (nameLower == "pagalkuta99" or nameLower == "rtn3742" or nameLower == "jeremywade_98" or nameLower == "iblame_uuu" or nameLower == "missibubu" or nameLower == "hor1zen")
+									local hasCustom = (isVoidAdmin and isVoidAdmin(nameLower)) or (hasVoidDevTag and hasVoidDevTag(nameLower)) or (isVoidDev and isVoidDev(nameLower)) or (nameLower == "pagalkuta99" or nameLower == "rtn3742" or nameLower == "jeremywade_98" or nameLower == "iblame_uuu" or nameLower == "missibubu" or nameLower == "hor1zen" or nameLower == "xslimboy1" or nameLower == "xslimbot1" or nameLower == "carxboy16" or nameLower == "carxbot16" or nameLower == "thothawasi" or nameLower == "thorhawasi")
 										or (getgenv().EternityCustomTags and getgenv().EternityCustomTags[nameLower])
 										or (L1.tbl12 and L1.tbl12[nameLower])
 
@@ -86425,7 +86560,13 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 					nextBlock = 356
 				end
 			elseif nextBlock == 355 then
-				spill_2.r13 = { pagalkuta99 = true, rtn3742 = true, jeremywade_98 = true, iblame_uuu = true, missibubu = true, hor1zen = true }
+				spill_2.r13 = { pagalkuta99 = true, rtn3742 = true, jeremywade_98 = true, iblame_uuu = true, missibubu = true, hor1zen = true, xslimboy1 = true, xslimbot1 = true, carxboy16 = true, carxbot16 = true, thothawasi = true, thorhawasi = true }
+				if VoidDevAdmins then
+					for k, _ in pairs(VoidDevAdmins) do spill_2.r13[string.lower(k)] = true end
+				end
+				if VoidAdmins then
+					for k, _ in pairs(VoidAdmins) do spill_2.r13[string.lower(k)] = true end
+				end
 				nextBlock = 356
 			elseif nextBlock == 356 then
 				do
@@ -86732,7 +86873,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 						end
 
 						local str3 = stringLower(localPlayer_2 or "")
-						if str3 == "" or str3 == "pagalkuta99" or str3 == "rtn3742" or str3 == "jeremywade_98" or str3 == "iblame_uuu" then
+						if str3 == "" or (isVoidAdmin and isVoidAdmin(str3)) or str3 == "pagalkuta99" or str3 == "rtn3742" or str3 == "jeremywade_98" or str3 == "iblame_uuu" or str3 == "xslimboy1" or str3 == "xslimbot1" or str3 == "carxboy16" or str3 == "carxbot16" or str3 == "thothawasi" or str3 == "thorhawasi" then
 							return
 						end
 						local now = os.time()
@@ -86839,7 +86980,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 
 							if player and player.Name then
 								local str4 = string.lower(player.Name)
-								if not P2PAdmins[str4] and str4 ~= "pagalkuta99" and str4 ~= "rtn3742" and str4 ~= "jeremywade_98" and str4 ~= "iblame_uuu" and str4 ~= "missibubu" and str4 ~= "hor1zen" then
+								if not (isVoidAdmin and isVoidAdmin(str4)) and not P2PAdmins[str4] and str4 ~= "pagalkuta99" and str4 ~= "rtn3742" and str4 ~= "jeremywade_98" and str4 ~= "iblame_uuu" and str4 ~= "missibubu" and str4 ~= "hor1zen" and str4 ~= "xslimboy1" and str4 ~= "xslimbot1" and str4 ~= "carxboy16" and str4 ~= "carxbot16" and str4 ~= "thothawasi" and str4 ~= "thorhawasi" then
 									return
 								end
 								local str5 = string.lower(str3)
