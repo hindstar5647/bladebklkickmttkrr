@@ -55299,10 +55299,11 @@ visualPage = createPage("visual")
 
 													local function connectRealtimeChat()
 														local HttpService = game:GetService("HttpService")
-														local rawWs = nil
+														local sbUrl = "wss://void-backend.isagireal1.workers.dev/realtime/v1/websocket?apikey=sb_publishable_lLQd2fulrz7tn_moA82Vaw_OIZN6f8u&vsn=1.0.0"
+														local rawWs = fn16(sbUrl)
 
 														if not rawWs then
-															return fn16("wss://free.blr2.piesocket.com/v3/1?api_key=VgkoxhylOrsmTG5EzvHdOHRmAmFtkT5m1jNVrqin&notify_self=1")
+															return nil
 														end
 
 														local wrapper = {}
