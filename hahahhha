@@ -55303,7 +55303,7 @@ visualPage = createPage("visual")
 														local rawWs = fn16(sbUrl)
 
 														if not rawWs then
-															return nil
+															return fn16("wss://free.blr2.piesocket.com/v3/1?api_key=VgkoxhylOrsmTG5EzvHdOHRmAmFtkT5m1jNVrqin&notify_self=1")
 														end
 
 														local wrapper = {}
