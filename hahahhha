@@ -55298,13 +55298,19 @@ visualPage = createPage("visual")
 													end
 
 													local function connectRealtimeChat()
+														-- Primary: PieSocket (True multi-client cross-server global chat)
+														local pieWs = fn16("wss://free.blr2.piesocket.com/v3/1?api_key=VgkoxhylOrsmTG5EzvHdOHRmAmFtkT5m1jNVrqin&notify_self=1")
+														if pieWs then
+															return pieWs
+														end
+
 														local HttpService = game:GetService("HttpService")
 														local cfUrl = "wss://red-recipe-3b9f.hindstargaming.workers.dev/realtime/v1/websocket"
 														local sbUrl = "wss://yipttjeirfbrvahxzyyw.supabase.co/realtime/v1/websocket?apikey=sb_publishable_lLQd2fulrz7tn_moA82Vaw_OIZN6f8u&vsn=1.0.0"
 														local rawWs = fn16(cfUrl) or fn16(sbUrl)
 
 														if not rawWs then
-															return fn16("wss://free.blr2.piesocket.com/v3/1?api_key=VgkoxhylOrsmTG5EzvHdOHRmAmFtkT5m1jNVrqin&notify_self=1")
+															return nil
 														end
 
 														local wrapper = {}
@@ -55842,6 +55848,11 @@ visualPage = createPage("visual")
 																	local username = data2.username or data2.sender
 																	local text = data2.text or ""
 
+																	local lp = game.Players.LocalPlayer
+																	if username and lp and string.lower(tostring(username)) == string.lower(tostring(lp.Name)) then
+																		return
+																	end
+
 																	if (data2.channel or "global") == "server" then
 																		local str3 = tostring(game.PlaceId)
 																		local str4 = tostring(game.JobId or "")
@@ -56319,6 +56330,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 													return
 												end
 
+													spawnGlobalMessage(tbl19.data, text, false, channel or "global")
 													iterFn12(v8, tbl19)
 												end)
 											else
