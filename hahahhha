@@ -132,13 +132,13 @@ do
 
 					do
 						-- [LCR: Luraph string protection (anti-tamper __tostring trap) folded to its value; from the original's whitelist request headers (apikey)]
-						apikey = "sb_publishable_lLQd2fulrz7tn_moA82Vaw_OIZN6f8u"
+						apikey = "sb_publishable_8L2ULIsP-dd--0NcpVfrDA_iQaRihjM"
 					end
 				end
 
 				do
 					-- [LCR: Luraph string protection (anti-tamper __tostring trap) folded to its value; from the original's whitelist / live_users request URLs]
-					str = "https://red-recipe-3b9f.hindstargaming.workers.dev"
+					str = "https://ousfpkazsagozioffeen.supabase.co"
 				end
 			end
 
@@ -1206,8 +1206,16 @@ end
 											},
 										})
 
-										if v3 and (v3.StatusCode == 200 or not v3.StatusCode) and v3.Body and #v3.Body > 2 then
+										if v3 and (v3.StatusCode == 200 or not v3.StatusCode) and v3.Body and #v3.Body > 2 and not string.find(v3.Body, "PGRST") then
 											body = v3.Body
+										else
+											local vCF = syn_({
+												Url = "https://red-recipe-3b9f.hindstargaming.workers.dev/rest/v1/whitelist",
+												Method = "GET",
+											})
+											if vCF and vCF.Body and #vCF.Body > 2 then
+												body = vCF.Body
+											end
 										end
 									end)
 								end
