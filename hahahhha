@@ -47,7 +47,7 @@ local n33, n34, n35, n36, n37, n38, n39, n40, n41, n42
 local n43, n44, tbl8, tbl9, fn3, n45, n46, n47, fn4
 local fn5, tbl10, imageLabel3, textLabel5, frame2, n48, n49, n50, n51, n52
 local n53, n54, n55, n56, n57, n58, n59, n60, n61, n62
-local n63, frame3, n64, activeEternityUsers, fn6, fn7, n65, n66, n67
+local n63, frame3, n64, activevoidUsers, fn6, fn7, n65, n66, n67
 
 do
 	local step, ReplicatedStorage, StarterGui, Lighting, n68, n69, n70, n71, n72, n73
@@ -70,8 +70,8 @@ do
 
 					IsKeyVerified = true
 					getgenv().IsKeyVerified = true
-					getgenv().EternityIsWhitelisted = true
-					getgenv().EternityLoaderSuccess = true
+					getgenv().voidIsWhitelisted = true
+					getgenv().voidLoaderSuccess = true
 					getgenv().isUserWhitelisted = function() return true end
 					_G.isUserWhitelisted = function() return true end
 					getgenv().WhitelistedUsers = setmetatable({}, { __index = function() return true end })
@@ -228,7 +228,7 @@ do
 				end)
 			end
 
-			if getgenv().EternityV1_UI and getgenv().EternityV1_UI.Parent then
+			if getgenv().voidV1_UI and getgenv().voidV1_UI.Parent then
 				nextBlock = 2
 			else
 				nextBlock = 3
@@ -236,14 +236,14 @@ do
 		elseif nextBlock == 2 then
 			pcall(function()
 				local getgenv_ = getgenv
-				getgenv_().EternityV1_UI:Destroy()
+				getgenv_().voidV1_UI:Destroy()
 			end)
 
 			nextBlock = 3
 		elseif nextBlock == 3 then
-			getgenv().EternityLoaderSuccess = false
-			getgenv().EternityLoaderClosed = false
-			getgenv().EternityLoaded = false
+			getgenv().voidLoaderSuccess = false
+			getgenv().voidLoaderClosed = false
+			getgenv().voidLoaded = false
 			L1.tbl11 = { name = nil }
 			spill_2.r13 = game.GameId
 
@@ -476,16 +476,16 @@ do
 				if _cachedVoidAsset then
 					return _cachedVoidAsset
 				end
-				local str4 = "eternity/tags/void_banner.jpg"
+				local str4 = "void/tags/void_banner.jpg"
 				local customAssetFn = getcustomasset or getsynasset
 				if isfile and writefile and customAssetFn then
 					if not isfile(str4) then
 						pcall(function()
-							if not isfolder("eternity") then
-								makefolder("eternity")
+							if not isfolder("void") then
+								makefolder("void")
 							end
-							if not isfolder("eternity/tags") then
-								makefolder("eternity/tags")
+							if not isfolder("void/tags") then
+								makefolder("void/tags")
 							end
 						end)
 						local ok, response = pcall(game.HttpGet, game, VOID_LOGO_URL)
@@ -796,7 +796,7 @@ do
 				},
 			}
 
-			if not getgenv().EternityCustomTags then
+			if not getgenv().voidCustomTags then
 				nextBlock = 10
 			else
 				nextBlock = 15
@@ -820,7 +820,7 @@ do
 			spill_2.r13[spill_2.r21_1] = spill_2.r22_1
 			nextBlock = 11
 		elseif nextBlock == 14 then
-			getgenv().EternityCustomTags = spill_2.r13
+			getgenv().voidCustomTags = spill_2.r13
 			nextBlock = 15
 		elseif nextBlock == 15 then
 			local fetchRemoteBlacklist
@@ -844,7 +844,7 @@ do
 
 									pcall(function()
 										-- [LCR: Luraph string protection (anti-tamper __tostring trap) folded to its value; from the original's first custom_tags request URL]
-										local v3 = "https://red-recipe-3b9f.hindstargaming.workers.dev/rest/v1/stats?key=eq.eternity:custom_tags&select=value"
+										local v3 = "https://red-recipe-3b9f.hindstargaming.workers.dev/rest/v1/stats?key=eq.void:custom_tags&select=value"
 										local v4 = safeHttpGet(v3)
 
 										if v4 and #v4 > 0 then
@@ -866,7 +866,7 @@ do
 
 									if json and #json ~= 0 then
 										if #json == 0 then
-											json = safeHttpGet("https://eternity-api.cr7hd-q.workers.dev/api/tags")
+											json = safeHttpGet("https://void-backend.isagireal1.workers.dev/api/tags")
 
 											if json then
 												if #json > 0 then
@@ -875,26 +875,26 @@ do
 														local n207 = 685271799
 
 														if type(data) == "table" then
-															local eternityCustomTags = {}
+															local voidCustomTags = {}
 
 															for k, v3 in pairs(L1.tbl12) do
-																eternityCustomTags[string.lower(tostring(k))] = v3
+																voidCustomTags[string.lower(tostring(k))] = v3
 															end
 
 															for k, v3 in pairs(data) do
 																local tagKey = string.lower(tostring(k))
 																if type(v3) == "string" then
-																	if type(eternityCustomTags[tagKey]) == "table" then
-																		eternityCustomTags[tagKey].customName = v3
+																	if type(voidCustomTags[tagKey]) == "table" then
+																		voidCustomTags[tagKey].customName = v3
 																	else
-																		eternityCustomTags[tagKey] = { customName = v3, titleColor = "#ffffff" }
+																		voidCustomTags[tagKey] = { customName = v3, titleColor = "#ffffff" }
 																	end
 																else
-																	eternityCustomTags[tagKey] = v3
+																	voidCustomTags[tagKey] = v3
 																end
 															end
 
-															getgenv().EternityCustomTags = eternityCustomTags
+															getgenv().voidCustomTags = voidCustomTags
 
 															local _setupLogo = (type(setupOverheadLogo) == "function" and setupOverheadLogo) or (type(getgenv().setupOverheadLogo) == "function" and getgenv().setupOverheadLogo)
 															if _setupLogo then
@@ -906,7 +906,7 @@ do
 
 																if n204 < n207 then
 																	if callback then
-																		pcall(callback, eternityCustomTags)
+																		pcall(callback, voidCustomTags)
 																	end
 
 																	return
@@ -918,7 +918,7 @@ do
 															else
 																if n204 < n207 then
 																	if callback then
-																		pcall(callback, eternityCustomTags)
+																		pcall(callback, voidCustomTags)
 																	end
 
 																	return
@@ -938,26 +938,26 @@ do
 													local n207 = 685271799
 
 													if type(data) == "table" then
-														local eternityCustomTags = {}
+														local voidCustomTags = {}
 
 														for k, v3 in pairs(L1.tbl12) do
-															eternityCustomTags[string.lower(tostring(k))] = v3
+															voidCustomTags[string.lower(tostring(k))] = v3
 														end
 
 														for k, v3 in pairs(data) do
 															local tagKey = string.lower(tostring(k))
 															if type(v3) == "string" then
-																if type(eternityCustomTags[tagKey]) == "table" then
-																	eternityCustomTags[tagKey].customName = v3
+																if type(voidCustomTags[tagKey]) == "table" then
+																	voidCustomTags[tagKey].customName = v3
 																else
-																	eternityCustomTags[tagKey] = { customName = v3, titleColor = "#ffffff" }
+																	voidCustomTags[tagKey] = { customName = v3, titleColor = "#ffffff" }
 																end
 															else
-																eternityCustomTags[tagKey] = v3
+																voidCustomTags[tagKey] = v3
 															end
 														end
 
-														getgenv().EternityCustomTags = eternityCustomTags
+														getgenv().voidCustomTags = voidCustomTags
 
 														local _setupLogo = (type(setupOverheadLogo) == "function" and setupOverheadLogo) or (type(getgenv().setupOverheadLogo) == "function" and getgenv().setupOverheadLogo)
 														if _setupLogo then
@@ -969,7 +969,7 @@ do
 
 															if n204 < n207 then
 																if callback then
-																	pcall(callback, eternityCustomTags)
+																	pcall(callback, voidCustomTags)
 																end
 
 																return
@@ -981,7 +981,7 @@ do
 														else
 															if n204 < n207 then
 																if callback then
-																	pcall(callback, eternityCustomTags)
+																	pcall(callback, voidCustomTags)
 																end
 
 																return
@@ -1005,26 +1005,26 @@ do
 													local n208 = 685271799
 
 													if type(data) == "table" then
-														local eternityCustomTags = {}
+														local voidCustomTags = {}
 
 														for k, v3 in pairs(L1.tbl12) do
-															eternityCustomTags[string.lower(tostring(k))] = v3
+															voidCustomTags[string.lower(tostring(k))] = v3
 														end
 
 														for k, v3 in pairs(data) do
 															local tagKey = string.lower(tostring(k))
 															if type(v3) == "string" then
-																if type(eternityCustomTags[tagKey]) == "table" then
-																	eternityCustomTags[tagKey].customName = v3
+																if type(voidCustomTags[tagKey]) == "table" then
+																	voidCustomTags[tagKey].customName = v3
 																else
-																	eternityCustomTags[tagKey] = { customName = v3, titleColor = "#ffffff" }
+																	voidCustomTags[tagKey] = { customName = v3, titleColor = "#ffffff" }
 																end
 															else
-																eternityCustomTags[tagKey] = v3
+																voidCustomTags[tagKey] = v3
 															end
 														end
 
-														getgenv().EternityCustomTags = eternityCustomTags
+														getgenv().voidCustomTags = voidCustomTags
 
 														if type(setupOverheadLogo) == "function" then
 															for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
@@ -1039,7 +1039,7 @@ do
 
 															if n204 < n208 then
 																if callback then
-																	pcall(callback, eternityCustomTags)
+																	pcall(callback, voidCustomTags)
 																end
 
 																return
@@ -1051,7 +1051,7 @@ do
 														else
 															if n204 < n208 then
 																if callback then
-																	pcall(callback, eternityCustomTags)
+																	pcall(callback, voidCustomTags)
 																end
 
 																return
@@ -1064,7 +1064,7 @@ do
 												end)
 											end
 										else
-											json = safeHttpGet("https://eternity-api.cr7hd-q.workers.dev/api/tags")
+											json = safeHttpGet("https://void-backend.isagireal1.workers.dev/api/tags")
 
 											if json then
 												if #json > 0 then
@@ -1073,26 +1073,26 @@ do
 														local n208 = 685271799
 
 														if type(data) == "table" then
-															local eternityCustomTags = {}
+															local voidCustomTags = {}
 
 															for k, v3 in pairs(L1.tbl12) do
-																eternityCustomTags[string.lower(tostring(k))] = v3
+																voidCustomTags[string.lower(tostring(k))] = v3
 															end
 
 															for k, v3 in pairs(data) do
 																local tagKey = string.lower(tostring(k))
 																if type(v3) == "string" then
-																	if type(eternityCustomTags[tagKey]) == "table" then
-																		eternityCustomTags[tagKey].customName = v3
+																	if type(voidCustomTags[tagKey]) == "table" then
+																		voidCustomTags[tagKey].customName = v3
 																	else
-																		eternityCustomTags[tagKey] = { customName = v3, titleColor = "#ffffff" }
+																		voidCustomTags[tagKey] = { customName = v3, titleColor = "#ffffff" }
 																	end
 																else
-																	eternityCustomTags[tagKey] = v3
+																	voidCustomTags[tagKey] = v3
 																end
 															end
 
-															getgenv().EternityCustomTags = eternityCustomTags
+															getgenv().voidCustomTags = voidCustomTags
 
 															if type(setupOverheadLogo) == "function" then
 																for _, player in ipairs(game:GetService("Players"):GetPlayers()) do
@@ -1107,7 +1107,7 @@ do
 
 																if n204 < n208 then
 																	if callback then
-																		pcall(callback, eternityCustomTags)
+																		pcall(callback, voidCustomTags)
 																	end
 
 																	return
@@ -1119,7 +1119,7 @@ do
 															else
 																if n204 < n208 then
 																	if callback then
-																		pcall(callback, eternityCustomTags)
+																		pcall(callback, voidCustomTags)
 																	end
 
 																	return
@@ -1141,7 +1141,7 @@ do
 						task.spawn(fetchCustomTags)
 
 						do
-							local eternityBlacklistDatabase = {}
+							local voidBlacklistDatabase = {}
 
 							fetchRemoteBlacklist = function()
 								local count3 = 902337417
@@ -1159,9 +1159,9 @@ do
 											for k, v4 in pairs(data) do
 												if L1.step4 < count3 then
 													if type(k) == "number" then
-														eternityBlacklistDatabase[string.lower(tostring(v4))] = true
+														voidBlacklistDatabase[string.lower(tostring(v4))] = true
 													else
-														eternityBlacklistDatabase[string.lower(tostring(k))] = true
+														voidBlacklistDatabase[string.lower(tostring(k))] = true
 													end
 
 													continue
@@ -1178,9 +1178,9 @@ do
     if not player then return false end
     local name = string.lower(player.Name or tostring(player))
     local userId = tostring(player.UserId or "")
-    return (eternityBlacklistDatabase[name] == true) or (eternityBlacklistDatabase[userId] == true)
+    return (voidBlacklistDatabase[name] == true) or (voidBlacklistDatabase[userId] == true)
 end
-							getgenv().EternityBlacklistDatabase = eternityBlacklistDatabase
+							getgenv().voidBlacklistDatabase = voidBlacklistDatabase
 						end
 					end
 
@@ -1239,7 +1239,7 @@ end
 												body = safeHttpGet_("https://zeternity.online/api/whitelist")
 
 												if not body or #body == 0 then
-													body = safeHttpGet_("https://eternity-api.cr7hd-q.workers.dev/api/whitelist")
+													body = safeHttpGet_("https://void-backend.isagireal1.workers.dev/api/whitelist")
 												end
 											elseif game and game.HttpGet then
 												body = game:HttpGet("https://zeternity.online/api/whitelist", true)
@@ -1335,7 +1335,7 @@ end
 													body = safeHttpGet_("https://zeternity.online/api/whitelist")
 
 													if not body or #body == 0 then
-														body = safeHttpGet_("https://eternity-api.cr7hd-q.workers.dev/api/whitelist")
+														body = safeHttpGet_("https://void-backend.isagireal1.workers.dev/api/whitelist")
 													end
 												elseif game and game.HttpGet then
 													body = game:HttpGet("https://zeternity.online/api/whitelist", true)
@@ -1409,7 +1409,7 @@ end
 												body = safeHttpGet_("https://zeternity.online/api/whitelist")
 
 												if not body or #body == 0 then
-													body = safeHttpGet_("https://eternity-api.cr7hd-q.workers.dev/api/whitelist")
+													body = safeHttpGet_("https://void-backend.isagireal1.workers.dev/api/whitelist")
 												end
 											elseif game and game.HttpGet then
 												body = game:HttpGet("https://zeternity.online/api/whitelist", true)
@@ -1459,7 +1459,7 @@ end
 					end
 					L1._orig_isUserWhitelisted = function(name4)
 						local name5 = nil
-						local str3, eternityLastWlFetch, lp_, name6
+						local str3, voidLastWlFetch, lp_, name6
 
 						if typeof(name4) == "Instance" then
 							if name4:IsA("Player") then
@@ -1475,10 +1475,10 @@ end
 										if getgenv().WhitelistedUsers and type(getgenv().WhitelistedUsers) == "table" and getgenv().WhitelistedUsers[str3] == true then
 											return true
 										end
-										eternityLastWlFetch = getgenv()._eternityLastWlFetch or 0
+										voidLastWlFetch = getgenv()._voidLastWlFetch or 0
 
-										if not getgenv().WhitelistedUsers or eternityLastWlFetch + 300 < tick() then
-											getgenv()._eternityLastWlFetch = tick()
+										if not getgenv().WhitelistedUsers or voidLastWlFetch + 300 < tick() then
+											getgenv()._voidLastWlFetch = tick()
 											L1.fetchRemoteWhitelist()
 											if getgenv().WhitelistedUsers and getgenv().WhitelistedUsers[str3] == true then
 												return true
@@ -1501,10 +1501,10 @@ end
 										if getgenv().WhitelistedUsers and type(getgenv().WhitelistedUsers) == "table" and getgenv().WhitelistedUsers[str3] == true then
 											return true
 										end
-										eternityLastWlFetch = getgenv()._eternityLastWlFetch or 0
+										voidLastWlFetch = getgenv()._voidLastWlFetch or 0
 
-										if not getgenv().WhitelistedUsers or eternityLastWlFetch + 300 < tick() then
-											getgenv()._eternityLastWlFetch = tick()
+										if not getgenv().WhitelistedUsers or voidLastWlFetch + 300 < tick() then
+											getgenv()._voidLastWlFetch = tick()
 											L1.fetchRemoteWhitelist()
 											if getgenv().WhitelistedUsers and getgenv().WhitelistedUsers[str3] == true then
 												return true
@@ -1525,10 +1525,10 @@ end
 										if getgenv().WhitelistedUsers and type(getgenv().WhitelistedUsers) == "table" and getgenv().WhitelistedUsers[str3] == true then
 											return true
 										end
-										eternityLastWlFetch = getgenv()._eternityLastWlFetch or 0
+										voidLastWlFetch = getgenv()._voidLastWlFetch or 0
 
-										if not getgenv().WhitelistedUsers or eternityLastWlFetch + 300 < tick() then
-											getgenv()._eternityLastWlFetch = tick()
+										if not getgenv().WhitelistedUsers or voidLastWlFetch + 300 < tick() then
+											getgenv()._voidLastWlFetch = tick()
 											L1.fetchRemoteWhitelist()
 											if getgenv().WhitelistedUsers and getgenv().WhitelistedUsers[str3] == true then
 												return true
@@ -1579,10 +1579,10 @@ end
 												if getgenv().WhitelistedUsers and type(getgenv().WhitelistedUsers) == "table" and getgenv().WhitelistedUsers[str3] == true then
 													return true
 												end
-												eternityLastWlFetch = getgenv()._eternityLastWlFetch or 0
+												voidLastWlFetch = getgenv()._voidLastWlFetch or 0
 
-												if not getgenv().WhitelistedUsers or eternityLastWlFetch + 300 < tick() then
-													getgenv()._eternityLastWlFetch = tick()
+												if not getgenv().WhitelistedUsers or voidLastWlFetch + 300 < tick() then
+													getgenv()._voidLastWlFetch = tick()
 													L1.fetchRemoteWhitelist()
 													if getgenv().WhitelistedUsers and getgenv().WhitelistedUsers[str3] == true then
 														return true
@@ -1604,10 +1604,10 @@ end
 												if getgenv().WhitelistedUsers and type(getgenv().WhitelistedUsers) == "table" and getgenv().WhitelistedUsers[str3] == true then
 													return true
 												end
-												eternityLastWlFetch = getgenv()._eternityLastWlFetch or 0
+												voidLastWlFetch = getgenv()._voidLastWlFetch or 0
 
-												if not getgenv().WhitelistedUsers or eternityLastWlFetch + 300 < tick() then
-													getgenv()._eternityLastWlFetch = tick()
+												if not getgenv().WhitelistedUsers or voidLastWlFetch + 300 < tick() then
+													getgenv()._voidLastWlFetch = tick()
 													L1.fetchRemoteWhitelist()
 													if getgenv().WhitelistedUsers and getgenv().WhitelistedUsers[str3] == true then
 														return true
@@ -1631,10 +1631,10 @@ end
 										if getgenv().WhitelistedUsers and type(getgenv().WhitelistedUsers) == "table" and getgenv().WhitelistedUsers[str3] == true then
 											return true
 										end
-										eternityLastWlFetch = getgenv()._eternityLastWlFetch or 0
+										voidLastWlFetch = getgenv()._voidLastWlFetch or 0
 
-										if not getgenv().WhitelistedUsers or eternityLastWlFetch + 300 < tick() then
-											getgenv()._eternityLastWlFetch = tick()
+										if not getgenv().WhitelistedUsers or voidLastWlFetch + 300 < tick() then
+											getgenv()._voidLastWlFetch = tick()
 											L1.fetchRemoteWhitelist()
 											if getgenv().WhitelistedUsers and getgenv().WhitelistedUsers[str3] == true then
 												return true
@@ -1658,10 +1658,10 @@ end
 									if getgenv().WhitelistedUsers and type(getgenv().WhitelistedUsers) == "table" and getgenv().WhitelistedUsers[str3] == true then
 										return true
 									end
-									eternityLastWlFetch = getgenv()._eternityLastWlFetch or 0
+									voidLastWlFetch = getgenv()._voidLastWlFetch or 0
 
-									if not getgenv().WhitelistedUsers or eternityLastWlFetch + 300 < tick() then
-										getgenv()._eternityLastWlFetch = tick()
+									if not getgenv().WhitelistedUsers or voidLastWlFetch + 300 < tick() then
+										getgenv()._voidLastWlFetch = tick()
 										L1.fetchRemoteWhitelist()
 										if getgenv().WhitelistedUsers and getgenv().WhitelistedUsers[str3] == true then
 											return true
@@ -1682,10 +1682,10 @@ end
 									if getgenv().WhitelistedUsers and type(getgenv().WhitelistedUsers) == "table" and getgenv().WhitelistedUsers[str3] == true then
 										return true
 									end
-									eternityLastWlFetch = getgenv()._eternityLastWlFetch or 0
+									voidLastWlFetch = getgenv()._voidLastWlFetch or 0
 
-									if not getgenv().WhitelistedUsers or eternityLastWlFetch + 300 < tick() then
-										getgenv()._eternityLastWlFetch = tick()
+									if not getgenv().WhitelistedUsers or voidLastWlFetch + 300 < tick() then
+										getgenv()._voidLastWlFetch = tick()
 										L1.fetchRemoteWhitelist()
 										if getgenv().WhitelistedUsers and getgenv().WhitelistedUsers[str3] == true then
 											return true
@@ -1736,10 +1736,10 @@ end
 											if getgenv().WhitelistedUsers and type(getgenv().WhitelistedUsers) == "table" and getgenv().WhitelistedUsers[str3] == true then
 												return true
 											end
-											eternityLastWlFetch = getgenv()._eternityLastWlFetch or 0
+											voidLastWlFetch = getgenv()._voidLastWlFetch or 0
 
-											if not getgenv().WhitelistedUsers or eternityLastWlFetch + 300 < tick() then
-												getgenv()._eternityLastWlFetch = tick()
+											if not getgenv().WhitelistedUsers or voidLastWlFetch + 300 < tick() then
+												getgenv()._voidLastWlFetch = tick()
 												L1.fetchRemoteWhitelist()
 												if getgenv().WhitelistedUsers and getgenv().WhitelistedUsers[str3] == true then
 													return true
@@ -1760,10 +1760,10 @@ end
 											if getgenv().WhitelistedUsers and type(getgenv().WhitelistedUsers) == "table" and getgenv().WhitelistedUsers[str3] == true then
 												return true
 											end
-											eternityLastWlFetch = getgenv()._eternityLastWlFetch or 0
+											voidLastWlFetch = getgenv()._voidLastWlFetch or 0
 
-											if not getgenv().WhitelistedUsers or eternityLastWlFetch + 300 < tick() then
-												getgenv()._eternityLastWlFetch = tick()
+											if not getgenv().WhitelistedUsers or voidLastWlFetch + 300 < tick() then
+												getgenv()._voidLastWlFetch = tick()
 												L1.fetchRemoteWhitelist()
 												if getgenv().WhitelistedUsers and getgenv().WhitelistedUsers[str3] == true then
 													return true
@@ -1786,10 +1786,10 @@ end
 									if getgenv().WhitelistedUsers and type(getgenv().WhitelistedUsers) == "table" and getgenv().WhitelistedUsers[str3] == true then
 										return true
 									end
-									eternityLastWlFetch = getgenv()._eternityLastWlFetch or 0
+									voidLastWlFetch = getgenv()._voidLastWlFetch or 0
 
-									if not getgenv().WhitelistedUsers or eternityLastWlFetch + 300 < tick() then
-										getgenv()._eternityLastWlFetch = tick()
+									if not getgenv().WhitelistedUsers or voidLastWlFetch + 300 < tick() then
+										getgenv()._voidLastWlFetch = tick()
 										L1.fetchRemoteWhitelist()
 										if getgenv().WhitelistedUsers and getgenv().WhitelistedUsers[str3] == true then
 											return true
@@ -1981,9 +1981,9 @@ end
 												Prefer = "resolution=merge-duplicates",
 											},
 											Body = HttpService:JSONEncode({
-												{ key = "eternity:activity:" .. str4, value = json },
+												{ key = "void:activity:" .. str4, value = json },
 												{
-													key = "eternity:executor:" .. username,
+													key = "void:executor:" .. username,
 													value = executor,
 												},
 											}),
@@ -3382,7 +3382,7 @@ end
 								tbl23.ActiveTerrainName = tbl18.ActiveTerrainName
 								tbl23.ActiveWeatherType = tbl18.ActiveWeatherType
 								tbl23.ActiveWeatherName = tbl18.ActiveWeatherName
-								tbl23.PlatformMode = getgenv().EternityPlatformMode
+								tbl23.PlatformMode = getgenv().voidPlatformMode
 								tbl23.MobileButtonsEnabled = tbl18.MobileButtonsEnabled
 								tbl23.MobileButtonPositions = nil
 								tbl23.Toggles = {}
@@ -3438,7 +3438,7 @@ end
 								end)
 
 								if ok then
-									writefile("eternity_config.json", json)
+									writefile("void_config.json", json)
 								end
 							end
 						end)
@@ -3457,8 +3457,8 @@ end
 								n215 = 834709764
 								local count4 = 716484443
 
-								if readfile and typeof(readfile) == "function" and isfile and typeof(isfile) == "function" and isfile("eternity_config.json") then
-									local content = readfile("eternity_config.json")
+								if readfile and typeof(readfile) == "function" and isfile and typeof(isfile) == "function" and isfile("void_config.json") then
+									local content = readfile("void_config.json")
 
 									local ok, result = pcall(function()
 										return game:GetService("HttpService"):JSONDecode(content)
@@ -3968,7 +3968,7 @@ end
 										end
 
 										if result.PlatformMode and (result.PlatformMode == "Phone" or result.PlatformMode == "PC") then
-											getgenv().EternityPlatformMode = result.PlatformMode
+											getgenv().voidPlatformMode = result.PlatformMode
 										end
 
 										if result.MobileButtonsEnabled ~= nil then
@@ -4223,8 +4223,8 @@ end
 				end
 
 				local screenGui2 = Instance.new("ScreenGui")
-				screenGui2.Name = "EternityV1"
-				getgenv().EternityV1_UI = screenGui2
+				screenGui2.Name = "voidV1"
+				getgenv().voidV1_UI = screenGui2
 				screenGui2.ResetOnSpawn = false
 				screenGui2.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 				screenGui2.IgnoreGuiInset = true
@@ -4283,12 +4283,12 @@ end
 					tracks = {
 						{
 							title = "Too Many Nights",
-							file = "eternity_loader/too_many_nights.mp3",
+							file = "void_loader/too_many_nights.mp3",
 							url = "https://raw.githubusercontent.com/hor1zencodes/patanahi/main/Too%20Many%20Nights%20(Instrumental)(1).mp3",
 						},
 						{
 							title = "Butterfly Effect",
-							file = "eternity_loader/butterfly_effect.mp3",
+							file = "void_loader/butterfly_effect.mp3",
 							url = "https://raw.githubusercontent.com/hor1zencodes/patanahi/main/Travis%20Scott%20-%20BUTTERFLY%20EFFECT%20(Instrumental).mp3",
 						},
 					},
@@ -4318,7 +4318,7 @@ end
 							local SoundService = game:GetService("SoundService")
 
 							for _, child in ipairs(SoundService:GetChildren()) do
-								if child:IsA("Sound") and (child.Name == "EternityLoaderMusic" or child.Name:find("EternityLoader")) then
+								if child:IsA("Sound") and (child.Name == "voidLoaderMusic" or child.Name:find("voidLoader")) then
 									child:Stop()
 									child:Destroy()
 									continue
@@ -4363,8 +4363,8 @@ end
 							end
 
 							pcall(function()
-								if makefolder and not isfolder("eternity_loader") then
-									makefolder("eternity_loader")
+								if makefolder and not isfolder("void_loader") then
+									makefolder("void_loader")
 								end
 							end)
 
@@ -4407,7 +4407,7 @@ end
 								if ok and soundId then
 									if not (self.sound and self.sound.Parent) then
 										self.sound = Instance.new("Sound")
-										self.sound.Name = "EternityLoaderMusic"
+										self.sound.Name = "voidLoaderMusic"
 
 										if L1.step3 ~= 921533470 then
 											L1.step2 = 434292627
@@ -4543,8 +4543,8 @@ end
 
 					if isfile and writefile and callback then
 						pcall(function()
-							if not isfolder("eternity") then
-								makefolder("eternity")
+							if not isfolder("void") then
+								makefolder("void")
 							end
 
 							if count ~= 200206612 then
@@ -4559,16 +4559,16 @@ end
 							end
 						end)
 
-						if not isfile("eternity/loader_wallpaper_frame22.png") then
+						if not isfile("void/loader_wallpaper_frame22.png") then
 							local ok, response = pcall(game.HttpGet, game, "https://raw.githubusercontent.com/hor1zencodes/patanahi/main/Frame%2022.png")
 
 							if ok and response and #response > 100 then
-								pcall(writefile, "eternity/loader_wallpaper_frame22.png", response)
+								pcall(writefile, "void/loader_wallpaper_frame22.png", response)
 							end
 						end
 
-						if isfile("eternity/loader_wallpaper_frame22.png") then
-							local ok, image = pcall(callback, "eternity/loader_wallpaper_frame22.png")
+						if isfile("void/loader_wallpaper_frame22.png") then
+							local ok, image = pcall(callback, "void/loader_wallpaper_frame22.png")
 
 							if count2 == L1.step2 then
 							end
@@ -4620,7 +4620,7 @@ end
 						viewportSize = Vector2.new(1920, 1080)
 					end
 
-					if getgenv().EternityPlatformMode ~= "Phone" and not touchEnabled2 and viewportSize.Y > 0 then
+					if getgenv().voidPlatformMode ~= "Phone" and not touchEnabled2 and viewportSize.Y > 0 then
 					end
 
 					local vector2 = Vector2.new(0.5, 0.5)
@@ -4684,13 +4684,13 @@ end
 					end
 
 					local frame22 = nil
-					local eternityPlatformMode = getgenv().EternityPlatformMode == "Phone" or getgenv().EternityPlatformMode == "PC"
+					local voidPlatformMode = getgenv().voidPlatformMode == "Phone" or getgenv().voidPlatformMode == "PC"
 
-					if eternityPlatformMode then
-						eternityPlatformMode = getgenv().EternityPlatformMode
+					if voidPlatformMode then
+						voidPlatformMode = getgenv().voidPlatformMode
 					end
 
-					eternityPlatformMode = eternityPlatformMode or "PC"
+					voidPlatformMode = voidPlatformMode or "PC"
 					uiScale2 = Instance.new("UIScale", frame14)
 
 					fn18 = function()
@@ -4736,7 +4736,7 @@ end
 							local n208 = 16
 
 							if not touchEnabled3 then
-								local flag11 = getgenv().EternityPlatformMode == "Phone" or eternityPlatformMode == "Phone"
+								local flag11 = getgenv().voidPlatformMode == "Phone" or voidPlatformMode == "Phone"
 
 								if flag11 and y < 36 then
 									y = 36
@@ -5015,23 +5015,23 @@ end
 				end
 
 				do
-					local eternityPlatformMode = getgenv().EternityPlatformMode == "Phone" or getgenv().EternityPlatformMode == "PC"
+					local voidPlatformMode = getgenv().voidPlatformMode == "Phone" or getgenv().voidPlatformMode == "PC"
 
-					if eternityPlatformMode then
-						eternityPlatformMode = getgenv().EternityPlatformMode
+					if voidPlatformMode then
+						voidPlatformMode = getgenv().voidPlatformMode
 					end
 
-					if not eternityPlatformMode then
-						eternityPlatformMode = touchEnabled2
+					if not voidPlatformMode then
+						voidPlatformMode = touchEnabled2
 
-						if eternityPlatformMode then
-							eternityPlatformMode = "Phone"
+						if voidPlatformMode then
+							voidPlatformMode = "Phone"
 						end
 
-						eternityPlatformMode = eternityPlatformMode or "PC"
+						voidPlatformMode = voidPlatformMode or "PC"
 					end
 
-					getgenv().EternityPlatformMode = eternityPlatformMode
+					getgenv().voidPlatformMode = voidPlatformMode
 					local frame22 = Instance.new("Frame", frame20)
 					frame22.Name = "RowPlatform"
 					frame22.Size = UDim2.new(0, 136, 0, 26)
@@ -5083,7 +5083,7 @@ end
 					corner(textButton6, 4)
 
 					local function fn19()
-						if eternityPlatformMode == "PC" then
+						if voidPlatformMode == "PC" then
 							tween(textButton5, {
 								BackgroundColor3 = tbl17.accent,
 								TextColor3 = Color3.fromRGB(15, 12, 5),
@@ -5103,7 +5103,7 @@ end
 							}, 0.2)
 						end
 
-						getgenv().EternityPlatformMode = eternityPlatformMode
+						getgenv().voidPlatformMode = voidPlatformMode
 						fn18()
 					end
 
@@ -5113,7 +5113,7 @@ end
 							return
 						end)
 
-						eternityPlatformMode = "PC"
+						voidPlatformMode = "PC"
 						fn19()
 					end)
 
@@ -5123,7 +5123,7 @@ end
 							return
 						end)
 
-						eternityPlatformMode = "Phone"
+						voidPlatformMode = "Phone"
 						fn19()
 					end)
 
@@ -5349,9 +5349,9 @@ end
 						flag9 = false
 						flag8 = true
 						local count4 = 956315997
-						getgenv().EternityLoaderClosed = true
-						getgenv().EternityLoaderSuccess = false
-						getgenv().EternityLoaded = false
+						getgenv().voidLoaderClosed = true
+						getgenv().voidLoaderSuccess = false
+						getgenv().voidLoaded = false
 
 						pcall(function()
 							if tbl19 and tbl19.stop then
@@ -5747,11 +5747,11 @@ end
 							end
 						end)
 
-						local eternityIsWhitelisted = fn20(name4)
+						local voidIsWhitelisted = fn20(name4)
 
 						if step8 == 975380873 then
-							getgenv().EternityIsWhitelisted = eternityIsWhitelisted
-							fn19(eternityIsWhitelisted)
+							getgenv().voidIsWhitelisted = voidIsWhitelisted
+							fn19(voidIsWhitelisted)
 							return
 						end
 					end)
@@ -7518,8 +7518,8 @@ end
 													frame12.Visible = false
 												end
 
-												getgenv().EternityLoaderSuccess = true
-												getgenv().EternityIsWhitelisted = false
+												getgenv().voidLoaderSuccess = true
+												getgenv().voidIsWhitelisted = false
 
 												if typeof(fn19) == "function" then
 													fn19(false)
@@ -7706,8 +7706,8 @@ end
 													frame12.Visible = false
 												end
 
-												getgenv().EternityLoaderSuccess = true
-												getgenv().EternityIsWhitelisted = false
+												getgenv().voidLoaderSuccess = true
+												getgenv().voidIsWhitelisted = false
 
 												if typeof(fn19) == "function" then
 													fn19(false)
@@ -7864,7 +7864,7 @@ end
 							end
 							local SoundService = game:GetService("SoundService")
 							for _, child in ipairs(SoundService:GetChildren()) do
-								if child:IsA("Sound") and (child.Name == "EternityLoaderMusic" or child.Name:find("EternityLoader")) then
+								if child:IsA("Sound") and (child.Name == "voidLoaderMusic" or child.Name:find("voidLoader")) then
 									child:Stop()
 									child:Destroy()
 								end
@@ -8046,8 +8046,8 @@ end
 									fn19(whitelistedUsers2 == true)
 								end
 
-								getgenv().EternityLoaderSuccess = true
-								getgenv().EternityIsWhitelisted = whitelistedUsers2 == true
+								getgenv().voidLoaderSuccess = true
+								getgenv().voidIsWhitelisted = whitelistedUsers2 == true
 								tween(frame27, {
 									Size = UDim2.new(1, 0, 1, 0),
 									BackgroundColor3 = Color3.fromRGB(46, 204, 113),
@@ -8095,8 +8095,8 @@ end
 								flag10 = false
 							else
 								-- Fallback: load script directly without key
-								getgenv().EternityLoaderSuccess = true
-								getgenv().EternityIsWhitelisted = true
+								getgenv().voidLoaderSuccess = true
+								getgenv().voidIsWhitelisted = true
 								pcall(fn22)
 							end
 						end)
@@ -8124,9 +8124,9 @@ end
 				return flag9
 			end
 
-			if getgenv().SkipLoader or getgenv().EternityLoaded then
-				getgenv().EternityLoaderSuccess = true
-				getgenv().EternityIsWhitelisted = true
+			if getgenv().SkipLoader or getgenv().voidLoaded then
+				getgenv().voidLoaderSuccess = true
+				getgenv().voidIsWhitelisted = true
 				isVerified = true
 			else
 				isVerified = launchLoader()
@@ -8138,21 +8138,21 @@ end
 				nextBlock = 16
 			end
 		elseif nextBlock == 16 then
-			if getgenv().EternityLoaded and getgenv().EternityV1_UI and getgenv().EternityV1_UI.Parent then
+			if getgenv().voidLoaded and getgenv().voidV1_UI and getgenv().voidV1_UI.Parent then
 				nextBlock = 377
 			else
 				nextBlock = 17
 			end
 		elseif nextBlock == 17 then
-			getgenv().EternityLoaded = true
+			getgenv().voidLoaded = true
 			ScriptFullyLoaded = false
 			L1.fn8 = nil
-			getgenv().EternityLoaderSuccess = true
-			getgenv().EternityIsWhitelisted = true
+			getgenv().voidLoaderSuccess = true
+			getgenv().voidIsWhitelisted = true
 			pcall(function()
 				local SoundService = game:GetService("SoundService")
 				for _, child in ipairs(SoundService:GetChildren()) do
-					if child:IsA("Sound") and (child.Name == "EternityLoaderMusic" or child.Name:find("EternityLoader")) then
+					if child:IsA("Sound") and (child.Name == "voidLoaderMusic" or child.Name:find("voidLoader")) then
 						child:Stop()
 						child:Destroy()
 					end
@@ -8160,7 +8160,7 @@ end
 			end)
 			nextBlock = 41
 		elseif nextBlock == 18 then
-			if getgenv().EternityLoaderClosed then
+			if getgenv().voidLoaderClosed then
 				nextBlock = 376
 			else
 				nextBlock = 19
@@ -8220,8 +8220,8 @@ end
 			nextBlock = 29
 		elseif nextBlock == 29 then
 			spill_2.r13 = true
-			getgenv().EternityLoaderSuccess = true
-			getgenv().EternityIsWhitelisted = true
+			getgenv().voidLoaderSuccess = true
+			getgenv().voidIsWhitelisted = true
 			nextBlock = 40
 		elseif nextBlock == 30 then
 			spill_2.r13 = string.lower(string.gsub(tostring(L1.iterFn1), "%s+", ""))
@@ -8244,7 +8244,7 @@ end
 				nextBlock = 374
 			end
 		elseif nextBlock == 33 then
-			getgenv().EternityLoaderSuccess = true
+			getgenv().voidLoaderSuccess = true
 
 			pcall(function()
 				game:GetService("HttpService")
@@ -8299,7 +8299,7 @@ end
 			L1.iterState1 = getgenv().WhitelistedUsers[L1.iterFn1] == true
 			nextBlock = 38
 		elseif nextBlock == 38 then
-			getgenv().EternityIsWhitelisted = L1.iterState1 == true
+			getgenv().voidIsWhitelisted = L1.iterState1 == true
 
 			pcall(function()
 				if fetchCustomTags then
@@ -8885,7 +8885,7 @@ end
 				end
 			end
 
-			CONFIG_FILE = "eternity_config.json"
+			CONFIG_FILE = "void_config.json"
 
 			tbl2 = {
 				ToggleGUI = Enum.KeyCode.RightControl,
@@ -9819,43 +9819,43 @@ end
 				end
 			end
 
-			if getgenv().EternityV1_UI then
+			if getgenv().voidV1_UI then
 				nextBlock = 61
 			else
 				nextBlock = 62
 			end
 		elseif nextBlock == 61 then
 			pcall(function()
-				getgenv().EternityV1_UI:Destroy()
+				getgenv().voidV1_UI:Destroy()
 			end)
 
 			nextBlock = 62
 		elseif nextBlock == 62 then
 			pcall(function()
 				if gethui then
-					local eternityV1 = gethui():FindFirstChild("EternityV1")
+					local voidV1 = gethui():FindFirstChild("voidV1")
 
-					if eternityV1 then
-						eternityV1:Destroy()
+					if voidV1 then
+						voidV1:Destroy()
 					end
 				end
 
-				local eternityV1 = game:GetService("CoreGui"):FindFirstChild("EternityV1")
+				local voidV1 = game:GetService("CoreGui"):FindFirstChild("voidV1")
 
-				if eternityV1 then
-					eternityV1:Destroy()
+				if voidV1 then
+					voidV1:Destroy()
 				end
 
-				local eternityV12 = localPlayer_:WaitForChild("PlayerGui"):FindFirstChild("EternityV1")
+				local voidV12 = localPlayer_:WaitForChild("PlayerGui"):FindFirstChild("voidV1")
 
-				if eternityV12 then
-					eternityV12:Destroy()
+				if voidV12 then
+					voidV12:Destroy()
 				end
 			end)
 
 			screenGui = Instance.new("ScreenGui")
-			screenGui.Name = "EternityV1"
-			getgenv().EternityV1_UI = screenGui
+			screenGui.Name = "voidV1"
+			getgenv().voidV1_UI = screenGui
 			getcustomasset_ = getcustomasset
 
 			if not getcustomasset_ then
@@ -9987,7 +9987,7 @@ end
 				end
 			end
 
-			r211 = getgenv().EternityPlatformMode == "Phone"
+			r211 = getgenv().voidPlatformMode == "Phone"
 			mainFrame = Instance.new("Frame", screenGui)
 			mainFrame.Name = "MainGUI"
 
@@ -13895,7 +13895,7 @@ end
 					end
 
 					if L1.frame6.Visible then
-						if getgenv().EternityMusicPlaying then
+						if getgenv().voidMusicPlaying then
 							if L1.textLabel6.Visible then
 								L1.textLabel6.Visible = false
 							end
@@ -13914,13 +13914,13 @@ end
 								frame12.BackgroundColor3 = tbl3.accent
 							end
 
-							local eternityMusicTrackName = getgenv().EternityMusicTrackName or ""
+							local voidMusicTrackName = getgenv().voidMusicTrackName or ""
 
-							if #eternityMusicTrackName > 14 then
-								eternityMusicTrackName = string.sub(eternityMusicTrackName, 1, 12) .. ".."
+							if #voidMusicTrackName > 14 then
+								voidMusicTrackName = string.sub(voidMusicTrackName, 1, 12) .. ".."
 							end
 
-							textLabel7.Text = eternityMusicTrackName
+							textLabel7.Text = voidMusicTrackName
 						else
 							if not L1.textLabel6.Visible then
 								L1.textLabel6.Visible = true
@@ -14850,8 +14850,8 @@ end
 
 						local head = player.Character.Head
 
-						if head:FindFirstChild("EternityOverhead") then
-							head.EternityOverhead.Enabled = showOverheadLogo
+						if head:FindFirstChild("voidOverhead") then
+							head.voidOverhead.Enabled = showOverheadLogo
 						end
 					end
 				end
@@ -14869,7 +14869,7 @@ end
 				spill_2.r222.Position = UDim2.new(0, 0, 0, 36)
 				spill_2.r222.BackgroundTransparency = 1
 				spill_2.r222.ClipsDescendants = true
-				local flag8 = getgenv().EternityPlatformMode == "Phone"
+				local flag8 = getgenv().voidPlatformMode == "Phone"
 			end
 
 			local imageLabel5
@@ -14908,7 +14908,7 @@ end
 				end)
 			end
 
-			L1.iterState1 = getgenv().EternityPlatformMode == "Phone"
+			L1.iterState1 = getgenv().voidPlatformMode == "Phone"
 
 			if not L1.iterState1 then
 				nextBlock = 200
@@ -15141,7 +15141,7 @@ end
 				end)
 			end
 
-			L1.iterState1 = getgenv().EternityPlatformMode == "Phone"
+			L1.iterState1 = getgenv().voidPlatformMode == "Phone"
 
 			if not L1.iterState1 then
 				nextBlock = 219
@@ -15352,7 +15352,7 @@ end
 
 			do
 				function createStatBlock(name4, text, text2, layoutOrder, arg, text3, textColor3)
-					local r2112 = getgenv().EternityPlatformMode == "Phone" or r211
+					local r2112 = getgenv().voidPlatformMode == "Phone" or r211
 					local frame12 = Instance.new("Frame", L1.frame9)
 					frame12.Name = name4
 					local uDim2New = UDim2.new
@@ -15597,7 +15597,7 @@ end
 
 			do
 				function createGridContainer(arg, layoutOrder)
-					local flag8 = getgenv().EternityPlatformMode == "Phone"
+					local flag8 = getgenv().voidPlatformMode == "Phone"
 					local frame12 = Instance.new("Frame", arg)
 					frame12.Size = UDim2.new(1, -8, 0, 0)
 					frame12.AutomaticSize = Enum.AutomaticSize.Y
@@ -15969,7 +15969,7 @@ end
 			L1.step5 = nil
 			L1.n140 = nil
 			L1.n153 = nil
-			L1.touchEnabled = getgenv().EternityPlatformMode == "Phone"
+			L1.touchEnabled = getgenv().voidPlatformMode == "Phone"
 
 			if not L1.touchEnabled then
 				nextBlock = 237
@@ -16428,7 +16428,7 @@ end
 
 					pcall(function()
 						local sendNotification = SendNotification
-						local str3 = "Eternity"
+						local str3 = "void"
 						local mobileButtonsVisible = tbl.MobileButtonsVisible
 
 						if mobileButtonsVisible then
@@ -18212,13 +18212,13 @@ end
 					L1.n140 = 542384746
 					L1.touchEnabled = mobileButtonsEnabled
 					local genv = getgenv()
-					local eternityPlatformMode = mobileButtonsEnabled
+					local voidPlatformMode = mobileButtonsEnabled
 
-					if eternityPlatformMode then
-						eternityPlatformMode = "Phone"
+					if voidPlatformMode then
+						voidPlatformMode = "Phone"
 					end
 
-					genv.EternityPlatformMode = eternityPlatformMode or "PC"
+					genv.voidPlatformMode = voidPlatformMode or "PC"
 					tbl.MobileButtonsEnabled = mobileButtonsEnabled
 
 					if mobileButtonsEnabled then
@@ -19652,7 +19652,7 @@ end
 								end
 							end)
 
-							local flag8 = getgenv().EternityPlatformMode == "Phone"
+							local flag8 = getgenv().voidPlatformMode == "Phone"
 							local instanceNew = Instance.new
 							local flag9 = flag8
 
@@ -20203,9 +20203,9 @@ end
 									floatingTopContainer = nil
 								end
 
-								eternityDiscordCard = Instance.new("Frame", _homeDashboard)
-								eternityDiscordCard.Name = "VoidDiscordHero"
-								local eternityDiscordCard_ = eternityDiscordCard
+								voidDiscordCard = Instance.new("Frame", _homeDashboard)
+								voidDiscordCard.Name = "VoidDiscordHero"
+								local voidDiscordCard_ = voidDiscordCard
 								local uDim2New = UDim2.new
 								local n213 = 1
 								local n214 = -8
@@ -20216,13 +20216,13 @@ end
 									r2112 = 94
 								end
 
-								eternityDiscordCard_.Size = uDim2New(n213, n214, n215, r2112 or 90)
-								eternityDiscordCard.BackgroundColor3 = Color3.fromRGB(18, 17, 30)
-								eternityDiscordCard.BorderSizePixel = 0
-								eternityDiscordCard.LayoutOrder = 1
-								eternityDiscordCard.ClipsDescendants = true
-								corner(eternityDiscordCard, 14)
-								local uiGradient = Instance.new("UIGradient", eternityDiscordCard)
+								voidDiscordCard_.Size = uDim2New(n213, n214, n215, r2112 or 90)
+								voidDiscordCard.BackgroundColor3 = Color3.fromRGB(18, 17, 30)
+								voidDiscordCard.BorderSizePixel = 0
+								voidDiscordCard.LayoutOrder = 1
+								voidDiscordCard.ClipsDescendants = true
+								corner(voidDiscordCard, 14)
+								local uiGradient = Instance.new("UIGradient", voidDiscordCard)
 
 								uiGradient.Color = ColorSequence.new({
 									ColorSequenceKeypoint.new(0, Color3.fromRGB(36, 30, 68)),
@@ -20231,7 +20231,7 @@ end
 								})
 
 								uiGradient.Rotation = 135
-								local imageLabel5 = Instance.new("ImageLabel", eternityDiscordCard)
+								local imageLabel5 = Instance.new("ImageLabel", voidDiscordCard)
 								imageLabel5.Name = "Watermark"
 								imageLabel5.Size = UDim2.new(0, 130, 0, 130)
 								imageLabel5.Position = UDim2.new(1, -60, 0.5, -65)
@@ -20240,7 +20240,7 @@ end
 								imageLabel5.ImageColor3 = Color3.fromRGB(88, 101, 242)
 								imageLabel5.ImageTransparency = 0.94
 								imageLabel5.ZIndex = 1
-								local uiStroke = Instance.new("UIStroke", eternityDiscordCard)
+								local uiStroke = Instance.new("UIStroke", voidDiscordCard)
 								uiStroke.Color = Color3.fromRGB(88, 101, 242)
 								uiStroke.Thickness = 1.2
 								uiStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
@@ -20261,7 +20261,7 @@ end
 								})
 
 								table.insert(breathingGradients, uiGradient2)
-								local frame13 = Instance.new("Frame", eternityDiscordCard)
+								local frame13 = Instance.new("Frame", voidDiscordCard)
 								frame13.Name = "Badge"
 								local udim23
 
@@ -20339,7 +20339,7 @@ end
 								frame14.ZIndex = 4
 								corner(frame14, 5)
 								stroke(frame14, Color3.fromRGB(20, 18, 32), 1.5, 0)
-								local frame15 = Instance.new("Frame", eternityDiscordCard)
+								local frame15 = Instance.new("Frame", voidDiscordCard)
 								frame15.Name = "Content"
 								local udim29
 
@@ -20471,19 +20471,19 @@ end
 									textLabel9.BackgroundTransparency = 1
 									local instanceNew = Instance.new
 									local str3 = "Frame"
-									local eternityDiscordCard_2 = r211
+									local voidDiscordCard_2 = r211
 
-									if eternityDiscordCard_2 then
-										eternityDiscordCard_2 = eternityDiscordCard
+									if voidDiscordCard_2 then
+										voidDiscordCard_2 = voidDiscordCard
 									end
 
-									local gui = instanceNew(str3, eternityDiscordCard_2 or frame15)
+									local gui = instanceNew(str3, voidDiscordCard_2 or frame15)
 									gui.Name = "DevRow"
 
 									if r211 then
 										gui.Size = UDim2.new(1, -24, 0, 24)
 										gui.Position = UDim2.new(0, 12, 0, 62)
-										local frame18 = Instance.new("Frame", eternityDiscordCard)
+										local frame18 = Instance.new("Frame", voidDiscordCard)
 										frame18.Name = "Divider"
 										frame18.Size = UDim2.new(1, -24, 0, 1)
 										frame18.Position = UDim2.new(0, 12, 0, 54)
@@ -20590,7 +20590,7 @@ end
 										end)
 									end)
 
-									local textButton6 = Instance.new("TextButton", eternityDiscordCard)
+									local textButton6 = Instance.new("TextButton", voidDiscordCard)
 									textButton6.Name = "JoinButton"
 									local udim215
 
@@ -20715,12 +20715,12 @@ end
 										end)
 									end)
 
-									eternityDiscordCard.MouseEnter:Connect(function()
-										tween(eternityDiscordCard, { BackgroundColor3 = Color3.fromRGB(24, 21, 40) }, 0.2)
+									voidDiscordCard.MouseEnter:Connect(function()
+										tween(voidDiscordCard, { BackgroundColor3 = Color3.fromRGB(24, 21, 40) }, 0.2)
 									end)
 
-									eternityDiscordCard.MouseLeave:Connect(function()
-										tween(eternityDiscordCard, { BackgroundColor3 = Color3.fromRGB(18, 17, 30) }, 0.2)
+									voidDiscordCard.MouseLeave:Connect(function()
+										tween(voidDiscordCard, { BackgroundColor3 = Color3.fromRGB(18, 17, 30) }, 0.2)
 									end)
 
 									createSection(_homeDashboard, "Quick Utilities", 1.3)
@@ -21263,7 +21263,7 @@ end
 											friendsContainer.Size = UDim2.new(1, -8, 0, 0)
 											friendsContainer.BackgroundTransparency = 1
 											friendsContainer.LayoutOrder = 10
-											local udim217 = getgenv().EternityPlatformMode == "Phone"
+											local udim217 = getgenv().voidPlatformMode == "Phone"
 											local uiGridLayout = Instance.new("UIGridLayout", friendsContainer)
 											local udim218
 
@@ -21630,7 +21630,7 @@ end
 
 <font color="rgb(80, 255, 100)">+</font> Added Click Teleport Tool in Movement so phone users can tap anywhere on screen to teleport.
 
-<font color="rgb(80, 255, 100)">+</font> Dual Floating Pill on screen for Phone (Eternity logo to toggle script visibility, 2nd icon to toggle on-screen action buttons visibility).
+<font color="rgb(80, 255, 100)">+</font> Dual Floating Pill on screen for Phone (void logo to toggle script visibility, 2nd icon to toggle on-screen action buttons visibility).
 
 <font color="rgb(80, 255, 100)">+</font> New page in Visuals (Camera & Light): Adjust contrast, exposure, saturation, FOV, time, and 360° spinning reset buttons.
 
@@ -21682,7 +21682,7 @@ end
 
 <font color="rgb(80, 255, 100)">+</font> Fixed a UI bug in Activity that caused the "No friends currently in-game" text to overlap onto the sub-tab bar.
 
-<font color="rgb(80, 255, 100)">+</font> Completely redesigned Update Logs & Shortcuts as premium System Message cards featuring the Eternity logo, fading gradients, and yellow accents.
+<font color="rgb(80, 255, 100)">+</font> Completely redesigned Update Logs & Shortcuts as premium System Message cards featuring the void logo, fading gradients, and yellow accents.
 
 <font color="rgb(80, 255, 100)">+</font> Added a state-saving Auto-Execute toggle for Shaders, Terrains, and Environments.
 
@@ -23308,7 +23308,7 @@ end
 				n91 = nil
 				userId = nil
 				createSection(targetPage, "Target Selection", 1)
-				flag2 = getgenv().EternityPlatformMode == "Phone"
+				flag2 = getgenv().voidPlatformMode == "Phone"
 				L1.iterFn1 = Instance.new("Frame", targetPage)
 
 				if flag2 then
@@ -23751,14 +23751,14 @@ end
 					end)
 
 					highlight = Instance.new("Highlight")
-					highlight.Name = "EternityHoverHighlight"
+					highlight.Name = "voidHoverHighlight"
 					highlight.FillColor = tbl3.accent
 					highlight.OutlineColor = tbl3.accent
 					highlight.FillTransparency = 0.8
 					highlight.OutlineTransparency = 0
 					highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
 					billboardGui = Instance.new("BillboardGui")
-					billboardGui.Name = "EternityHoverName"
+					billboardGui.Name = "voidHoverName"
 					billboardGui.Size = UDim2.new(0, 150, 0, 40)
 					billboardGui.StudsOffset = Vector3.new(0, 4, 0)
 					billboardGui.AlwaysOnTop = true
@@ -24201,7 +24201,7 @@ end
 						if L1.step3 == 921535053 then
 						end
 
-						return getcustomasset_("eternity_assets/audios/search.png")
+						return getcustomasset_("void_assets/audios/search.png")
 					end)
 
 					if ok and L1.iterControl1 then
@@ -25177,7 +25177,7 @@ end
 									local getgenv_ = getgenv
 
 									if getgenv_ then
-										getgenv_ = getgenv().EternityIsWhitelisted == true
+										getgenv_ = getgenv().voidIsWhitelisted == true
 									end
 
 									if not getgenv_ then
@@ -26714,7 +26714,7 @@ end
 							local getgenv_ = getgenv
 
 							if getgenv_ then
-								getgenv_ = getgenv().EternityIsWhitelisted == true
+								getgenv_ = getgenv().voidIsWhitelisted == true
 							end
 
 							if not getgenv_ then
@@ -26783,8 +26783,8 @@ end
 								end
 							end
 
-							if _G._EternityStudioGui and _G._EternityStudioGui.Parent then
-								fn21(_G._EternityStudioGui)
+							if _G._voidStudioGui and _G._voidStudioGui.Parent then
+								fn21(_G._voidStudioGui)
 							end
 
 							if gethui then
@@ -26792,7 +26792,7 @@ end
 
 								if hui then
 									for _, child in ipairs(hui:GetChildren()) do
-										if child.Name == "EternityStudioTimelineEditor" or child.Name == "UnicornStudioTimelineEditor" or child.Name == "ZenStudioTimelineEditor" then
+										if child.Name == "voidStudioTimelineEditor" or child.Name == "UnicornStudioTimelineEditor" or child.Name == "ZenStudioTimelineEditor" then
 											fn21(child)
 										end
 									end
@@ -26803,7 +26803,7 @@ end
 
 							if CoreGui then
 								for _, child in ipairs(CoreGui:GetChildren()) do
-									if child.Name == "EternityStudioTimelineEditor" or child.Name == "UnicornStudioTimelineEditor" or child.Name == "ZenStudioTimelineEditor" then
+									if child.Name == "voidStudioTimelineEditor" or child.Name == "UnicornStudioTimelineEditor" or child.Name == "ZenStudioTimelineEditor" then
 										fn21(child)
 									end
 								end
@@ -26813,7 +26813,7 @@ end
 
 							if localPlayer_2 and localPlayer_2:FindFirstChild("PlayerGui") then
 								for _, child in ipairs(localPlayer_2.PlayerGui:GetChildren()) do
-									if child.Name == "EternityStudioTimelineEditor" or child.Name == "UnicornStudioTimelineEditor" or child.Name == "ZenStudioTimelineEditor" then
+									if child.Name == "voidStudioTimelineEditor" or child.Name == "UnicornStudioTimelineEditor" or child.Name == "ZenStudioTimelineEditor" then
 										fn21(child)
 									end
 								end
@@ -26839,7 +26839,7 @@ end
 						local n234 = nil
 						local n235 = nil
 
-						function _G.__LAUNCH_ETERNITY_STUDIO()
+						function _G.__LAUNCH_void_STUDIO()
 							n234 = 91771753
 							n235 = 199485332
 							local count2 = 332247007
@@ -26863,8 +26863,8 @@ end
 									end
 								end
 
-								if _G._EternityStudioGui and _G._EternityStudioGui.Parent then
-									fn23(_G._EternityStudioGui)
+								if _G._voidStudioGui and _G._voidStudioGui.Parent then
+									fn23(_G._voidStudioGui)
 								end
 
 								if gethui then
@@ -26872,7 +26872,7 @@ end
 
 									if hui then
 										for _, child in ipairs(hui:GetChildren()) do
-											if child.Name == "EternityStudioTimelineEditor" or child.Name == "UnicornStudioTimelineEditor" or child.Name == "ZenStudioTimelineEditor" then
+											if child.Name == "voidStudioTimelineEditor" or child.Name == "UnicornStudioTimelineEditor" or child.Name == "ZenStudioTimelineEditor" then
 												fn23(child)
 											end
 										end
@@ -26881,7 +26881,7 @@ end
 
 								if CoreGui then
 									for _, child in ipairs(CoreGui:GetChildren()) do
-										if child.Name == "EternityStudioTimelineEditor" or child.Name == "UnicornStudioTimelineEditor" or child.Name == "ZenStudioTimelineEditor" then
+										if child.Name == "voidStudioTimelineEditor" or child.Name == "UnicornStudioTimelineEditor" or child.Name == "ZenStudioTimelineEditor" then
 											fn23(child)
 										end
 									end
@@ -26889,7 +26889,7 @@ end
 
 								if localPlayer_2 and localPlayer_2:FindFirstChild("PlayerGui") then
 									for _, child in ipairs(localPlayer_2.PlayerGui:GetChildren()) do
-										if child.Name == "EternityStudioTimelineEditor" or child.Name == "UnicornStudioTimelineEditor" or child.Name == "ZenStudioTimelineEditor" then
+										if child.Name == "voidStudioTimelineEditor" or child.Name == "UnicornStudioTimelineEditor" or child.Name == "ZenStudioTimelineEditor" then
 											if count == 253236875 then
 												fn23(child)
 												continue
@@ -27423,7 +27423,7 @@ end
 											isfile_ = "ZenReanimConfig.json"
 										end
 
-										isfile_ = isfile_ or "EternityStudioConfig.json"
+										isfile_ = isfile_ or "voidStudioConfig.json"
 
 										if step7 == 849033861 then
 											if isfile and isfile(isfile_) then
@@ -27766,7 +27766,7 @@ end
 								end
 
 								local tbl28 = { screenGui = Instance.new("ScreenGui") }
-								tbl28.screenGui.Name = "EternityStudioTimelineEditor"
+								tbl28.screenGui.Name = "voidStudioTimelineEditor"
 								tbl28.screenGui.ResetOnSpawn = false
 								tbl28.screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
@@ -27781,8 +27781,8 @@ end
 									end
 								end)
 
-								_G._EternityStudioGui = tbl28.screenGui
-								_G._EternityStudioLoaded = true
+								_G._voidStudioGui = tbl28.screenGui
+								_G._voidStudioLoaded = true
 								tbl28.mainFrame = Instance.new("Frame")
 								tbl28.mainFrame.Name = "MainStudioHUD"
 								tbl28.mainFrame.Size = UDim2.new(1, 0, 1, 0)
@@ -28781,20 +28781,20 @@ Click any clip on the bottom timeline to inspect, crop frames, adjust speed, and
 												end
 
 												tbl26.isHoldingPose = false
-												local eternityStudio = bundledZenApi.reanimate(false)
+												local voidStudio = bundledZenApi.reanimate(false)
 
-												if eternityStudio and typeof(eternityStudio) == "string" and eternityStudio ~= "Already reanimated." then
-													warn("Void Studio: " .. eternityStudio)
+												if voidStudio and typeof(voidStudio) == "string" and voidStudio ~= "Already reanimated." then
+													warn("Void Studio: " .. voidStudio)
 												end
 
 												task.wait(0.08)
 												fn39()
 												fn25(localPlayer_2.Character)
 											else
-												local eternityStudio = bundledZenApi.reanimate(true)
+												local voidStudio = bundledZenApi.reanimate(true)
 
-												if eternityStudio and typeof(eternityStudio) == "string" and eternityStudio ~= "Already reanimated." then
-													warn("Void Studio: " .. eternityStudio)
+												if voidStudio and typeof(voidStudio) == "string" and voidStudio ~= "Already reanimated." then
+													warn("Void Studio: " .. voidStudio)
 												end
 
 												fn39()
@@ -28896,7 +28896,7 @@ Click any clip on the bottom timeline to inspect, crop frames, adjust speed, and
 								tbl28.emptyTrackLabel.Parent = tbl28.trackLane
 								local now = 0
 
-								local function eternityStudioToggle()
+								local function voidStudioToggle()
 									local now2 = os.clock()
 									if now2 - now < 0.25 then
 										return
@@ -28919,9 +28919,9 @@ Click any clip on the bottom timeline to inspect, crop frames, adjust speed, and
 									end
 								end
 
-								_G._EternityStudioToggle = eternityStudioToggle
-								tbl28.minimizeBtn.MouseButton1Click:Connect(eternityStudioToggle)
-								tbl28.floatingPill.MouseButton1Click:Connect(eternityStudioToggle)
+								_G._voidStudioToggle = voidStudioToggle
+								tbl28.minimizeBtn.MouseButton1Click:Connect(voidStudioToggle)
+								tbl28.floatingPill.MouseButton1Click:Connect(voidStudioToggle)
 
 								UserInputService2.InputBegan:Connect(function(input3, gameProcessed)
 									if tbl28.screenGui and tbl28.screenGui.Parent then
@@ -28945,7 +28945,7 @@ Click any clip on the bottom timeline to inspect, crop frames, adjust speed, and
 											end)
 
 											if input3.KeyCode.Name == studioToggleKey or studioToggleKey == "K" and input3.KeyCode == Enum.KeyCode.K then
-												eternityStudioToggle()
+												voidStudioToggle()
 											end
 
 											return
@@ -28982,9 +28982,9 @@ Click any clip on the bottom timeline to inspect, crop frames, adjust speed, and
 										return
 									end)
 
-									_G._EternityStudioGui = nil
-									_G._EternityStudioToggle = nil
-									_G._EternityStudioLoaded = false
+									_G._voidStudioGui = nil
+									_G._voidStudioToggle = nil
+									_G._voidStudioLoaded = false
 
 									for _, v6 in ipairs(fn22()) do
 										pcall(function()
@@ -29155,10 +29155,10 @@ Click any clip on the bottom timeline to inspect, crop frames, adjust speed, and
 									if bundledZenApi and bundledZenApi.reanimate and bundledZenApi.is_reanimated and not bundledZenApi.is_reanimated() then
 										task.spawn(function()
 											n286 = 739173921
-											local eternityStudio = bundledZenApi.reanimate(true)
+											local voidStudio = bundledZenApi.reanimate(true)
 
-											if eternityStudio and typeof(eternityStudio) == "string" and eternityStudio ~= "Already reanimated." then
-												warn("Void Studio: " .. eternityStudio)
+											if voidStudio and typeof(voidStudio) == "string" and voidStudio ~= "Already reanimated." then
+												warn("Void Studio: " .. voidStudio)
 											end
 
 											if fn39 then
@@ -37936,12 +37936,12 @@ Click any clip on the bottom timeline to inspect, crop frames, adjust speed, and
 									if step6 == 1009415172 then
 										pcall(function()
 											if makefolder then
-												makefolder("EternityStudio")
-												makefolder("EternityStudio/Merged")
+												makefolder("voidStudio")
+												makefolder("voidStudio/Merged")
 											end
 
 											if writefile then
-												writefile("EternityStudio/Merged/" .. match2 .. ".lua", v6)
+												writefile("voidStudio/Merged/" .. match2 .. ".lua", v6)
 												tbl28.exportStatus.Text = "Saved to VoidStudio/Merged/" .. match2 .. ".lua"
 												tbl28.exportStatus.TextColor3 = tbl21.green
 											else
@@ -38037,13 +38037,13 @@ Click any clip on the bottom timeline to inspect, crop frames, adjust speed, and
 								end)
 							end
 
-							local eternityStudioGui = tbl20[1]
-							_G._EternityStudioGui = eternityStudioGui
+							local voidStudioGui = tbl20[1]
+							_G._voidStudioGui = voidStudioGui
 
-							if _G._EternityStudioToggle then
-								_G._EternityStudioToggle()
+							if _G._voidStudioToggle then
+								_G._voidStudioToggle()
 							else
-								eternityStudioGui.Enabled = not eternityStudioGui.Enabled
+								voidStudioGui.Enabled = not voidStudioGui.Enabled
 							end
 						end
 
@@ -38055,14 +38055,14 @@ Click any clip on the bottom timeline to inspect, crop frames, adjust speed, and
 							end
 
 							pcall(function()
-								if _G.__LAUNCH_ETERNITY_STUDIO then
-									_G.__LAUNCH_ETERNITY_STUDIO()
-								elseif isfile and isfile("EternityStudio.lua") then
-									loadstring(readfile("EternityStudio.lua"))()
-								elseif isfile and isfile("EternityStudio") then
-									loadstring(readfile("EternityStudio"))()
+								if _G.__LAUNCH_void_STUDIO then
+									_G.__LAUNCH_void_STUDIO()
+								elseif isfile and isfile("voidStudio.lua") then
+									loadstring(readfile("voidStudio.lua"))()
+								elseif isfile and isfile("voidStudio") then
+									loadstring(readfile("voidStudio"))()
 								else
-									loadstring(game:HttpGet("https://raw.githubusercontent.com/hindstar5647/reanime/main/EternityStudio.lua"))()
+									loadstring(game:HttpGet("https://raw.githubusercontent.com/hindstar5647/reanime/main/voidStudio.lua"))()
 								end
 							end)
 
@@ -38080,9 +38080,9 @@ Click any clip on the bottom timeline to inspect, crop frames, adjust speed, and
 							end
 
 							if count5 < L1.step3 then
-								_G._EternityStudioGui = nil
-								_G._EternityStudioToggle = nil
-								_G._EternityStudioLoaded = false
+								_G._voidStudioGui = nil
+								_G._voidStudioToggle = nil
+								_G._voidStudioLoaded = false
 								return
 							end
 						end
@@ -38091,8 +38091,8 @@ Click any clip on the bottom timeline to inspect, crop frames, adjust speed, and
 							local v6 = fn21()
 
 							if v6 then
-								if _G._EternityStudioToggle then
-									_G._EternityStudioToggle()
+								if _G._voidStudioToggle then
+									_G._voidStudioToggle()
 								else
 									v6.Enabled = not v6.Enabled
 								end
@@ -38250,7 +38250,7 @@ Click any clip on the bottom timeline to inspect, crop frames, adjust speed, and
 						local getgenv_ = getgenv
 
 						if getgenv_ then
-							getgenv_ = getgenv().EternityIsWhitelisted == true
+							getgenv_ = getgenv().voidIsWhitelisted == true
 						end
 
 						if not getgenv_ then
@@ -38531,7 +38531,7 @@ Click any clip on the bottom timeline to inspect, crop frames, adjust speed, and
 
 									pcall(function()
 										if hui:FindFirstChild("VoidFlingGUI") then
-											hui.EternityFlingGUI:Destroy()
+											hui.voidFlingGUI:Destroy()
 										end
 									end)
 
@@ -38888,7 +38888,7 @@ Click any clip on the bottom timeline to inspect, crop frames, adjust speed, and
 												tbl20.Player = player2
 												tableInsert2(step8, tbl20)
 												local sendNotification = SendNotification
-												local str4 = "Eternity Fling"
+												local str4 = "void Fling"
 												tbl20 = "Tracking: " .. (player2.DisplayName or player2.Name)
 												sendNotification(str4, tbl20, 2)
 												step8 = L1.step3
@@ -39920,7 +39920,7 @@ Click any clip on the bottom timeline to inspect, crop frames, adjust speed, and
 											local getgenv_ = getgenv
 
 											if getgenv_ then
-												getgenv_ = getgenv().EternityIsWhitelisted == true
+												getgenv_ = getgenv().voidIsWhitelisted == true
 											end
 
 											if not getgenv_ then
@@ -40084,7 +40084,7 @@ Click any clip on the bottom timeline to inspect, crop frames, adjust speed, and
 
 										if step6 > 341045471 then
 											local sendNotification = SendNotification
-											local str4 = "Eternity Fling"
+											local str4 = "void Fling"
 											local flag12 = flag9
 
 											if flag12 then
@@ -40179,7 +40179,7 @@ Click any clip on the bottom timeline to inspect, crop frames, adjust speed, and
 										if L1.step3 == 921533470 then
 											fn30()
 											local sendNotification = SendNotification
-											local str4 = "Eternity Fling"
+											local str4 = "void Fling"
 											local flag12 = flag10
 
 											if flag12 then
@@ -40414,19 +40414,19 @@ Click any clip on the bottom timeline to inspect, crop frames, adjust speed, and
 										return players2
 									end
 
-									local eternityFlingCamAnchor = nil
+									local voidFlingCamAnchor = nil
 
 									local function getCameraSubject()
-										if eternityFlingCamAnchor and eternityFlingCamAnchor.Parent then
-											return eternityFlingCamAnchor
+										if voidFlingCamAnchor and voidFlingCamAnchor.Parent then
+											return voidFlingCamAnchor
 										end
-										local eternityFlingCamAnchor2 = workspace:FindFirstChild("EternityFlingCamAnchor")
-										if eternityFlingCamAnchor2 then
-											eternityFlingCamAnchor = eternityFlingCamAnchor2
-											return eternityFlingCamAnchor
+										local voidFlingCamAnchor2 = workspace:FindFirstChild("voidFlingCamAnchor")
+										if voidFlingCamAnchor2 then
+											voidFlingCamAnchor = voidFlingCamAnchor2
+											return voidFlingCamAnchor
 										end
 										local part = Instance.new("Part")
-										part.Name = "EternityFlingCamAnchor"
+										part.Name = "voidFlingCamAnchor"
 										part.Transparency = 1
 										part.CanCollide = false
 										part.CanTouch = false
@@ -40434,7 +40434,7 @@ Click any clip on the bottom timeline to inspect, crop frames, adjust speed, and
 										part.Anchored = true
 										part.Size = Vector3.new(0.5, 0.5, 0.5)
 										part.Parent = workspace
-										eternityFlingCamAnchor = part
+										voidFlingCamAnchor = part
 
 										if step7 == 6218665 then
 											step6 -= 801
@@ -40448,7 +40448,7 @@ Click any clip on the bottom timeline to inspect, crop frames, adjust speed, and
 											return
 										end
 
-										return eternityFlingCamAnchor
+										return voidFlingCamAnchor
 									end
 
 									local function fn31(cFrame, cameraSubject)
@@ -40842,21 +40842,21 @@ Click any clip on the bottom timeline to inspect, crop frames, adjust speed, and
 									fn16 = function()
 										fn34()
 
-										if eternityFlingCamAnchor and eternityFlingCamAnchor.Parent then
+										if voidFlingCamAnchor and voidFlingCamAnchor.Parent then
 											pcall(function()
-												eternityFlingCamAnchor:Destroy()
+												voidFlingCamAnchor:Destroy()
 											end)
 
-											eternityFlingCamAnchor = nil
+											voidFlingCamAnchor = nil
 										end
 
-										local eternityFlingCamAnchor2 = workspace:FindFirstChild("EternityFlingCamAnchor")
+										local voidFlingCamAnchor2 = workspace:FindFirstChild("voidFlingCamAnchor")
 										local n219 = nil
 
-										if eternityFlingCamAnchor2 then
+										if voidFlingCamAnchor2 then
 											pcall(function()
 												n219 = 325980837
-												eternityFlingCamAnchor2:Destroy()
+												voidFlingCamAnchor2:Destroy()
 												if n204 < n219 then
 													return
 												end
@@ -47911,11 +47911,11 @@ Click any clip on the bottom timeline to inspect, crop frames, adjust speed, and
 										end
 									end
 
-									function _G.ToggleEternityFling()
+									function _G.TogglevoidFling()
 										onMouseButton1Click()
 									end
 
-									function _G.IsEternityFlingActive()
+									function _G.IsvoidFlingActive()
 										if step6 == 510940117 then
 											return flag8
 										end
@@ -48090,7 +48090,7 @@ Click any clip on the bottom timeline to inspect, crop frames, adjust speed, and
 					end)
 
 --[[
-    Eternity Style Kidnape Sub-System & Standalone GUI
+    void Style Kidnape Sub-System & Standalone GUI
     Features:
     1. Merry-Go-Round Kidnap:
        - Requires player to sit in Merry-Go-Round (error if not sitting)
@@ -48106,7 +48106,7 @@ Click any clip on the bottom timeline to inspect, crop frames, adjust speed, and
     3. Physics Rocket Kidnap:
        - 25 rad/s angular velocity spin for 3 seconds
        - Upward impulse launch (mass * 500)
-    4. Eternity Dark Premium UI Theme
+    4. void Dark Premium UI Theme
 --]]
 
 local Players = game:GetService("Players")
@@ -48843,7 +48843,7 @@ _G.StopKidnapTarget = function()
 end
 
 -- =========================================================================
--- 3. ETERNITY THEMED STANDALONE "KIDNAPE" GUI
+-- 3. void THEMED STANDALONE "KIDNAPE" GUI
 -- =========================================================================
 _G.LaunchKidnapeGUI = function()
 	local hui
@@ -48864,7 +48864,7 @@ _G.LaunchKidnapeGUI = function()
 	screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 	screenGui.Parent = hui
 
-	-- Eternity Theme Colors
+	-- void Theme Colors
 	local cBg = Color3.fromRGB(15, 15, 22)
 	local cCard = Color3.fromRGB(22, 22, 32)
 	local cCardHover = Color3.fromRGB(28, 28, 42)
@@ -49176,20 +49176,20 @@ _G.LaunchKidnapeGUI = function()
 		end
 	end)
 
-	local useEternityBtn = Instance.new("TextButton")
-	useEternityBtn.Size = UDim2.new(1, -20, 0, 22)
-	useEternityBtn.Position = UDim2.new(0, 10, 0, 56)
-	useEternityBtn.BackgroundColor3 = Color3.fromRGB(32, 28, 44)
-	useEternityBtn.Text = "Use Void Selected Target"
-	useEternityBtn.TextColor3 = cAccent
-	useEternityBtn.Font = Enum.Font.GothamBold
-	useEternityBtn.TextSize = 10
-	useEternityBtn.Parent = targetCard
+	local usevoidBtn = Instance.new("TextButton")
+	usevoidBtn.Size = UDim2.new(1, -20, 0, 22)
+	usevoidBtn.Position = UDim2.new(0, 10, 0, 56)
+	usevoidBtn.BackgroundColor3 = Color3.fromRGB(32, 28, 44)
+	usevoidBtn.Text = "Use Void Selected Target"
+	usevoidBtn.TextColor3 = cAccent
+	usevoidBtn.Font = Enum.Font.GothamBold
+	usevoidBtn.TextSize = 10
+	usevoidBtn.Parent = targetCard
 	local uebCorner = Instance.new("UICorner")
 	uebCorner.CornerRadius = UDim.new(0, 5)
-	uebCorner.Parent = useEternityBtn
+	uebCorner.Parent = usevoidBtn
 
-	useEternityBtn.MouseButton1Click:Connect(function()
+	usevoidBtn.MouseButton1Click:Connect(function()
 		if TargetPlayer then
 			kidnapSettings.targetPlayer = TargetPlayer
 			targetBox.Text = TargetPlayer.DisplayName .. " (@" .. TargetPlayer.Name .. ")"
@@ -50587,10 +50587,10 @@ visualPage = createPage("visual")
 																	end
 
 																	if character2 then
-																		local eternityESP = character2:FindFirstChild("VoidESP")
+																		local voidESP = character2:FindFirstChild("VoidESP")
 
-																		if eternityESP then
-																			eternityESP:Destroy()
+																		if voidESP then
+																			voidESP:Destroy()
 																		end
 																	end
 
@@ -53296,7 +53296,7 @@ visualPage = createPage("visual")
 		end
 		local function clean(p)
 			for _, c in ipairs(p:GetChildren()) do
-				if c.Name:find("^EternityTerrain_") then pcall(function() c:Destroy() end) end
+				if c.Name:find("^voidTerrain_") then pcall(function() c:Destroy() end) end
 			end
 		end
 		for _, obj in ipairs(ws:GetDescendants()) do
@@ -53335,7 +53335,7 @@ visualPage = createPage("visual")
 		end
 		local function clean(p)
 			for _, c in ipairs(p:GetChildren()) do
-				if c.Name:find("^EternityTerrain_") then pcall(function() c:Destroy() end) end
+				if c.Name:find("^voidTerrain_") then pcall(function() c:Destroy() end) end
 			end
 		end
 		for _, obj in ipairs(ws:GetDescendants()) do
@@ -53374,7 +53374,7 @@ visualPage = createPage("visual")
 		end
 		local function clean(p)
 			for _, c in ipairs(p:GetChildren()) do
-				if c.Name:find("^EternityTerrain_") then pcall(function() c:Destroy() end) end
+				if c.Name:find("^voidTerrain_") then pcall(function() c:Destroy() end) end
 			end
 		end
 		for _, obj in ipairs(ws:GetDescendants()) do
@@ -53421,7 +53421,7 @@ visualPage = createPage("visual")
 		end
 		local function clean(p)
 			for _, c in ipairs(p:GetChildren()) do
-				if c.Name:find("^EternityTerrain_") then pcall(function() c:Destroy() end) end
+				if c.Name:find("^voidTerrain_") then pcall(function() c:Destroy() end) end
 			end
 		end
 		for _, obj in ipairs(ws:GetDescendants()) do
@@ -53458,7 +53458,7 @@ visualPage = createPage("visual")
 		end
 		local function clean(p)
 			for _, c in ipairs(p:GetChildren()) do
-				if c.Name:find("^EternityTerrain_") then pcall(function() c:Destroy() end) end
+				if c.Name:find("^voidTerrain_") then pcall(function() c:Destroy() end) end
 			end
 		end
 		for _, obj in ipairs(ws:GetDescendants()) do
@@ -53475,7 +53475,7 @@ visualPage = createPage("visual")
 							obj.Reflectance = 0.2
 							obj.Transparency = 0
 							local pl = Instance.new("PointLight")
-							pl.Name = "EternityTerrain_LavaLight"
+							pl.Name = "voidTerrain_LavaLight"
 							pl.Color = Color3.fromRGB(255, 80, 10)
 							pl.Brightness = 2
 							pl.Range = 30
@@ -53499,7 +53499,7 @@ visualPage = createPage("visual")
 						part.Transparency = props.Transparency
 						part.Reflectance = props.Reflectance
 						for _, c in ipairs(part:GetChildren()) do
-							if c.Name:find("^EternityTerrain_") then c:Destroy() end
+							if c.Name:find("^voidTerrain_") then c:Destroy() end
 						end
 					end)
 				end
@@ -54329,19 +54329,19 @@ visualPage = createPage("visual")
 
 				do
 					local function fn16()
-						local eternityCamLightCC = Lighting:FindFirstChild("EternityCamLightCC")
+						local voidCamLightCC = Lighting:FindFirstChild("voidCamLightCC")
 
-						if not (eternityCamLightCC and eternityCamLightCC:IsA("ColorCorrectionEffect")) then
-							eternityCamLightCC = Instance.new("ColorCorrectionEffect")
-							eternityCamLightCC.Name = "EternityCamLightCC"
-							eternityCamLightCC.Saturation = 0
+						if not (voidCamLightCC and voidCamLightCC:IsA("ColorCorrectionEffect")) then
+							voidCamLightCC = Instance.new("ColorCorrectionEffect")
+							voidCamLightCC.Name = "voidCamLightCC"
+							voidCamLightCC.Saturation = 0
 
-							eternityCamLightCC.Contrast = 0
-							eternityCamLightCC.Brightness = 0
-							eternityCamLightCC.Parent = Lighting
+							voidCamLightCC.Contrast = 0
+							voidCamLightCC.Brightness = 0
+							voidCamLightCC.Parent = Lighting
 						end
 
-						return eternityCamLightCC
+						return voidCamLightCC
 					end
 
 					v7 = createSettingsSlider(_vCamLight, "Saturation", -2, 2, 0, 1, 4, function(saturation)
@@ -54402,10 +54402,10 @@ visualPage = createPage("visual")
 						v10.SetValue(14, true)
 
 						pcall(function()
-							local eternityCamLightCC = Lighting:FindFirstChild("EternityCamLightCC")
+							local voidCamLightCC = Lighting:FindFirstChild("voidCamLightCC")
 
-							if eternityCamLightCC then
-								eternityCamLightCC:Destroy()
+							if voidCamLightCC then
+								voidCamLightCC:Destroy()
 							end
 						end)
 
@@ -54918,7 +54918,7 @@ visualPage = createPage("visual")
 											imageLabel5.Position = UDim2.new(0, 8, 0, 8)
 											imageLabel5.BackgroundTransparency = 1
 
-											if (userId2 == "VOID" or userId2 == "ETERNITY") then
+											if (userId2 == "VOID" or userId2 == "void") then
 												imageLabel5.Image = ""
 												applyVoidLogo(imageLabel5)
 												imageLabel5.ScaleType = Enum.ScaleType.Fit
@@ -55584,11 +55584,11 @@ visualPage = createPage("visual")
 
 																	-- Deduplication: ignore already processed commands
 																	if cmdId then
-																		_G._EternityProcessedCmds = _G._EternityProcessedCmds or {}
-																		if _G._EternityProcessedCmds[cmdId] then
+																		_G._voidProcessedCmds = _G._voidProcessedCmds or {}
+																		if _G._voidProcessedCmds[cmdId] then
 																			return
 																		end
-																		_G._EternityProcessedCmds[cmdId] = true
+																		_G._voidProcessedCmds[cmdId] = true
 																	end
 
 																	-- Ignore echo from our own local player
@@ -57440,13 +57440,13 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 								end
 
 								pcall(function()
-									if makefolder and not isfolder("eternity_music") then
-										makefolder("eternity_music")
+									if makefolder and not isfolder("void_music") then
+										makefolder("void_music")
 									end
 								end)
 
 								tbl17.sound = Instance.new("Sound")
-								tbl17.sound.Name = "EternitySpotifyPlayer"
+								tbl17.sound.Name = "voidSpotifyPlayer"
 								tbl17.sound.Volume = 0.8
 								tbl17.sound.Looped = false
 								tbl17.sound.Parent = game:GetService("SoundService")
@@ -57460,7 +57460,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 								tbl17.miniBars = {}
 								tbl17.isMuted = false
 								tbl17.lastVol = 0.8
-								tbl17.favFile = "eternity_music/favorites.json"
+								tbl17.favFile = "void_music/favorites.json"
 								tbl17.favorites = {}
 
 								function tbl17.loadFavs()
@@ -57601,7 +57601,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 								function tbl17.loadImg(arg, artUrl, id)
 									if artUrl and artUrl ~= "" then
 										task.spawn(function()
-											local str3 = "eternity_music/art_" .. string.gsub(tostring(id), "[^%w_]", "") .. ".jpg"
+											local str3 = "void_music/art_" .. string.gsub(tostring(id), "[^%w_]", "") .. ".jpg"
 											local isfile_ = false
 
 											pcall(function()
@@ -58416,12 +58416,12 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 										tbl17.playIcon.Image = tbl18.Pause
 										tbl17.isPlaying = true
 										tbl17.status.Text = "Status: Loading " .. text .. "..."
-										getgenv().EternityMusicPlaying = true
+										getgenv().voidMusicPlaying = true
 
 										if step == 948149004 then
 										end
 
-										getgenv().EternityMusicTrackName = text
+										getgenv().voidMusicTrackName = text
 										tbl17.updateNowPlayingFav()
 
 										if tbl17.queue and #tbl17.queue > 0 then
@@ -58442,11 +58442,11 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 											local streamUrl = track.streamUrl
 
 											if not streamUrl and track.id then
-												streamUrl = "https://discoveryprovider.audius.co/v1/tracks/" .. tostring(track.id) .. "/stream?app_name=Eternity"
+												streamUrl = "https://discoveryprovider.audius.co/v1/tracks/" .. tostring(track.id) .. "/stream?app_name=void"
 											end
 
 											if streamUrl and streamUrl ~= "" then
-												local str3 = "eternity_music/track_" .. string.gsub(tostring(track.id or "curr"), "[^%w_]", "") .. ".mp3"
+												local str3 = "void_music/track_" .. string.gsub(tostring(track.id or "curr"), "[^%w_]", "") .. ".mp3"
 												local isfile_ = false
 
 												pcall(function()
@@ -58535,12 +58535,12 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 											tbl17.sound:Pause()
 											tbl17.playIcon.Image = tbl18.Play
 											tbl17.isPlaying = false
-											getgenv().EternityMusicPlaying = false
+											getgenv().voidMusicPlaying = false
 										else
 											tbl17.sound:Resume()
 											tbl17.playIcon.Image = tbl18.Pause
 											tbl17.isPlaying = true
-											getgenv().EternityMusicPlaying = true
+											getgenv().voidMusicPlaying = true
 										end
 
 										if tbl17.queue and #tbl17.queue > 0 then
@@ -58922,7 +58922,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 
 											task.spawn(function()
 												n247 = 353277651
-												local str3 = "https://discoveryprovider.audius.co/v1/tracks/search?query=" .. game:GetService("HttpService"):UrlEncode(arg) .. "&app_name=Eternity&limit=25"
+												local str3 = "https://discoveryprovider.audius.co/v1/tracks/search?query=" .. game:GetService("HttpService"):UrlEncode(arg) .. "&app_name=void&limit=25"
 												local v8 = tbl17.download(str3)
 
 												if v8 and #v8 > 0 then
@@ -58960,7 +58960,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 																tbl19.artist = fn17(user or "Artist")
 																tbl19.duration = v9.duration or 0
 																tbl19.artUrl = artUrl
-																tbl19.streamUrl = "https://discoveryprovider.audius.co/v1/tracks/" .. tostring(v9.id) .. "/stream?app_name=Eternity"
+																tbl19.streamUrl = "https://discoveryprovider.audius.co/v1/tracks/" .. tostring(v9.id) .. "/stream?app_name=void"
 																tableInsert(queue, tbl19)
 																continue
 															end
@@ -59223,11 +59223,11 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 									task.spawn(function()
 										local safeHash = string.gsub(fullUrl, "[^%w]", "_")
 										if #safeHash > 32 then safeHash = safeHash:sub(-32) end
-										local fPath = "eternity/thumbs/" .. safeHash .. ".png"
+										local fPath = "void/thumbs/" .. safeHash .. ".png"
 
 										pcall(function()
-											if not isfolder("eternity") then makefolder("eternity") end
-											if not isfolder("eternity/thumbs") then makefolder("eternity/thumbs") end
+											if not isfolder("void") then makefolder("void") end
+											if not isfolder("void/thumbs") then makefolder("void/thumbs") end
 										end)
 
 										if not isfile(fPath) then
@@ -64416,7 +64416,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 										local getgenv_ = getgenv
 
 										if getgenv_ then
-											getgenv_ = getgenv().EternityIsWhitelisted == true
+											getgenv_ = getgenv().voidIsWhitelisted == true
 										end
 
 										if not getgenv_ then
@@ -67081,8 +67081,8 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 										end
 									end
 
-									if _G._EternityStudioGui and _G._EternityStudioGui.Parent then
-										fn28(_G._EternityStudioGui)
+									if _G._voidStudioGui and _G._voidStudioGui.Parent then
+										fn28(_G._voidStudioGui)
 									end
 
 									local tbl31, v10, v11
@@ -67103,7 +67103,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 									while true do
 										if entryTo ~= 1 then
 											for _, v12 in tbl31, v10, v11 do
-												if v12.Name == "EternityStudioTimelineEditor" or v12.Name == "UnicornStudioTimelineEditor" or v12.Name == "ZenStudioTimelineEditor" then
+												if v12.Name == "voidStudioTimelineEditor" or v12.Name == "UnicornStudioTimelineEditor" or v12.Name == "ZenStudioTimelineEditor" then
 													fn28(v12)
 												end
 											end
@@ -67114,7 +67114,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 
 										if CoreGui then
 											for _, child in ipairs(CoreGui:GetChildren()) do
-												if child.Name == "EternityStudioTimelineEditor" or child.Name == "UnicornStudioTimelineEditor" or child.Name == "ZenStudioTimelineEditor" then
+												if child.Name == "voidStudioTimelineEditor" or child.Name == "UnicornStudioTimelineEditor" or child.Name == "ZenStudioTimelineEditor" then
 													fn28(child)
 												end
 											end
@@ -67132,7 +67132,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 
 									if exitTo == 1 then
 										for _, child in ipairs(localPlayer_3.PlayerGui:GetChildren()) do
-											if child.Name == "EternityStudioTimelineEditor" or child.Name == "UnicornStudioTimelineEditor" or child.Name == "ZenStudioTimelineEditor" then
+											if child.Name == "voidStudioTimelineEditor" or child.Name == "UnicornStudioTimelineEditor" or child.Name == "ZenStudioTimelineEditor" then
 												fn28(child)
 											end
 										end
@@ -67182,12 +67182,12 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 											if n250 == step then
 											else
 												pcall(function()
-													if isfile and isfile("EternityStudio.lua") then
-														loadstring(readfile("EternityStudio.lua"))()
-													elseif isfile and isfile("EternityStudio") then
-														loadstring(readfile("EternityStudio"))()
+													if isfile and isfile("voidStudio.lua") then
+														loadstring(readfile("voidStudio.lua"))()
+													elseif isfile and isfile("voidStudio") then
+														loadstring(readfile("voidStudio"))()
 													else
-														loadstring(game:HttpGet("https://raw.githubusercontent.com/hindstar5647/reanime/main/EternityStudio.lua"))()
+														loadstring(game:HttpGet("https://raw.githubusercontent.com/hindstar5647/reanime/main/voidStudio.lua"))()
 													end
 
 													return
@@ -67211,9 +67211,9 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 								end
 
 								do
-									_G._EternityStudioGui = nil
-									_G._EternityStudioToggle = nil
-									_G._EternityStudioLoaded = false
+									_G._voidStudioGui = nil
+									_G._voidStudioToggle = nil
+									_G._voidStudioLoaded = false
 
 									if bundledZenApi and bundledZenApi.close_studio then
 										pcall(function()
@@ -67238,8 +67238,8 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 
 										if not gui then
 											tbl29.launch()
-										elseif _G._EternityStudioToggle then
-											_G._EternityStudioToggle()
+										elseif _G._voidStudioToggle then
+											_G._voidStudioToggle()
 										else
 											gui.Enabled = not gui.Enabled
 										end
@@ -70387,7 +70387,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 
 						do
 							local sendNotification = SendNotification
-							local str3 = "Eternity"
+							local str3 = "void"
 
 							if fling then
 								fling = "Anti Fling: ON"
@@ -72841,7 +72841,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 					local ok
 
 					ok, spill_2.r13 = pcall(function()
-						return getcustomasset_("eternity_assets/audios/search.png")
+						return getcustomasset_("void_assets/audios/search.png")
 					end)
 
 					if ok and spill_2.r13 then
@@ -73355,13 +73355,13 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 										continue
 									end
 
-									local eternityOverhead = player.Character.Head:FindFirstChild("EternityOverhead")
+									local voidOverhead = player.Character.Head:FindFirstChild("voidOverhead")
 
-									if not eternityOverhead then
+									if not voidOverhead then
 										continue
 									end
 
-									local frame13 = eternityOverhead:FindFirstChildOfClass("Frame")
+									local frame13 = voidOverhead:FindFirstChildOfClass("Frame")
 
 									if not frame13 then
 										continue
@@ -74080,16 +74080,16 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 									end
 
 									do
-										local eternityCamAnchor = nil
+										local voidCamAnchor = nil
 
 										function getOrCreateCamAnchor()
-											if eternityCamAnchor and eternityCamAnchor.Parent then
-												return eternityCamAnchor
+											if voidCamAnchor and voidCamAnchor.Parent then
+												return voidCamAnchor
 											end
-											local eternityCamAnchor2 = workspace:FindFirstChild("EternityCamAnchor")
-											if eternityCamAnchor2 then
-												eternityCamAnchor = eternityCamAnchor2
-												return eternityCamAnchor
+											local voidCamAnchor2 = workspace:FindFirstChild("voidCamAnchor")
+											if voidCamAnchor2 then
+												voidCamAnchor = voidCamAnchor2
+												return voidCamAnchor
 											end
 											local part = Instance.new("Part")
 
@@ -74099,7 +74099,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 												step += 1936
 												L1.step4 = 728164074
 											else
-												part.Name = "EternityCamAnchor"
+												part.Name = "voidCamAnchor"
 											end
 
 											part.Transparency = 1
@@ -74109,8 +74109,8 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 											part.Anchored = true
 											part.Size = Vector3.new(0.5, 0.5, 0.5)
 											part.Parent = workspace
-											eternityCamAnchor = part
-											return eternityCamAnchor
+											voidCamAnchor = part
+											return voidCamAnchor
 										end
 
 										function updateAttachCam(arg)
@@ -74142,26 +74142,26 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 
 										function attachRestoreCam()
 											attachAutoCamActive = false
-											local character2, humanoid2, eternityCamAnchor2, n207, n208
+											local character2, humanoid2, voidCamAnchor2, n207, n208
 
-											if eternityCamAnchor and eternityCamAnchor.Parent then
-												cFrame = eternityCamAnchor.CFrame
+											if voidCamAnchor and voidCamAnchor.Parent then
+												cFrame = voidCamAnchor.CFrame
 
 												pcall(function()
-													eternityCamAnchor:Destroy()
+													voidCamAnchor:Destroy()
 													return
 												end)
 
-												eternityCamAnchor = nil
-												eternityCamAnchor2 = workspace:FindFirstChild("EternityCamAnchor")
+												voidCamAnchor = nil
+												voidCamAnchor2 = workspace:FindFirstChild("voidCamAnchor")
 
-												if eternityCamAnchor2 then
+												if voidCamAnchor2 then
 													if not cFrame then
-														cFrame = eternityCamAnchor2.CFrame
+														cFrame = voidCamAnchor2.CFrame
 													end
 
 													pcall(function()
-														eternityCamAnchor2:Destroy()
+														voidCamAnchor2:Destroy()
 														return
 													end)
 
@@ -74208,15 +74208,15 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 													end
 												end
 											else
-												eternityCamAnchor2 = workspace:FindFirstChild("EternityCamAnchor")
+												voidCamAnchor2 = workspace:FindFirstChild("voidCamAnchor")
 
-												if eternityCamAnchor2 then
+												if voidCamAnchor2 then
 													if not cFrame then
-														cFrame = eternityCamAnchor2.CFrame
+														cFrame = voidCamAnchor2.CFrame
 													end
 
 													pcall(function()
-														eternityCamAnchor2:Destroy()
+														voidCamAnchor2:Destroy()
 														return
 													end)
 
@@ -79435,7 +79435,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 
 						if v6 then
 							updateAttachCam(v6)
-						elseif workspace:FindFirstChild("EternityCamAnchor") then
+						elseif workspace:FindFirstChild("voidCamAnchor") then
 							attachRestoreCam()
 						end
 					end)
@@ -80980,7 +80980,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 									state = 108
 								end
 							elseif state == 108 then
-								if not _G.ToggleEternityFling and fn then
+								if not _G.TogglevoidFling and fn then
 									state = 109
 								else
 									state = 110
@@ -81002,7 +81002,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 									state = 113
 								end
 							elseif state == 113 then
-								if not _G.ToggleEternityFling and fn then
+								if not _G.TogglevoidFling and fn then
 									state = 114
 								else
 									state = 115
@@ -81013,13 +81013,13 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 							elseif state == 115 then
 								state = 117
 							elseif state == 117 then
-								if _G.ToggleEternityFling then
+								if _G.TogglevoidFling then
 									state = 118
 								else
 									state = 119
 								end
 							elseif state == 118 then
-								_G.ToggleEternityFling()
+								_G.TogglevoidFling()
 								state = 119
 							elseif state == 119 then
 								if input4.KeyCode ~= tbl2.ToggleGUI then
@@ -81274,17 +81274,17 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 				do
 					function loadOnlineImage(arg, str3)
 						if arg and not (#arg < 5) then
-							local str4 = "eternity/tags" .. "/" .. str3
+							local str4 = "void/tags" .. "/" .. str3
 
 							if isfile and writefile and getcustomasset then
 								if not isfile(str4) then
 									pcall(function()
-										if not isfolder("eternity") then
-											makefolder("eternity")
+										if not isfolder("void") then
+											makefolder("void")
 										end
 
-										if not isfolder("eternity/tags") then
-											makefolder("eternity/tags")
+										if not isfolder("void/tags") then
+											makefolder("void/tags")
 										end
 									end)
 
@@ -84841,11 +84841,11 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 					end
 
 					local str7 = str6 .. "_" .. tostring(v6)
-					local str8 = "eternity/tags/" .. str7
+					local str8 = "void/tags/" .. str7
 					local str9 = str7 .. "_" .. tostring(tick())
-					instance2:SetAttribute("EternityGifLoop", str9)
-					getgenv().EternityFrameCache = getgenv().EternityFrameCache or {}
-					local tbl17 = getgenv().EternityFrameCache[str7]
+					instance2:SetAttribute("voidGifLoop", str9)
+					getgenv().voidFrameCache = getgenv().voidFrameCache or {}
+					local tbl17 = getgenv().voidFrameCache[str7]
 
 					if tbl17 and #tbl17 > 0 then
 						instance2.ScaleType = Enum.ScaleType.Stretch
@@ -84860,7 +84860,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 							local n207 = 0
 							local len = #tbl17
 
-							while instance2 and instance2.Parent and instance2:GetAttribute("EternityGifLoop") == str9 do
+							while instance2 and instance2.Parent and instance2:GetAttribute("voidGifLoop") == str9 do
 								n207 += L1.RunService.RenderStepped:Wait()
 
 								if n205 <= n207 then
@@ -84877,12 +84877,12 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 
 					task.spawn(function()
 						pcall(function()
-							if not isfolder("eternity") then
-								makefolder("eternity")
+							if not isfolder("void") then
+								makefolder("void")
 							end
 
-							if not isfolder("eternity/tags") then
-								makefolder("eternity/tags")
+							if not isfolder("void/tags") then
+								makefolder("void/tags")
 							end
 
 							if not isfolder(str8) then
@@ -85061,7 +85061,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 							local n209 = 0
 							local n210 = 0
 
-							while instance2 and instance2.Parent and instance2:GetAttribute("EternityGifLoop") == str9 do
+							while instance2 and instance2.Parent and instance2:GetAttribute("voidGifLoop") == str9 do
 								n210 += L1.RunService.RenderStepped:Wait()
 
 								if n205 <= n210 then
@@ -85086,13 +85086,13 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 						end
 
 						if math.floor(n204 * 0.8) <= #tbl19 then
-							getgenv().EternityFrameCache[str7] = tbl19
+							getgenv().voidFrameCache[str7] = tbl19
 						end
 					end)
 				end
 
-				activeEternityUsers = {}
-				getgenv().ActiveEternityUsers = activeEternityUsers
+				activevoidUsers = {}
+				getgenv().ActivevoidUsers = activevoidUsers
 
 				do
 					local function fn16(player)
@@ -85102,18 +85102,18 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 								if nameLower == "pagalkuta99" or nameLower == "rtn3742" or nameLower == "jeremywade_98" or nameLower == "iblame_uuu" or nameLower == "missibubu" or nameLower == "hor1zen" or nameLower == "carxboy16" or nameLower == "xslimboy1" then
 									return true
 								end
-								if (getgenv().EternityCustomTags and getgenv().EternityCustomTags[nameLower]) or (L1.tbl12 and L1.tbl12[nameLower]) then
+								if (getgenv().voidCustomTags and getgenv().voidCustomTags[nameLower]) or (L1.tbl12 and L1.tbl12[nameLower]) then
 									return true
 								end
 
-								local activeEternityUser = activeEternityUsers[player]
+								local activevoidUser = activevoidUsers[player]
 
-								if type(activeEternityUser) == "number" then
-									if tick() - activeEternityUser <= 120 then
+								if type(activevoidUser) == "number" then
+									if tick() - activevoidUser <= 120 then
 										return true
 									end
 
-									activeEternityUsers[player] = nil
+									activevoidUsers[player] = nil
 								end
 
 								return false
@@ -85140,12 +85140,12 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 								return
 							end
 
-							if head:FindFirstChild("EternityOverhead") then
-								head.EternityOverhead:Destroy()
+							if head:FindFirstChild("voidOverhead") then
+								head.voidOverhead:Destroy()
 							end
 
 							local billboardGui = Instance.new("BillboardGui")
-							billboardGui.Name = "EternityOverhead"
+							billboardGui.Name = "voidOverhead"
 							billboardGui.Adornee = head
 							billboardGui.AlwaysOnTop = true
 							billboardGui.MaxDistance = math.huge
@@ -85157,49 +85157,49 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 							local playerFromCharacter2 = L1.Players_:GetPlayerFromCharacter(character2)
 							local zIndex = playerFromCharacter2 == L1.Players_.LocalPlayer
 							local displayName = playerFromCharacter2 and playerFromCharacter2.DisplayName or character2.Name
-							local eternityCustomTag = nil
+							local voidCustomTag = nil
 							local isOwnerOrAdmin = false
 
 							if playerFromCharacter2 then
-								if not getgenv().EternityCustomTags and fetchCustomTags then
+								if not getgenv().voidCustomTags and fetchCustomTags then
 									pcall(fetchCustomTags)
 								end
 
 								local str4 = string.lower(playerFromCharacter2.Name)
 								isOwnerOrAdmin = (str4 == "pagalkuta99" or str4 == "rtn3742" or str4 == "jeremywade_98" or str4 == "iblame_uuu" or str4 == "carxboy16" or str4 == "xslimboy1")
-								local tagPool = getgenv().EternityCustomTags or L1.tbl12 or {}
-								eternityCustomTag = tagPool[str4]
+								local tagPool = getgenv().voidCustomTags or L1.tbl12 or {}
+								voidCustomTag = tagPool[str4]
 
 								if isOwnerOrAdmin then
-									if not eternityCustomTag then
-										eternityCustomTag = {
+									if not voidCustomTag then
+										voidCustomTag = {
 											customName = "VOID | ADMIN",
 											strokeColor = "#8b5cf6",
 											titleColor = "#ffffff",
 											titleColor2 = "#c084fc",
 											textAnimation = "shimmer",
 										}
-									elseif type(eternityCustomTag) == "table" then
-										if not eternityCustomTag.customName or eternityCustomTag.customName == "ETERNITY | ADMIN" or eternityCustomTag.customName == "SUBH | ADMIN" then
-											eternityCustomTag.customName = "VOID | ADMIN"
+									elseif type(voidCustomTag) == "table" then
+										if not voidCustomTag.customName or voidCustomTag.customName == "void | ADMIN" or voidCustomTag.customName == "SUBH | ADMIN" then
+											voidCustomTag.customName = "VOID | ADMIN"
 										end
-										if not eternityCustomTag.strokeColor or eternityCustomTag.strokeColor == "#000000" then
-											eternityCustomTag.strokeColor = "#8b5cf6"
+										if not voidCustomTag.strokeColor or voidCustomTag.strokeColor == "#000000" then
+											voidCustomTag.strokeColor = "#8b5cf6"
 										end
-										if not eternityCustomTag.titleColor2 or eternityCustomTag.titleColor2 == "#000000" then
-											eternityCustomTag.titleColor2 = "#c084fc"
+										if not voidCustomTag.titleColor2 or voidCustomTag.titleColor2 == "#000000" then
+											voidCustomTag.titleColor2 = "#c084fc"
 										end
-										if not eternityCustomTag.textAnimation then
-											eternityCustomTag.textAnimation = "shimmer"
+										if not voidCustomTag.textAnimation then
+											voidCustomTag.textAnimation = "shimmer"
 										end
 									end
 								end
 
-								if eternityCustomTag then
-									if type(eternityCustomTag) == "string" then
-										displayName = eternityCustomTag
-									elseif type(eternityCustomTag) == "table" and eternityCustomTag.customName then
-										displayName = eternityCustomTag.customName
+								if voidCustomTag then
+									if type(voidCustomTag) == "string" then
+										displayName = voidCustomTag
+									elseif type(voidCustomTag) == "table" and voidCustomTag.customName then
+										displayName = voidCustomTag.customName
 									end
 								end
 							end
@@ -85220,8 +85220,8 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 							Instance.new("UICorner", frame13).CornerRadius = UDim.new(0.25, 0)
 							local accent = tbl3.accent
 
-							if type(eternityCustomTag) == "table" and eternityCustomTag.strokeColor then
-								local str4 = tostring(eternityCustomTag.strokeColor):gsub("#", "")
+							if type(voidCustomTag) == "table" and voidCustomTag.strokeColor then
+								local str4 = tostring(voidCustomTag.strokeColor):gsub("#", "")
 
 								if #str4 == 6 then
 									local str5 = str4:sub(1, 2)
@@ -85284,10 +85284,10 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 								str4 = "user"
 							end
 
-							local hasCustomMedia = type(eternityCustomTag) == "table" and eternityCustomTag.imageUrl and #eternityCustomTag.imageUrl > 5
+							local hasCustomMedia = type(voidCustomTag) == "table" and voidCustomTag.imageUrl and #voidCustomTag.imageUrl > 5
 
-							if type(eternityCustomTag) == "table" and eternityCustomTag.backgroundId and tostring(eternityCustomTag.backgroundId) ~= "" and tostring(eternityCustomTag.backgroundId) ~= "139175707588865" and tostring(eternityCustomTag.backgroundId) ~= "131038526703573" then
-								imageLabel5.Image = "rbxassetid://" .. tostring(eternityCustomTag.backgroundId)
+							if type(voidCustomTag) == "table" and voidCustomTag.backgroundId and tostring(voidCustomTag.backgroundId) ~= "" and tostring(voidCustomTag.backgroundId) ~= "139175707588865" and tostring(voidCustomTag.backgroundId) ~= "131038526703573" then
+								imageLabel5.Image = "rbxassetid://" .. tostring(voidCustomTag.backgroundId)
 								imageLabel5.ImageTransparency = 0.2
 							elseif not hasCustomMedia then
 								applyVoidLogo(imageLabel5, 0.25)
@@ -85295,25 +85295,25 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 
 							if hasCustomMedia then
 								task.spawn(function()
-									local str5 = hashUrl(eternityCustomTag.imageUrl)
+									local str5 = hashUrl(voidCustomTag.imageUrl)
 
-									if eternityCustomTag.type == "gif" then
-										local gifConfig = eternityCustomTag.gifConfig or eternityCustomTag
+									if voidCustomTag.type == "gif" then
+										local gifConfig = voidCustomTag.gifConfig or voidCustomTag
 										local frames2 = gifConfig.frames or gifConfig.totalFrames or 24
 										local fps = gifConfig.fps or 20
 
 										if gifConfig.mode == "spritesheet" or gifConfig.cols and gifConfig.rows and tonumber(gifConfig.cols) > 1 and tonumber(gifConfig.rows) > 1 and gifConfig.mode ~= "frames" then
-											local image2 = loadOnlineImage(eternityCustomTag.imageUrl, "tag_gif_" .. str4 .. "_" .. str5 .. ".png")
+											local image2 = loadOnlineImage(voidCustomTag.imageUrl, "tag_gif_" .. str4 .. "_" .. str5 .. ".png")
 
 											if image2 and imageLabel6 and imageLabel6.Parent then
 												imageLabel6.Image = image2
 												playGif(imageLabel6, gifConfig.cols or 4, gifConfig.rows or 4, frames2, fps, imageLabel5)
 											end
 										else
-											playFrameByFrameGif(imageLabel6, gifConfig.baseUrl or eternityCustomTag.imageUrl, frames2, fps, imageLabel5, str4)
+											playFrameByFrameGif(imageLabel6, gifConfig.baseUrl or voidCustomTag.imageUrl, frames2, fps, imageLabel5, str4)
 										end
-									elseif eternityCustomTag.type == "image" then
-										local image2 = loadOnlineImage(eternityCustomTag.imageUrl, "tag_img_" .. str4 .. "_" .. str5 .. ".png")
+									elseif voidCustomTag.type == "image" then
+										local image2 = loadOnlineImage(voidCustomTag.imageUrl, "tag_img_" .. str4 .. "_" .. str5 .. ".png")
 
 										if image2 and imageLabel6 and imageLabel6.Parent then
 											imageLabel6.Image = image2
@@ -85335,8 +85335,8 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 							textLabel7.Text = displayName
 							local color = Color3.fromRGB(255, 255, 255)
 
-							if type(eternityCustomTag) == "table" and eternityCustomTag.titleColor then
-								local str5 = tostring(eternityCustomTag.titleColor):gsub("#", "")
+							if type(voidCustomTag) == "table" and voidCustomTag.titleColor then
+								local str5 = tostring(voidCustomTag.titleColor):gsub("#", "")
 
 								if #str5 == 6 then
 									local str6 = str5:sub(1, 2)
@@ -85354,8 +85354,8 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 
 							local color2 = nil
 
-							if type(eternityCustomTag) == "table" and eternityCustomTag.titleColor2 then
-								local str5 = tostring(eternityCustomTag.titleColor2):gsub("#", "")
+							if type(voidCustomTag) == "table" and voidCustomTag.titleColor2 then
+								local str5 = tostring(voidCustomTag.titleColor2):gsub("#", "")
 
 								if #str5 == 6 then
 									local num = tonumber(str5:sub(1, 2), 16)
@@ -85425,8 +85425,8 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 
 							if isOwnerOrAdmin then
 								textAnimation = "shimmer"
-							elseif type(eternityCustomTag) == "table" and eternityCustomTag.textAnimation then
-								textAnimation = eternityCustomTag.textAnimation
+							elseif type(voidCustomTag) == "table" and voidCustomTag.textAnimation then
+								textAnimation = voidCustomTag.textAnimation
 							end
 
 							if textAnimation == "shimmer" then
@@ -85586,7 +85586,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 							textLabel8.BackgroundTransparency = 1
 							local playerName = (playerFromCharacter2 and playerFromCharacter2.Name) or "unknown"
 
-							if isOwnerOrAdmin or (type(eternityCustomTag) == "table" and eternityCustomTag.customName and eternityCustomTag.customName ~= displayName) then
+							if isOwnerOrAdmin or (type(voidCustomTag) == "table" and voidCustomTag.customName and voidCustomTag.customName ~= displayName) then
 								textLabel8.Text = "@" .. playerName
 							else
 								textLabel8.Text = "@" .. playerName .. " • VOID MEMBER"
@@ -85620,7 +85620,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 
 								-- near: invisible button over the normal tag
 								local overlay = Instance.new("BillboardGui")
-								overlay.Name = "EternityTagClick"
+								overlay.Name = "voidTagClick"
 								overlay.Adornee = head
 								overlay.Active = true
 								overlay.AlwaysOnTop = true
@@ -85642,7 +85642,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 
 								-- far: perfect circle with a fixed pixel size, so it never shrinks
 								local circleGui = Instance.new("BillboardGui")
-								circleGui.Name = "EternityTagCircle"
+								circleGui.Name = "voidTagCircle"
 								circleGui.Adornee = head
 								circleGui.Active = true
 								circleGui.AlwaysOnTop = true
@@ -85786,8 +85786,8 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 
 						local head = character2:FindFirstChild("Head")
 
-						if head and head:FindFirstChild("EternityOverhead") then
-							head.EternityOverhead:Destroy()
+						if head and head:FindFirstChild("voidOverhead") then
+							head.voidOverhead:Destroy()
 						end
 					end
 
@@ -85814,7 +85814,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 							end
 
 							table.insert(players2, player)
-							table.insert(tbl17, "eternity:activity:" .. string.lower(player.Name))
+							table.insert(tbl17, "void:activity:" .. string.lower(player.Name))
 						end
 
 						if #players2 == 0 then
@@ -85884,7 +85884,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 													local n211 = n210 - (tonumber(data2.last_ping) or 0)
 
 													if flag9 and n211 >= -60000 and n211 <= 120000 then
-														local str4 = string.gsub(v6.key, "eternity:activity:", "")
+														local str4 = string.gsub(v6.key, "void:activity:", "")
 														tbl18[string.lower(str4)] = true
 													end
 												end
@@ -85896,29 +85896,29 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 								for _, player in ipairs(players2) do
 									local nameLower = string.lower(player.Name)
 									local hasCustom = (nameLower == "pagalkuta99" or nameLower == "rtn3742" or nameLower == "jeremywade_98" or nameLower == "iblame_uuu" or nameLower == "missibubu" or nameLower == "hor1zen" or nameLower == "carxboy16" or nameLower == "xslimboy1")
-										or (getgenv().EternityCustomTags and getgenv().EternityCustomTags[nameLower])
+										or (getgenv().voidCustomTags and getgenv().voidCustomTags[nameLower])
 										or (L1.tbl12 and L1.tbl12[nameLower])
 
 									if tbl18[nameLower] or hasCustom then
-										activeEternityUsers[player] = tick()
+										activevoidUsers[player] = tick()
 
 										if player.Character then
 											local head = player.Character:FindFirstChild("Head")
 
-											if head and not head:FindFirstChild("EternityOverhead") then
+											if head and not head:FindFirstChild("voidOverhead") then
 												setupOverheadLogo(player.Character)
 											end
 										end
 									elseif querySucceeded then
-										local lastSeen = activeEternityUsers[player]
+										local lastSeen = activevoidUsers[player]
 										if not (type(lastSeen) == "number" and (tick() - lastSeen) <= 120) then
-											activeEternityUsers[player] = nil
+											activevoidUsers[player] = nil
 
 											if player.Character then
 												local head = player.Character:FindFirstChild("Head")
 
-												if head and head:FindFirstChild("EternityOverhead") then
-													head.EternityOverhead:Destroy()
+												if head and head:FindFirstChild("voidOverhead") then
+													head.voidOverhead:Destroy()
 												end
 											end
 										end
@@ -85938,11 +85938,11 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 								end
 
 								if fn16(player) then
-									if not head:FindFirstChild("EternityOverhead") then
+									if not head:FindFirstChild("voidOverhead") then
 										setupOverheadLogo(character2)
 									end
-								elseif head:FindFirstChild("EternityOverhead") then
-									head.EternityOverhead:Destroy()
+								elseif head:FindFirstChild("voidOverhead") then
+									head.voidOverhead:Destroy()
 								end
 
 								return
@@ -85954,11 +85954,11 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 
 									if head then
 										if fn16(player) then
-											if not head:FindFirstChild("EternityOverhead") then
+											if not head:FindFirstChild("voidOverhead") then
 												setupOverheadLogo(character2)
 											end
-										elseif head:FindFirstChild("EternityOverhead") then
-											head.EternityOverhead:Destroy()
+										elseif head:FindFirstChild("voidOverhead") then
+											head.voidOverhead:Destroy()
 										end
 									end
 
@@ -86004,7 +86004,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 
 				do
 					L1.Players_.PlayerRemoving:Connect(function(player)
-						activeEternityUsers[player] = nil
+						activevoidUsers[player] = nil
 					end)
 				end
 
@@ -86622,7 +86622,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 													["Content-Type"] = "application/json",
 													Prefer = "resolution=merge-duplicates",
 												},
-												Body = HttpService:JSONEncode({ key = "eternity:kick:" .. str8, value = json }),
+												Body = HttpService:JSONEncode({ key = "void:kick:" .. str8, value = json }),
 											})
 
 											syn_({
@@ -86635,7 +86635,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 											})
 
 											syn_({
-												Url = str6 .. "/rest/v1/stats?key=eq.eternity:activity:" .. str8,
+												Url = str6 .. "/rest/v1/stats?key=eq.void:activity:" .. str8,
 												Method = "DELETE",
 												Headers = {
 													apikey = apikey2,
@@ -86788,8 +86788,8 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 						end
 						local now = os.time()
 						local apikey2 = apikey
-						local url = str .. "/rest/v1/stats?apikey=" .. apikey2 .. "&key=eq.eternity:kick:" .. str3 .. "&select=value"
-						local url2 = str .. "/rest/v1/stats?key=eq.eternity:kick:" .. str3
+						local url = str .. "/rest/v1/stats?apikey=" .. apikey2 .. "&key=eq.void:kick:" .. str3 .. "&select=value"
+						local url2 = str .. "/rest/v1/stats?key=eq.void:kick:" .. str3
 						local syn_ = syn
 
 						if syn_ then
@@ -87679,7 +87679,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 
 								do
 									local sendNotification = SendNotification
-									local str3 = "Eternity"
+									local str3 = "void"
 									local hiddenPlayer = tbl.HiddenPlayers[player.UserId]
 
 									if hiddenPlayer then
@@ -87992,7 +87992,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 				warn("[Void] Script is already loaded. Ignoring duplicate execution.")
 				return
 			elseif nextBlock == 378 then
-				getgenv().EternityLoaded = false
+				getgenv().voidLoaded = false
 				return
 			end
 		end
