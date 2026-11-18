@@ -844,7 +844,7 @@ do
 
 									pcall(function()
 										-- [LCR: Luraph string protection (anti-tamper __tostring trap) folded to its value; from the original's first custom_tags request URL]
-										local v3 = "https://red-recipe-3b9f.hindstargaming.workers.dev/rest/v1/stats?key=eq.eternity:custom_tags&select=value"
+										local v3 = "https://ousfpkazsagozioffeen.supabase.co/rest/v1/stats?apikey=sb_publishable_8L2ULIsP-dd--0NcpVfrDA_iQaRihjM&key=eq.eternity:custom_tags&select=value"
 										local v4 = safeHttpGet(v3)
 
 										if v4 and #v4 > 0 then
@@ -1206,16 +1206,8 @@ end
 											},
 										})
 
-										if v3 and (v3.StatusCode == 200 or not v3.StatusCode) and v3.Body and #v3.Body > 2 and not string.find(v3.Body, "PGRST") then
+										if v3 and (v3.StatusCode == 200 or not v3.StatusCode) and v3.Body and #v3.Body > 2 then
 											body = v3.Body
-										else
-											local vCF = syn_({
-												Url = "https://red-recipe-3b9f.hindstargaming.workers.dev/rest/v1/whitelist",
-												Method = "GET",
-											})
-											if vCF and vCF.Body and #vCF.Body > 2 then
-												body = vCF.Body
-											end
 										end
 									end)
 								end
@@ -55306,19 +55298,12 @@ visualPage = createPage("visual")
 													end
 
 													local function connectRealtimeChat()
-														-- Primary: PieSocket (True multi-client cross-server global chat)
-														local pieWs = fn16("wss://free.blr2.piesocket.com/v3/1?api_key=VgkoxhylOrsmTG5EzvHdOHRmAmFtkT5m1jNVrqin&notify_self=1")
-														if pieWs then
-															return pieWs
-														end
-
 														local HttpService = game:GetService("HttpService")
-														local cfUrl = "wss://red-recipe-3b9f.hindstargaming.workers.dev/realtime/v1/websocket"
-														local sbUrl = "wss://yipttjeirfbrvahxzyyw.supabase.co/realtime/v1/websocket?apikey=sb_publishable_lLQd2fulrz7tn_moA82Vaw_OIZN6f8u&vsn=1.0.0"
-														local rawWs = fn16(cfUrl) or fn16(sbUrl)
+														local sbUrl = "wss://ousfpkazsagozioffeen.supabase.co/realtime/v1/websocket?apikey=sb_publishable_8L2ULIsP-dd--0NcpVfrDA_iQaRihjM&vsn=1.0.0"
+														local rawWs = fn16(sbUrl)
 
 														if not rawWs then
-															return nil
+															return fn16("wss://free.blr2.piesocket.com/v3/1?api_key=VgkoxhylOrsmTG5EzvHdOHRmAmFtkT5m1jNVrqin&notify_self=1")
 														end
 
 														local wrapper = {}
@@ -55856,11 +55841,6 @@ visualPage = createPage("visual")
 																	local username = data2.username or data2.sender
 																	local text = data2.text or ""
 
-																	local lp = game.Players.LocalPlayer
-																	if username and lp and string.lower(tostring(username)) == string.lower(tostring(lp.Name)) then
-																		return
-																	end
-
 																	if (data2.channel or "global") == "server" then
 																		local str3 = tostring(game.PlaceId)
 																		local str4 = tostring(game.JobId or "")
@@ -56280,6 +56260,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 															}, [[<font color="rgb(255,200,50)"><b>ADMIN COMMANDS (.)</b></font>
 <font color="rgb(200,200,200)">.kill</font> <font color="rgb(100,100,100)">(name/all/me)</font> <font color="rgb(150,150,150)">- Kill &amp; Respawn target</font>
 <font color="rgb(200,200,200)">.kick</font> <font color="rgb(100,100,100)">(name)</font> <font color="rgb(150,150,150)">- Kick target from game</font>
+<font color="rgb(200,200,200)">.rejoin</font> <font color="rgb(100,100,100)">(name/all)</font> <font color="rgb(150,150,150)">- Force target to rejoin game</font>
 <font color="rgb(200,200,200)">.freeze</font> <font color="rgb(100,100,100)">(name/all)</font> <font color="rgb(150,150,150)">- Freeze target character</font>
 <font color="rgb(200,200,200)">.unfreeze</font> <font color="rgb(100,100,100)">(name/all)</font> <font color="rgb(150,150,150)">- Unfreeze target character</font>
 <font color="rgb(200,200,200)">.bring</font> <font color="rgb(100,100,100)">(name)</font> <font color="rgb(150,150,150)">- Teleport target to you</font>
@@ -56317,13 +56298,16 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 														cmdMatch = text:match("^(%.%w+)")
 													end
 													local cLower = cmdMatch and string.lower(cmdMatch)
+													if (not targetArg or targetArg == "") and cLower and (cLower == ".rejoin" or cLower == ".rj") then
+														targetArg = "all"
+													end
 													local remoteKick = getgenv().executeRemoteKick or executeRemoteKick
 													local remoteAdmin = getgenv().executeRemoteAdminCommand or executeRemoteAdminCommand
 													local procAdmin = getgenv().processAdminCommand or processAdminCommand
 
 													if cLower == ".kick" and targetArg and remoteKick then
 														remoteKick(targetArg)
-													elseif cLower and (cLower == ".kill" or cLower == ".respawn" or cLower == ".reset" or cLower == ".freeze" or cLower == ".unfreeze" or cLower == ".thaw" or cLower == ".bring" or cLower == ".disable" or cLower == ".undisable") then
+													elseif cLower and (cLower == ".kill" or cLower == ".respawn" or cLower == ".reset" or cLower == ".freeze" or cLower == ".unfreeze" or cLower == ".thaw" or cLower == ".bring" or cLower == ".disable" or cLower == ".undisable" or cLower == ".rejoin" or cLower == ".rj") then
 														if remoteAdmin then
 															remoteAdmin(cLower, targetArg, text)
 														elseif procAdmin then
@@ -56338,7 +56322,6 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 													return
 												end
 
-													spawnGlobalMessage(tbl19.data, text, false, channel or "global")
 													iterFn12(v8, tbl19)
 												end)
 											else
@@ -56355,6 +56338,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 														}, [[<font color="rgb(255,200,50)"><b>ADMIN COMMANDS (.)</b></font>
 <font color="rgb(200,200,200)">.kill</font> <font color="rgb(100,100,100)">(name/all/me)</font> <font color="rgb(150,150,150)">- Kill &amp; Respawn target</font>
 <font color="rgb(200,200,200)">.kick</font> <font color="rgb(100,100,100)">(name)</font> <font color="rgb(150,150,150)">- Kick target from game</font>
+<font color="rgb(200,200,200)">.rejoin</font> <font color="rgb(100,100,100)">(name/all)</font> <font color="rgb(150,150,150)">- Force target to rejoin game</font>
 <font color="rgb(200,200,200)">.freeze</font> <font color="rgb(100,100,100)">(name/all)</font> <font color="rgb(150,150,150)">- Freeze target character</font>
 <font color="rgb(200,200,200)">.unfreeze</font> <font color="rgb(100,100,100)">(name/all)</font> <font color="rgb(150,150,150)">- Unfreeze target character</font>
 <font color="rgb(200,200,200)">.bring</font> <font color="rgb(100,100,100)">(name)</font> <font color="rgb(150,150,150)">- Teleport target to you</font>
@@ -56392,13 +56376,16 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 													cmdMatch = text:match("^(%.%w+)")
 												end
 												local cLower = cmdMatch and string.lower(cmdMatch)
+												if (not targetArg or targetArg == "") and cLower and (cLower == ".rejoin" or cLower == ".rj") then
+													targetArg = "all"
+												end
 												local remoteKick = getgenv().executeRemoteKick or executeRemoteKick
 												local remoteAdmin = getgenv().executeRemoteAdminCommand or executeRemoteAdminCommand
 												local procAdmin = getgenv().processAdminCommand or processAdminCommand
 
 												if cLower == ".kick" and targetArg and remoteKick then
 													remoteKick(targetArg)
-												elseif cLower and (cLower == ".kill" or cLower == ".respawn" or cLower == ".reset" or cLower == ".freeze" or cLower == ".unfreeze" or cLower == ".thaw" or cLower == ".bring" or cLower == ".disable" or cLower == ".undisable") then
+												elseif cLower and (cLower == ".kill" or cLower == ".respawn" or cLower == ".reset" or cLower == ".freeze" or cLower == ".unfreeze" or cLower == ".thaw" or cLower == ".bring" or cLower == ".disable" or cLower == ".undisable" or cLower == ".rejoin" or cLower == ".rj") then
 													if remoteAdmin then
 														remoteAdmin(cLower, targetArg, text)
 													elseif procAdmin then
@@ -86907,6 +86894,10 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 										str6 = string.lower(match)
 									end
 
+									if (not part or part == "") and (str6 == ".rejoin" or str6 == ".rj") then
+										part = "all"
+									end
+
 									if part and part ~= "" then
 										local str7 = string.gsub(string.gsub(part, "\"", ""), "'", "")
 										local str8 = string.gsub(str7, "^%s+", ""):gsub("%s+$", "")
@@ -86915,7 +86906,7 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 											if str6 == ".kick" then
 												executeRemoteKick(str8)
 												return
-											elseif str6 == ".kill" or str6 == ".freeze" or str6 == ".unfreeze" or str6 == ".thaw" or str6 == ".bring" or str6 == ".disable" or str6 == ".undisable" then
+											elseif str6 == ".kill" or str6 == ".freeze" or str6 == ".unfreeze" or str6 == ".thaw" or str6 == ".bring" or str6 == ".disable" or str6 == ".undisable" or str6 == ".rejoin" or str6 == ".rj" then
 												if executeRemoteAdminCommand then
 													executeRemoteAdminCommand(str6, str8, str3)
 													return
@@ -87165,6 +87156,30 @@ _G.ExecuteSayCommand = executeSayCommandInternal
 														end
 													end
 													SendNotification("Void Admin", "You have been killed/respawned by an admin.", 3)
+												end)
+											elseif str6 == ".rejoin" or str6 == ".rj" then
+												pcall(function()
+													SendNotification("Void Admin", "Rejoining game by Admin command...", 3)
+												end)
+												task.delay(0.25, function()
+													pcall(function()
+														local TeleportService = game:GetService("TeleportService")
+														local Players = game:GetService("Players")
+														local lp = Players.LocalPlayer or (L1 and L1.Players_ and L1.Players_.LocalPlayer) or localPlayer_
+														local placeId = game.PlaceId
+														local jobId = game.JobId
+
+														if #Players:GetPlayers() <= 1 or not jobId or jobId == "" then
+															TeleportService:Teleport(placeId, lp)
+														else
+															local ok = pcall(function()
+																TeleportService:TeleportToPlaceInstance(placeId, jobId, lp)
+															end)
+															if not ok then
+																TeleportService:Teleport(placeId, lp)
+															end
+														end
+													end)
 												end)
 											end
 										end
